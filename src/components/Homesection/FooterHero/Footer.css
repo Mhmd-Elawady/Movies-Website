@@ -8,7 +8,7 @@
 }
 
 .footer-container::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -41,7 +41,7 @@
 }
 
 .footer-section h4::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -5px;
   left: 0;
@@ -72,7 +72,7 @@
 }
 
 .footer-section ul li::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -10px;
   top: 50%;
@@ -154,7 +154,7 @@
 }
 
 .footer-links a::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
@@ -172,32 +172,32 @@
   width: 100%;
 }
 
-/* Responsive Design */
+/* Responsive  */
 @media (max-width: 768px) {
   .footer-container {
     padding: 40px 15px 20px;
   }
-  
+
   .footer-content {
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
   }
-  
+
   .footer-bottom {
     flex-direction: column;
     text-align: center;
     gap: 15px;
     margin-top: 30px;
   }
-  
+
   .footer-links {
     justify-content: center;
   }
-   .social-icons {
+  .social-icons {
     justify-content: center;
     gap: 10px;
   }
-  
+
   .social-icons svg {
     width: 40px;
     height: 40px;
@@ -211,16 +211,16 @@
     grid-template-columns: 1fr;
     gap: 25px;
   }
-  
+
   .footer-section {
     text-align: center;
   }
-  
+
   .footer-section h4::after {
     left: 50%;
     transform: translateX(-50%);
   }
-   .social-icons svg {
+  .social-icons svg {
     width: 35px;
     height: 35px;
     padding: 7px;
@@ -232,9 +232,9 @@
   }
 }
 
-/* تأثيرات إضافية */
+
 .footer-container::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;

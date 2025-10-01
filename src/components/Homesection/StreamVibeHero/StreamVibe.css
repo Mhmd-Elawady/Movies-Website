@@ -1,6 +1,4 @@
-/* StreamVibeHero.css */
 
-/* Hero Section */
 .hero {
   position: relative;
   width: 100%;
@@ -10,14 +8,14 @@
   overflow: hidden;
 }
 
-/* Image Container */
+
 .hero-image {
   position: relative;
   width: 100%;
-  height: 100vh; /* Full viewport height */
+  height: 100vh; 
 }
 
-/* Background Image */
+
 .hero-bg {
   width: 100%;
   height: 100%;
@@ -25,36 +23,36 @@
   display: block;
 }
 
-/* Gradient Overlay */
+
 .hero-gradient {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 300px; /* Increased for smoother gradient */
+  height: 300px; 
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%);
 }
 
-/* Content Section */
+
 .hero-content-below {
   color: #ffffff;
   text-align: center;
   padding: 1rem 2rem;
   position: relative;
-  z-index: 1; /* Ensure content is above gradient */
+  z-index: 1; 
   margin: 0 auto;
-  transform: translateY(-50px); /* Adjusted to align with gradient */
+  transform: translateY(-50px); 
 }
 
-/* Heading */
+
 .hero-content-below h1 {
-  font-size: clamp(2rem, 5vw, 3rem); /* Responsive font size */
+  font-size: clamp(2rem, 5vw, 3rem); 
   font-weight: 700;
   margin-bottom: 1.5rem;
   line-height: 1.2;
 }
 
-/* Paragraph */
+
 .hero-content-below p {
   font-size: clamp(1rem, 2.5vw, 1.25rem);
   color: #e5e7eb;
@@ -89,10 +87,10 @@
   outline-offset: 2px;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .hero-image {
-    height: 80vh; /* Slightly shorter for tablets */
+    height: 80vh; 
   }
 
   .hero-content-below {
@@ -107,7 +105,7 @@
 
 @media (max-width: 480px) {
   .hero-image {
-    height: 70vh; /* Shorter for mobile */
+    height: 70vh; 
   }
 
   .hero-gradient {

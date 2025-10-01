@@ -29,7 +29,7 @@
   margin: 0 auto;
 }
 
-/* Slider Wrapper */
+
 .slider-wrapper {
   display: flex;
   align-items: center;
@@ -39,7 +39,6 @@
   position: relative;
 }
 
-/* Slider Container */
 .slider-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -48,7 +47,7 @@
   max-width: 1000px;
 }
 
-/* Slider Arrows */
+
 .slider-arrow {
   background: rgba(220, 38, 38, 0.8);
   color: white;
@@ -76,7 +75,7 @@
   opacity: 0.5;
 }
 
-/* Category Cards */
+
 .category-card {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   border-radius: 12px;
@@ -160,7 +159,7 @@
   color: #ec4899;
 }
 
-/* Loading State */
+
 .loading-cell {
   background: #333;
   animation: pulse 2s infinite;
@@ -176,7 +175,6 @@
   }
 }
 
-/* Slider Dots */
 .slider-dots {
   display: flex;
   justify-content: center;
@@ -203,7 +201,6 @@
   background: #ec4899;
 }
 
-/* Responsive Design */
 @media (max-width: 1024px) {
   .slider-container {
     grid-template-columns: repeat(3, 1fr);

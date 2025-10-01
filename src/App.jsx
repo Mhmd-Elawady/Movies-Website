@@ -1,16 +1,11 @@
 import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Home from './pages/Home'
-import Shows from './pages/Shows'
-import MoviesOpen from './pages/MoviesOpen'
-import ShowsOpen from './pages/ShowsOpen'
-import Support from './pages/Support'
-import Subscription from './pages/Subscription'
+
 import { useDispatch } from 'react-redux'
 import { useEffect } from 'react'
 import axios from 'axios'
 import { setBannerData, setImageURL } from './store/movieSlice'
 
+import AppRoutes from './Routes/AppRoutes';
 function App() {
   const dispatch = useDispatch()
 
@@ -38,15 +33,11 @@ function App() {
   }, [])
 
   return (
-   
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/shows' element={<Shows />} />
-        <Route path='/moviesOpen' element={<MoviesOpen />} />
-        <Route path='/showsOpen' element={<ShowsOpen />} />
-        <Route path='/support' element={<Support />} />
-        <Route path='/subscription' element={<Subscription />} />
-      </Routes>
+     <>
+
+      <AppRoutes />
+
+     </>
  
   )
 }

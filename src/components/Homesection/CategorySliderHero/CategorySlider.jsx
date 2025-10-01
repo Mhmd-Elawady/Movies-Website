@@ -31,10 +31,9 @@ export default function CategorySlider() {
   const imageBaseUrl = "https://image.tmdb.org/t/p/w500";
   const API_KEY = import.meta.env.VITE_ACCESS_TOKEN;
 
-  // عدد الكروت اللي هتظهر في الشاشة
   const visibleCards = 4;
 
-  // Fetch Movies
+ 
   const fetchMovies = useCallback(async () => {
     try {
       setLoading(true);
@@ -69,7 +68,7 @@ export default function CategorySlider() {
     navigate(`/category/${categoryName.toLowerCase()}`);
   };
 
-  // Slider Controls
+ 
   const handleNext = () => {
     const maxIndex = categories.length - visibleCards;
     if (currentIndex < maxIndex) {
@@ -87,7 +86,7 @@ export default function CategorySlider() {
     setCurrentIndex(index);
   };
 
-  // الكروت اللي هتظهر حالياً
+
   const visibleCategories = categories.slice(currentIndex, currentIndex + visibleCards);
 
   return (
@@ -100,7 +99,6 @@ export default function CategorySlider() {
         </p>
       </div>
 
-      {/* Slider Container مع الأزرار */}
       <div className="slider-wrapper">
         <button 
           className="slider-arrow slider-arrow-prev"
@@ -110,7 +108,6 @@ export default function CategorySlider() {
           ‹
         </button>
 
-        {/* الكروت اللي ظاهرة فقط */}
         <div className="slider-container" ref={sliderRef}>
           {visibleCategories.map((cat) => (
             <div
@@ -156,7 +153,7 @@ export default function CategorySlider() {
         </button>
       </div>
 
-      {/* النقاط للإرشاد */}
+      
       <div className="slider-dots">
         {Array.from({ length: Math.ceil(categories.length / visibleCards) }).map((_, index) => (
           <button

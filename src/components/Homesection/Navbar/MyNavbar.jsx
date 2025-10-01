@@ -5,6 +5,7 @@ import { IoIosSearch } from "react-icons/io";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./MyNavbar.css";
 import logo from "../../../assets/Logo.svg";
+import { Link } from "react-router-dom";
 
 export default function MyNavbar() {
   return (
@@ -22,10 +23,18 @@ export default function MyNavbar() {
 
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="links ms-auto">
-              <Nav.Link href="#home">Home</Nav.Link>
-              <Nav.Link href="#movies">Movies & Shows</Nav.Link>
-              <Nav.Link href="#support">Support</Nav.Link>
-              <Nav.Link href="#subscriptions">Subscriptions</Nav.Link>
+              <Nav.Link as={Link} to="/">
+                Home
+              </Nav.Link>
+              <Nav.Link as={Link} to="/movies_shows">
+                Movies & Shows
+              </Nav.Link>
+              <Nav.Link as={Link} to="/support">
+                Support
+              </Nav.Link>
+              <Nav.Link as={Link} to="/subscription">
+                Subscriptions
+              </Nav.Link>
             </Nav>
 
             <Nav className="ms-auto">

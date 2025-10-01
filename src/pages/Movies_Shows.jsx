@@ -1,9 +1,11 @@
 import React from 'react'
 import MyNavbar from '../components/Homesection/Navbar/MyNavbar.jsx'
-export default function Support() {
+import MainSection from '../components/Movies&Shows/MainSection.jsx'
+export default function Movies_Shows() {
   return (
     <>
          <MyNavbar/>
+         <MainSection/>
     </>
   )
 }
