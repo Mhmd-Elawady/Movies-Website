@@ -1,0 +1,150 @@
+.banner-container {
+  background-color: #000000;
+  padding: 40px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-content {
+  background: url('../../../assets/BackgroundImages.png') no-repeat center center;
+  background-size: cover;
+  padding: 70px;
+  border-radius: 10px;
+  color: white;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.banner-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+.heding {
+  font-size: 2em;
+  margin-bottom: 20px;
+  text-align: start;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff 0%, #e5e7eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.par {
+  font-size: 1rem;
+  margin-bottom: 30px;
+  color: #d1d5db;
+  text-align: start;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.start-trial-button {
+  background: linear-gradient(135deg, #e50914 0%, #b80710 100%);
+  color: white;
+  border: none;
+  padding: 15px 20px;
+  font-size: 1.1em;
+  border-radius: 8px;
+  cursor: pointer;
+  float: left;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+  position: relative;
+  
+  overflow: hidden;
+}
+
+.start-trial-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.start-trial-button:hover {
+  background: linear-gradient(135deg, #f40612 0%, #d90410 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4);
+}
+
+.start-trial-button:hover::before {
+  left: 100%;
+}
+
+.start-trial-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .banner-container {
+    padding: 30px 15px;
+  }
+  
+  .banner-content {
+    padding: 60px 30px;
+  }
+  
+  .heding {
+    font-size: 2.2em;
+    text-align: center;
+  }
+  
+  .par {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+  
+  .start-trial-button {
+    float: none;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-content {
+    padding: 40px 20px;
+  }
+  
+  .heding {
+    font-size: 1.8em;
+  }
+  
+  .par {
+    font-size: 0.95rem;
+  }
+  
+  .start-trial-button {
+    padding: 12px 25px;
+    font-size: 1em;
+  }
+}
+
+
+/* .banner-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e50914, transparent);
+} */

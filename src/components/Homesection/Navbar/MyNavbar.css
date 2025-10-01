@@ -4,10 +4,15 @@
   --hover-color: #e50914;
 }
 .navbar {
-  background-color: transparent;
-  
+  background-color: transparent; /* خليها شفافة */
   padding: 20px 40px;
+  position: absolute; /* خليها فوق الصور */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10; /* فوق كل حاجة */
 }
+
 
 .navbar-brand img {
   width: 80%;

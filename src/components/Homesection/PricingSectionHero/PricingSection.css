@@ -1,0 +1,259 @@
+.pricing-section {
+  background-color: #000;
+  color: #fff;
+  padding: 4rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* إضافة تأثير خلفية متدرجة */
+/* .pricing-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #E50000, transparent);
+} */
+
+.pricing-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #f3f4f6;
+
+}
+
+.pricing-header p {
+  font-size: 1.1rem;
+  color: #9ca3af;
+  max-width: 750px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.7;
+}
+
+.pricing-toggle {
+  display: inline-flex;
+  background-color: #1A1A1A;
+  border-radius: 8px;
+  padding: 0.3rem;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.toggle-option {
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  z-index: 1;
+  position: relative;
+}
+
+.toggle-option.active {
+  color: #fff;
+  background: linear-gradient(135deg, #E50000, #B80000);
+  box-shadow: 0 2px 8px rgba(229, 0, 0, 0.3);
+}
+
+.pricing-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pricing-card {
+  background: linear-gradient(145deg, #1A1A1A, #141414);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.pricing-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #E50000, #B80000);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.pricing-card:hover::before {
+  transform: scaleX(1);
+}
+
+.pricing-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(229, 0, 0, 0.15);
+  border-color: rgba(229, 0, 0, 0.2);
+}
+
+.pricing-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+.pricing-card p {
+  font-size: 0.95rem;
+  color: #d1d5db;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.price span {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #9ca3af;
+}
+
+.start-trial {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 0.8rem;
+  width: 100%;
+  margin-bottom: 0.8rem;
+}
+
+.start-trial:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.choose-plan {
+  background: linear-gradient(135deg, #E50000, #B80000);
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.choose-plan::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.choose-plan:hover::before {
+  left: 100%;
+}
+
+.choose-plan:hover {
+  background: linear-gradient(135deg, #FF0000, #E50000);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(229, 0, 0, 0.4);
+}
+
+/* تأثيرات للبطاقات المختلفة */
+.pricing-card:nth-child(2) {
+  transform: scale(1.05);
+  border: 1px solid rgba(229, 0, 0, 0.3);
+}
+
+.pricing-card:nth-child(2):hover {
+  transform: scale(1.05) translateY(-8px);
+}
+
+.pricing-card:nth-child(2)::before {
+  background: linear-gradient(90deg, #E50000, #FF6B6B, #E50000);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .pricing-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .pricing-card:nth-child(2) {
+    transform: scale(1);
+    order: -1;
+  }
+  .pricing-card:nth-child(2):hover {
+    transform: translateY(-8px);
+  }
+}
+
+@media (max-width: 768px) {
+  .pricing-header h2 {
+    font-size: 2rem;
+  }
+  .pricing-header p {
+    font-size: 1rem;
+  }
+  .pricing-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .pricing-card {
+    padding: 2rem 1.5rem;
+  }
+  .pricing-card h3 {
+    font-size: 1.3rem;
+  }
+  .price {
+    font-size: 1.8rem;
+  }
+  .pricing-toggle {
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pricing-section {
+    padding: 3rem 1rem;
+  }
+  .pricing-header h2 {
+    font-size: 1.8rem;
+  }
+  .toggle-option {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+  .start-trial,
+  .choose-plan {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}

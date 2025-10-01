@@ -4,7 +4,7 @@ import { FaRegBell } from "react-icons/fa";
 import { IoIosSearch } from "react-icons/io";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./MyNavbar.css";
-import logo from "../../assets/Logo.svg";
+import logo from "../../../assets/Logo.svg";
 
 export default function MyNavbar() {
   return (

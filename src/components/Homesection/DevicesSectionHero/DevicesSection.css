@@ -1,0 +1,225 @@
+.devices-section {
+  background-color: #000000;
+  color: #fff;
+  padding: 4rem 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.devices-header h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fff 0%, #e5e7eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.devices-header p {
+  font-size: 1rem;
+  color: #9ca3af;
+  max-width: 850px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+.devices-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+  justify-content: center;
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.device-card {
+   background: linear-gradient(45deg, #000000 70%, #dc2626 100%);
+  border-radius: 16px;
+  padding: 1.8rem;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+ border: 1px solid rgba(55, 65, 81, 0.5); 
+  background-color: rgba(0, 0, 0, 0.9); 
+  background-blend-mode: overlay; 
+}
+
+.device-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent 0%, rgba(220, 38, 38, 0.1) 100%);
+  z-index: 1;
+}
+
+.device-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 
+    0 20px 40px rgba(220, 38, 38, 0.2),
+    0 10px 20px rgba(0, 0, 0, 0.4);
+  border-color: rgba(220, 38, 38, 0.5);
+  cursor: pointer;
+}
+
+.device-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.icon-wrapper {
+  background: rgba(20, 19, 19, 0.9);
+  width: 55px;
+  height: 55px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.device-card:hover .icon-wrapper {
+  background: rgba(220, 38, 38, 0.9);
+  transform: scale(1.05);
+  border-color: rgba(220, 38, 38, 0.6);
+}
+
+.icon-wrapper svg {
+  color: #dc2626;
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.device-card:hover .icon-wrapper svg {
+  color: #fff;
+}
+
+.device-top h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+
+.device-description {
+  font-size: 0.95rem;
+  color: #d1d5db;
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .devices-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .devices-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .device-card {
+    max-width: 350px;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .devices-section {
+    padding: 3rem 1.5rem;
+  }
+  
+  .devices-header h2 {
+    font-size: 2rem;
+  }
+  
+  .devices-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .device-card {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+  
+  .icon-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .icon-wrapper svg {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .devices-section {
+    padding: 2.5rem 1rem;
+  }
+  
+  .devices-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .device-card {
+    padding: 1.2rem;
+  }
+  
+  .icon-wrapper {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .icon-wrapper svg {
+    font-size: 1.2rem;
+  }
+  
+  .device-top h3 {
+    font-size: 1.1rem;
+  }
+  
+  .device-description {
+    font-size: 0.9rem;
+  }
+}
+
+/* تحسينات إضافية */
+.device-card > * {
+  position: relative;
+  z-index: 2;
+}
+/* 
+.devices-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.3), transparent);
+} */

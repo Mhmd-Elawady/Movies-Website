@@ -1,0 +1,120 @@
+/* StreamVibeHero.css */
+
+/* Hero Section */
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Image Container */
+.hero-image {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+}
+
+/* Background Image */
+.hero-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Gradient Overlay */
+.hero-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 300px; /* Increased for smoother gradient */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%);
+}
+
+/* Content Section */
+.hero-content-below {
+  color: #ffffff;
+  text-align: center;
+  padding: 1rem 2rem;
+  position: relative;
+  z-index: 1; /* Ensure content is above gradient */
+  margin: 0 auto;
+  transform: translateY(-50px); /* Adjusted to align with gradient */
+}
+
+/* Heading */
+.hero-content-below h1 {
+  font-size: clamp(2rem, 5vw, 3rem); /* Responsive font size */
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+/* Paragraph */
+.hero-content-below p {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: #e5e7eb;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-btn {
+  background: #e50914;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.875rem 2.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+}
+
+.cta-btn:hover {
+  background: #b20710;
+  box-shadow: 0 6px 18px rgba(229, 9, 20, 0.6);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.cta-btn:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-image {
+    height: 80vh; /* Slightly shorter for tablets */
+  }
+
+  .hero-content-below {
+    padding: 1rem;
+    transform: translateY(-30px);
+  }
+
+  .hero-gradient {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-image {
+    height: 70vh; /* Shorter for mobile */
+  }
+
+  .hero-gradient {
+    height: 200px;
+  }
+
+  .hero-content-below {
+    transform: translateY(-20px);
+  }
+}

@@ -1,0 +1,253 @@
+.faq-section {
+  background-color: #000;
+  color: #fff;
+  padding: 4rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* .faq-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #dc2626, transparent);
+}  */
+
+.faq-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #f3f4f6;
+ 
+}
+
+.faq-header p {
+  font-size: 1.1rem;
+  color: #9ca3af;
+  max-width: 750px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.7;
+}
+
+
+.faq-container {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 3rem auto 0;
+  gap: 2rem;
+}
+
+.faq-left,
+.faq-right {
+  flex: 1;
+}
+
+.faq-item {
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(220, 38, 38, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.faq-item::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%; /* يبدأ من 0% */
+  height: 1px;
+  background: linear-gradient(90deg, rgba(220, 38, 38, 0.7), rgba(220, 38, 38, 0.3));
+  transition: width 0.4s ease-in-out;
+}
+
+.faq-item:hover::before {
+  width: 100%; 
+}
+
+
+
+.faq-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.15);
+}
+
+
+.faq-question {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  padding: 1.2rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.faq-question:hover {
+  background: rgba(220, 38, 38, 0.05);
+}
+
+.faq-number {
+  color: #dc2626;
+  font-weight: 700;
+  margin-right: 1.2rem;
+  min-width: 35px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  background-color: #1F1F1F;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.faq-item:hover .faq-number {
+  transform: scale(1.1);
+}
+
+.faq-question h3 {
+  flex-grow: 1;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: #fff;
+  margin: 0;
+  text-align: left;
+  transition: all 0.3s ease;
+}
+
+.faq-question:hover h3 {
+  color: #f3f4f6;
+  transform: translateX(5px);
+}
+
+.faq-toggle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #dc2626;
+  transition: all 0.3s ease;
+  min-width: 20px;
+  text-align: center;
+}
+
+.faq-item.open .faq-toggle {
+  transform: rotate(180deg);
+  color: #ef4444;
+}
+
+.faq-answer {
+
+  padding: 0 1.5rem;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-item.open .faq-answer {
+  padding: 1.2rem 1.5rem;
+  max-height: 500px;
+}
+
+.faq-answer p {
+  font-size: 0.95rem;
+  color: #d1d5db;
+  margin: 0;
+  line-height: 1.7;
+  text-align: left;
+}
+
+/* تأثيرات للرسوم المتحركة */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.faq-item {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.faq-item:nth-child(even) {
+  animation-delay: 0.1s;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .faq-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .faq-left,
+  .faq-right {
+    margin: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .faq-section {
+    padding: 3rem 1.5rem;
+  }
+  
+  .faq-header h2 {
+    font-size: 2rem;
+  }
+  
+  .faq-header p {
+    font-size: 1rem;
+  }
+  
+  .ask-button {
+    padding: 0.8rem 1.8rem;
+    font-size: 0.95rem;
+  }
+  
+  .faq-question {
+    padding: 1rem 1.2rem;
+  }
+  
+  .faq-question h3 {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .faq-section {
+    padding: 2rem 1rem;
+  }
+  
+  .faq-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .faq-question {
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .faq-number {
+    margin-right: 0.8rem;
+    min-width: 30px;
+    font-size: 1rem;
+  }
+  
+  .faq-question h3 {
+    font-size: 1rem;
+    margin-right: 0.5rem;
+  }
+  
+  .faq-toggle {
+    font-size: 1.2rem;
+  }
+}
