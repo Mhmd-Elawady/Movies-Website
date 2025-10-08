@@ -5,7 +5,10 @@ import MoviesOpen from "../pages/MoviesOpen";
 import ShowsOpen from "../pages/ShowsOpen";
 import Support from "../pages/Support";
 import Subscription from "../pages/Subscription";
+import MovieDetail from "../components/Movies&Shows/MovieDetailHero/MovieDetail";
+import TVDetail from '../components/Movies&Shows/ShowsOpenHero/TVDetail';
 import { Route, Routes } from "react-router-dom";
+
 export default function AppRoutes() {
   return (
     <>
@@ -16,6 +19,8 @@ export default function AppRoutes() {
         <Route path="/showsOpen" element={<ShowsOpen />} />
         <Route path="/support" element={<Support />} />
         <Route path="/subscription" element={<Subscription />} />
+        <Route path="/movie/:id" element={<MovieDetail />} />
+        <Route path="/tv/:id" element={<TVDetail />} />
       </Routes>
     </>
   );
