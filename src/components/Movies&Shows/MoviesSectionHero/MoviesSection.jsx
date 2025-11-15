@@ -1,174 +1,241 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+  memo,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { TiArrowRight, TiArrowLeft } from "react-icons/ti";
 import { HiPlusSm } from "react-icons/hi";
-import { FaStar, FaClock, FaTv } from "react-icons/fa";
+import { FaStar, FaClock } from "react-icons/fa";
 import { fetchMoviesByCategory } from "../../../services/fetchMoviesByCategory";
+import { parseNumericId, addFavorite, getFavorites } from "../../../utils/helpers";
+import { useDispatch } from "react-redux";
+import { addToWatchlist as addToWatchlistAction } from "../../../store/watchlistSlice";
 import { fetchTVShowsByCategory } from "../../../services/fetchTVShowsByCategory";
 
-import './MoviesSection.css';
+import "./MoviesSection.css";
 
-
-const generateRandomDuration = () => {
-  const hours = Math.floor(Math.random() * 3) + 1;
-  const minutes = Math.floor(Math.random() * 60);
-  return `${hours}h ${minutes}m`;
-};
-
-
-const generateRandomYear = () => {
-  return Math.floor(Math.random() * 25) + 2000;
-};
-
-
-const generateRandomEpisodes = () => {
-  const seasons = Math.floor(Math.random() * 5) + 1;
-  let episodes;
-  
-  
-  switch(seasons) {
-    case 1:
-      episodes = Math.floor(Math.random() * 10) + 6; 
-      break;
-    case 2:
-      episodes = Math.floor(Math.random() * 10) + 10; 
-      break;
-    case 3:
-      episodes = Math.floor(Math.random() * 15) + 20; 
-      break;
-    case 4:
-      episodes = Math.floor(Math.random() * 20) + 30; 
-      break;
-    default:
-      episodes = Math.floor(Math.random() * 25) + 40; 
-  }
-  
-  return `${seasons} Season${seasons > 1 ? 's' : ''} • ${episodes} Episode${episodes > 1 ? 's' : ''}`;
-};
-function Row({ title, items, isLoading, showAllButton = false, isTVShow = false }) {
-  const scrollContainerRef = React.useRef(null);
+// Memoized Row component
+const Row = memo(function Row({
+  title,
+  items,
+  isLoading,
+  showAllButton = false,
+  isTVShow = false,
+}) {
+  const scrollContainerRef = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const [favoritedIds, setFavoritedIds] = useState(() => {
+    try {
+      return new Set((getFavorites() || []).map((f) => Number(f.id)));
+    } catch (err) {
+      console.debug('getFavorites parse error', err);
+      return new Set();
+    }
+  });
+
+  // Smooth scroll handler
   const handleScroll = useCallback((direction) => {
     const container = scrollContainerRef.current;
-    if (container) {
-      const scrollAmount = container.clientWidth * 0.8;
-      const newScrollLeft = container.scrollLeft + (direction === 'left' ? -scrollAmount : scrollAmount);
-      
-      container.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-      });
-    }
+    if (!container) return;
+
+    const scrollAmount = container.clientWidth * 0.8;
+    const targetScroll = container.scrollLeft + (direction === "left" ? -scrollAmount : scrollAmount);
+
+    container.scrollTo({
+      left: targetScroll,
+      behavior: "smooth",
+    });
   }, []);
 
+  // Add to watchlist handler
   const handleAddToWatchlist = useCallback((item, event) => {
     event.stopPropagation();
-    console.log('Adding to watchlist:', item.title);
+    event.preventDefault();
+    
+    try {
+      const rawId = item.id || item.movieId || item.tvShowId;
+      const itemId = parseNumericId(rawId);
+      if (!itemId) return;
+
+      const media_type = isTVShow ? "tv" : "movie";
+      const toAdd = {
+        id: itemId,
+        title: item.title || item.name || "",
+        poster_path: item.img || item.poster_path || null,
+        vote_average: item.rating != null ? Number(item.rating) : null,
+        release_date: item.release_date || item.year || null,
+        media_type,
+      };
+
+      const ok = addFavorite(toAdd);
+      if (ok) {
+        setFavoritedIds((prev) => new Set([...prev, itemId]));
+        dispatch(addToWatchlistAction(toAdd));
+        
+        // Update storage and notify
+        try {
+          localStorage.setItem("myapp.favorites.v1", JSON.stringify(getFavorites()));
+          window.dispatchEvent(new Event("favorites:change"));
+          window.dispatchEvent(new CustomEvent('app:toast', { 
+            detail: { 
+              message: `${toAdd.title || 'Item'} added to Watchlist`, 
+              type: 'success' 
+            } 
+          }));
+        } catch (err) {
+          console.debug('Storage or dispatch error', err);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to add to watchlist", err);
+    }
+  }, [isTVShow, dispatch]);
+
+  // Card click handler
+  const handleCardClick = useCallback((item) => {
+    if (!item) return;
+    
+    const rawId = item.id || item.movieId || item.tvShowId;
+    const itemId = parseNumericId(rawId);
+    if (!itemId) return;
+
+    const route = isTVShow ? `/tv/${itemId}` : `/movie/${itemId}`;
+    navigate(route);
+  }, [navigate, isTVShow]);
+
+  // Parse episodes info
+  const parseEpisodesInfo = useCallback((episodesText) => {
+    if (!episodesText) return { seasons: "", episodes: "" };
+    const parts = episodesText.split("•");
+    return {
+      seasons: parts[0]?.trim() || "",
+      episodes: parts[1]?.trim() || "",
+    };
   }, []);
 
- 
-  const handleCardClick = useCallback((item) => {
-    if (isTVShow) {
-      
-      navigate(`/tv/${item.id}`);
-    } else {
-      
-      navigate(`/movie/${item.id}`);
-    }
-  }, [navigate, isTVShow]); 
-
-  
-  const parseEpisodesInfo = (episodesText) => {
-    if (!episodesText) return { seasons: '', episodes: '' };
+  // Memoize processed items
+  const memoizedItems = useMemo(() => {
+    if (!Array.isArray(items) || items.length === 0) return [];
     
-    const parts = episodesText.split('•');
-    return {
-      seasons: parts[0]?.trim() || '',
-    };
-  };
+    const seen = new Set();
+    return items.filter((item) => {
+      const itemId = item?.id || item?.movieId || item?.tvShowId;
+      return item && itemId && !seen.has(itemId) && seen.add(itemId);
+    });
+  }, [items]);
+
+  // Image error handler
+  const handleImageError = useCallback((e) => {
+    const fallback = "https://via.placeholder.com/500x750/1a1a1a/666666?text=No+Image";
+    if (e.target.src !== fallback && !e.target.dataset.fallbackSet) {
+      e.target.src = fallback;
+      e.target.dataset.fallbackSet = "true";
+    }
+  }, []);
+
+  // Image load handler
+  const handleImageLoad = useCallback((e) => {
+    if (e.target.dataset.fallbackSet) {
+      delete e.target.dataset.fallbackSet;
+    }
+  }, []);
 
   return (
     <div className="row-section">
       <div className="row-header">
         <h3>{title}</h3>
         <div className="row-buttons">
-          <button 
-            onClick={() => handleScroll('left')}
+          <button
+            onClick={() => handleScroll("left")}
             aria-label={`Scroll ${title} left`}
           >
             <TiArrowLeft size={20} />
           </button>
-          <button 
-            onClick={() => handleScroll('right')}
+          <button
+            onClick={() => handleScroll("right")}
             aria-label={`Scroll ${title} right`}
           >
             <TiArrowRight size={20} />
           </button>
           {showAllButton && (
-            <button 
-              aria-label={`Show all ${title}`}
-            >
+            <button aria-label={`Show all ${title}`}>
               <HiPlusSm size={20} />
             </button>
           )}
         </div>
       </div>
-      
+
       <div className="row-cards" ref={scrollContainerRef}>
         {isLoading ? (
           Array.from({ length: 8 }, (_, index) => (
-            <div key={index} className="card loading">
+            <div key={`loading-${index}`} className="card loading">
               <div className="image-placeholder"></div>
               <div className="text-placeholder"></div>
               <div className="text-placeholder"></div>
             </div>
           ))
-        ) : items.length > 0 ? (
-          items.map(item => {
-            const episodesInfo = parseEpisodesInfo(item.episodes);
-            
+        ) : memoizedItems.length > 0 ? (
+          memoizedItems.map((item) => {
+            const itemId = item?.id || item?.movieId || item?.tvShowId;
+            if (!item || !itemId) return null;
+
+            const episodesInfo = item.episodes ? parseEpisodesInfo(item.episodes) : { seasons: "", episodes: "" };
+            const isAdded = favoritedIds.has(Number(itemId));
+
             return (
-              <div 
-                key={item.id} 
+              <div
+                key={itemId}
                 className="card"
                 onClick={() => handleCardClick(item)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: "pointer" }}
               >
                 <div className="card-image-container">
-                  <img 
-                    src={item.img} 
-                    alt={item.title}
+                  <img
+                    src={item.img || "https://via.placeholder.com/500x750/1a1a1a/666666?text=No+Image"}
+                    alt={item.title || "Media"}
                     loading="lazy"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/500x750/1a1a1a/666666?text=No+Image';
-                    }}
+                    onError={handleImageError}
+                    onLoad={handleImageLoad}
                   />
                   <div className="card-overlay"></div>
                   <div className="card-badge">
-                    {isTVShow ? 'TV' : (item.rating ? `${item.rating}/10` : 'NEW')}
+                    {isTVShow
+                      ? "TV"
+                      : item.rating && item.rating !== "N/A"
+                      ? `${item.rating}/10`
+                      : "NEW"}
                   </div>
-                  <button 
-                    className="add-to-watchlist"
+                  <button
+                    className={`add-to-watchlist ${isAdded ? "added" : ""}`}
                     onClick={(e) => handleAddToWatchlist(item, e)}
                     aria-label={`Add ${item.title} to watchlist`}
+                    title={isAdded ? "Added" : "Add to watchlist"}
                   >
-                    <HiPlusSm size={16} />
+                    {isAdded ? (
+                      <span style={{ fontSize: 12 }}>✓</span>
+                    ) : (
+                      <HiPlusSm size={16} />
+                    )}
                   </button>
                 </div>
-                
+
                 <div className="card-content">
                   <h4 className="card-title" title={item.title}>
                     {item.title}
                   </h4>
-                  
+
                   {isTVShow ? (
-                   
                     <div className="card-meta compact">
                       <div className="compact-meta-row">
                         <div className="rating-compact">
                           <FaStar size={10} />
-                          <span>{item.rating || (Math.random() * 3 + 7).toFixed(1)}</span>
+                          <span>{item.rating || "N/A"}</span>
                         </div>
                         {episodesInfo.seasons && (
                           <div className="episodes-info">
@@ -183,34 +250,25 @@ function Row({ title, items, isLoading, showAllButton = false, isTVShow = false 
                         )}
                       </div>
                       <div className="compact-meta-row">
-                        <span className="year">
-                          {item.year || generateRandomYear()}
-                        </span>
-                        <span className="genre">
-                          {item.genre || 'TV Show'}
-                        </span>
+                        <span className="year">{item.year || "Unknown"}</span>
+                        <span className="genre">{item.genre || "TV Show"}</span>
                       </div>
                     </div>
                   ) : (
-                 
                     <div className="card-meta">
                       <div className="meta-row">
                         <div className="rating">
                           <FaStar size={12} />
-                          <span>{item.rating || (Math.random() * 3 + 7).toFixed(1)}</span>
+                          <span>{item.rating || "N/A"}</span>
                         </div>
                         <div className="duration">
                           <FaClock size={12} />
-                          <span>{item.duration || generateRandomDuration()}</span>
+                          <span>{item.duration || "Unknown"}</span>
                         </div>
                       </div>
                       <div className="meta-row">
-                        <span className="year">
-                          {item.year || generateRandomYear()}
-                        </span>
-                        <span className="genre">
-                          {item.genre || 'Movie'}
-                        </span>
+                        <span className="year">{item.year || "Unknown"}</span>
+                        <span className="genre">{item.genre || "Movie"}</span>
                       </div>
                     </div>
                   )}
@@ -220,55 +278,74 @@ function Row({ title, items, isLoading, showAllButton = false, isTVShow = false 
           })
         ) : (
           <div className="no-movies">
-            <p>No {isTVShow ? 'TV shows' : 'movies'} available in this category</p>
+            <p>No {isTVShow ? "TV shows" : "movies"} available in this category</p>
           </div>
         )}
       </div>
     </div>
   );
-}
+});
 
+// Main component
 export default function MoviesSection() {
-  const [contentType, setContentType] = useState('movies');
+  const [contentType, setContentType] = useState("movies");
+  const [activeTab, setActiveTab] = useState("all");
   const [moviesData, setMoviesData] = useState({
     genres: [],
     trending: [],
     newReleases: [],
-    mustWatch: []
+    mustWatch: [],
   });
-  
   const [tvShowsData, setTvShowsData] = useState({
     genres: [],
     trending: [],
     newReleases: [],
-    mustWatch: []
+    mustWatch: [],
   });
-  
   const [loading, setLoading] = useState({
     movies: {
       genres: true,
       trending: true,
       newReleases: true,
-      mustWatch: true
+      mustWatch: true,
     },
     tvshows: {
       genres: true,
       trending: true,
       newReleases: true,
-      mustWatch: true
-    }
+      mustWatch: true,
+    },
   });
+  const [error, setError] = useState("");
 
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
   const navRef = useRef(null);
   const indicatorRef = useRef(null);
+  const resizeTimeoutRef = useRef(null);
 
+  // Tabs configuration
+  const tabsConfig = {
+    movies: [
+      { id: "all", label: "All Movies" },
+      { id: "trending", label: "Trending" },
+      { id: "new", label: "New Releases" },
+      { id: "genres", label: "Genres" },
+      { id: "top", label: "Top Rated" },
+    ],
+    tvshows: [
+      { id: "all", label: "All TV Shows" },
+      { id: "trending", label: "Trending" },
+      { id: "new", label: "New Releases" },
+      { id: "genres", label: "Genres" },
+      { id: "top", label: "Top Rated" },
+    ],
+  };
+
+  // Update active indicator
   useEffect(() => {
     const updateActiveIndicator = () => {
-      const activeElement = navRef.current?.querySelector('.nav-tab.active');
+      const activeElement = navRef.current?.querySelector(".nav-tab.active");
       const indicator = indicatorRef.current;
-      
+
       if (activeElement && indicator) {
         const { offsetLeft, offsetWidth } = activeElement;
         indicator.style.width = `${offsetWidth}px`;
@@ -277,318 +354,260 @@ export default function MoviesSection() {
     };
 
     updateActiveIndicator();
-    
-    window.addEventListener('resize', updateActiveIndicator);
-    return () => window.removeEventListener('resize', updateActiveIndicator);
+
+    const handleResize = () => {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+      resizeTimeoutRef.current = setTimeout(updateActiveIndicator, 150);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
   }, [activeTab, contentType]);
 
-  
-  const moviesTabs = [
-    { id: 'all', label: 'All Movies' },
-    { id: 'trending', label: 'Trending' },
-    { id: 'new', label: 'New Releases' },
-    { id: 'genres', label: 'Genres' },
-    { id: 'top', label: 'Top Rated' }
-  ];
+  // Data processing functions
+  const processMediaData = useCallback((data, isTVShow = false) => {
+    if (!Array.isArray(data) || data.length === 0) return [];
 
-
-  const tvShowsTabs = [
-    { id: 'all', label: 'All TV Shows' },
-    { id: 'trending', label: 'Trending' },
-    { id: 'new', label: 'New Releases' },
-    { id: 'genres', label: 'Genres' },
-    { id: 'top', label: 'Top Rated' }
-  ];
-
-  const currentTabs = contentType === 'movies' ? moviesTabs : tvShowsTabs;
-
-  
-  const filterMoviesByTab = useCallback((tabId, movies) => {
-    switch (tabId) {
-      case 'trending':
-        return movies.trending;
-      
-      case 'new':
-        return movies.newReleases;
-      
-      case 'genres':
-        return movies.genres;
-      
-      case 'top':
-        const allMovies = [
-          ...movies.trending,
-          ...movies.newReleases,
-          ...movies.mustWatch
-        ];
-        return allMovies.filter(movie => parseFloat(movie.rating) >= 8.0);
-      
-      case 'all':
-      default:
-        const allUniqueMovies = [
-          ...movies.trending,
-          ...movies.newReleases,
-          ...movies.mustWatch
-        ].filter((movie, index, self) => 
-          index === self.findIndex(m => m.id === movie.id)
-        );
-        return allUniqueMovies;
-    }
+    const seen = new Set();
+    return data
+      .filter((item) => {
+        const itemId = item.id || (isTVShow ? item.tvShowId : item.movieId);
+        return item && itemId && !seen.has(itemId) && seen.add(itemId);
+      })
+      .slice(0, 100)
+      .map((item) => ({
+        ...item,
+        id: item.id || (isTVShow ? item.tvShowId : item.movieId),
+        rating: item.rating || "N/A",
+        duration: item.duration || "Unknown",
+        episodes: item.episodes || "Unknown",
+        year: item.year || "Unknown",
+        genre: item.genre || (isTVShow ? "TV Show" : "Movie"),
+        type: isTVShow ? "tvshow" : "movie",
+      }));
   }, []);
 
-
-  const filterTVShowsByTab = useCallback((tabId, tvShows) => {
-    switch (tabId) {
-      case 'trending':
-        return tvShows.trending;
-      
-      case 'new':
-        return tvShows.newReleases;
-      
-      case 'genres':
-        return tvShows.genres;
-      
-      case 'top':
-        const allTVShows = [
-          ...tvShows.trending,
-          ...tvShows.newReleases,
-          ...tvShows.mustWatch
-        ];
-        return allTVShows.filter(show => parseFloat(show.rating) >= 8.0);
-      
-      case 'all':
-      default:
-        const allUniqueTVShows = [
-          ...tvShows.trending,
-          ...tvShows.newReleases,
-          ...tvShows.mustWatch
-        ].filter((show, index, self) => 
-          index === self.findIndex(s => s.id === show.id)
-        );
-        return allUniqueTVShows;
-    }
-  }, []);
-
-
-  const filteredMovies = useMemo(() => {
-    if (loading.movies.trending || loading.movies.newReleases || loading.movies.mustWatch) {
-      return { trending: [], newReleases: [], mustWatch: [], genres: [] };
-    }
-    
-    const filtered = filterMoviesByTab(activeTab, moviesData);
-    
-    return {
-      trending: activeTab === 'all' || activeTab === 'trending' ? filtered : [],
-      newReleases: activeTab === 'all' || activeTab === 'new' ? filtered : [],
-      mustWatch: activeTab === 'all' || activeTab === 'top' ? filtered : [],
-      genres: activeTab === 'all' || activeTab === 'genres' ? moviesData.genres : []
-    };
-  }, [activeTab, moviesData, loading.movies, filterMoviesByTab]);
-
-  const filteredTVShows = useMemo(() => {
-    if (loading.tvshows.trending || loading.tvshows.newReleases || loading.tvshows.mustWatch) {
-      return { trending: [], newReleases: [], mustWatch: [], genres: [] };
-    }
-    
-    const filtered = filterTVShowsByTab(activeTab, tvShowsData);
-    
-    return {
-      trending: activeTab === 'all' || activeTab === 'trending' ? filtered : [],
-      newReleases: activeTab === 'all' || activeTab === 'new' ? filtered : [],
-      mustWatch: activeTab === 'all' || activeTab === 'top' ? filtered : [],
-      genres: activeTab === 'all' || activeTab === 'genres' ? tvShowsData.genres : []
-    };
-  }, [activeTab, tvShowsData, loading.tvshows, filterTVShowsByTab]);
-
-  const handleTabClick = (tabId) => {
-    setActiveTab(tabId);
-  };
-
-  const handleContentTypeToggle = (type) => {
-    setContentType(type);
-    setActiveTab('all');
-  };
-
-  
-  const loadMoviesData = useCallback(async () => {
+  // Data loading functions
+  const loadMoviesData = useCallback(async (signal) => {
     try {
-      setError('');
-      
-      const [genres, trending, newReleases, mustWatch] = await Promise.all([
-        fetchMoviesByCategory('genres'),
-        fetchMoviesByCategory('trending'),
-        fetchMoviesByCategory('newReleases'),
-        fetchMoviesByCategory('mustWatch')
-      ]);
+      setError("");
 
-      const enhanceMovieData = (movies) => {
-        return movies.map(movie => ({
-          ...movie,
-          rating: (Math.random() * 3 + 7).toFixed(1),
-          duration: generateRandomDuration(),
-          year: generateRandomYear(),
-          genre: movie.genre || 'Movie',
-          type: 'movie'
-        }));
-      };
+      const [genres, trending, newReleases, mustWatch] = await Promise.allSettled([
+        fetchMoviesByCategory("genres", signal),
+        fetchMoviesByCategory("trending", signal),
+        fetchMoviesByCategory("newReleases", signal),
+        fetchMoviesByCategory("mustWatch", signal),
+      ]).then((results) =>
+        results.map((result) => (result.status === "fulfilled" ? result.value : []))
+      );
 
       setMoviesData({
-        genres: enhanceMovieData(genres.slice(0, 100)),
-        trending: enhanceMovieData(trending.slice(0, 100)),
-        newReleases: enhanceMovieData(newReleases.slice(0, 100)),
-        mustWatch: enhanceMovieData(mustWatch.slice(0, 100))
+        genres: processMediaData(genres),
+        trending: processMediaData(trending),
+        newReleases: processMediaData(newReleases),
+        mustWatch: processMediaData(mustWatch),
       });
 
       setLoading(prev => ({
         ...prev,
-        movies: {
-          genres: false,
-          trending: false,
-          newReleases: false,
-          mustWatch: false
-        }
+        movies: { genres: false, trending: false, newReleases: false, mustWatch: false }
       }));
     } catch (error) {
-      console.error('Error loading movies data:', error);
-      setError('Failed to load movies data.');
-      
+      console.error("Error loading movies data:", error);
+      setError("Failed to load movies data.");
       setLoading(prev => ({
         ...prev,
-        movies: {
-          genres: false,
-          trending: false,
-          newReleases: false,
-          mustWatch: false
-        }
+        movies: { genres: false, trending: false, newReleases: false, mustWatch: false }
       }));
     }
-  }, []);
+  }, [processMediaData]);
 
-
-  const loadTVShowsData = useCallback(async () => {
+  const loadTVShowsData = useCallback(async (signal) => {
     try {
-      setError('');
-      
-      const [genres, trending, newReleases, mustWatch] = await Promise.all([
-        fetchTVShowsByCategory('genres'),
-        fetchTVShowsByCategory('trending'),
-        fetchTVShowsByCategory('newReleases'),
-        fetchTVShowsByCategory('mustWatch')
-      ]);
+      setError("");
 
-      const enhanceTVShowData = (shows) => {
-        return shows.map(show => ({
-          ...show,
-          rating: (Math.random() * 3 + 7).toFixed(1),
-          episodes: generateRandomEpisodes(),
-          year: generateRandomYear(),
-          genre: show.genre || 'TV Show',
-          type: 'tvshow'
-        }));
-      };
+      const [genres, trending, newReleases, mustWatch] = await Promise.allSettled([
+        fetchTVShowsByCategory("genres", signal),
+        fetchTVShowsByCategory("trending", signal),
+        fetchTVShowsByCategory("newReleases", signal),
+        fetchTVShowsByCategory("mustWatch", signal),
+      ]).then((results) =>
+        results.map((result) => (result.status === "fulfilled" ? result.value : []))
+      );
 
       setTvShowsData({
-        genres: enhanceTVShowData(genres.slice(0, 100)),
-        trending: enhanceTVShowData(trending.slice(0,100)),
-        newReleases: enhanceTVShowData(newReleases.slice(0, 100)),
-        mustWatch: enhanceTVShowData(mustWatch.slice(0, 100))
+        genres: processMediaData(genres, true),
+        trending: processMediaData(trending, true),
+        newReleases: processMediaData(newReleases, true),
+        mustWatch: processMediaData(mustWatch, true),
       });
 
       setLoading(prev => ({
         ...prev,
-        tvshows: {
-          genres: false,
-          trending: false,
-          newReleases: false,
-          mustWatch: false
-        }
+        tvshows: { genres: false, trending: false, newReleases: false, mustWatch: false }
       }));
     } catch (error) {
-      console.error('Error loading TV shows data:', error);
-      setError('Failed to load TV shows data.');
-      
+      console.error("Error loading TV shows data:", error);
+      setError("Failed to load TV shows data.");
       setLoading(prev => ({
         ...prev,
-        tvshows: {
-          genres: false,
-          trending: false,
-          newReleases: false,
-          mustWatch: false
-        }
+        tvshows: { genres: false, trending: false, newReleases: false, mustWatch: false }
       }));
+    }
+  }, [processMediaData]);
+
+  // Initial data load
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          loadMoviesData(controller.signal),
+          loadTVShowsData(controller.signal),
+        ]);
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+        console.error("Error loading data:", err);
+      }
+    };
+
+    loadData();
+
+    return () => controller.abort();
+  }, [loadMoviesData, loadTVShowsData]);
+
+  // Filter functions
+  const filterMediaByTab = useCallback((tabId, data) => {
+    const { genres, trending, newReleases, mustWatch } = data;
+    
+    switch (tabId) {
+      case "trending":
+        return trending || [];
+      case "new":
+        return newReleases || [];
+      case "genres":
+        return genres || [];
+      case "top": {
+        const seen = new Set();
+        const allMedia = [...(trending || []), ...(newReleases || []), ...(mustWatch || [])];
+        return allMedia.filter((item) => {
+          if (!item?.id) return false;
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          const rating = parseFloat(item.rating);
+          return !isNaN(rating) && rating >= 8.0;
+        });
+      }
+      case "all":
+      default: {
+        const seen = new Set();
+        const allMedia = [...(trending || []), ...(newReleases || []), ...(mustWatch || [])];
+        return allMedia.filter((item) => item?.id && !seen.has(item.id) && seen.add(item.id));
+      }
     }
   }, []);
 
-  useEffect(() => {
-    loadMoviesData();
-    loadTVShowsData();
-  }, [loadMoviesData, loadTVShowsData]);
-
-  const handleRetry = () => {
-    if (contentType === 'movies') {
-      setLoading(prev => ({
-        ...prev,
-        movies: {
-          genres: true,
-          trending: true,
-          newReleases: true,
-          mustWatch: true
-        }
-      }));
-      loadMoviesData();
-    } else {
-      setLoading(prev => ({
-        ...prev,
-        tvshows: {
-          genres: true,
-          trending: true,
-          newReleases: true,
-          mustWatch: true
-        }
-      }));
-      loadTVShowsData();
+  // Memoized filtered data
+  const filteredMovies = useMemo(() => {
+    if (Object.values(loading.movies).some(Boolean)) {
+      return { trending: [], newReleases: [], mustWatch: [], genres: [] };
     }
-  };
 
-  const shouldShowSection = (section) => {
-    if (activeTab === 'all') return true;
+    const filtered = filterMediaByTab(activeTab, moviesData);
+    const shouldShow = (section) => activeTab === "all" || activeTab === section;
+
+    return {
+      trending: shouldShow("trending") ? filtered : [],
+      newReleases: shouldShow("new") ? filtered : [],
+      mustWatch: shouldShow("top") ? filtered : [],
+      genres: shouldShow("genres") ? moviesData.genres : [],
+    };
+  }, [activeTab, moviesData, loading.movies, filterMediaByTab]);
+
+  const filteredTVShows = useMemo(() => {
+    if (Object.values(loading.tvshows).some(Boolean)) {
+      return { trending: [], newReleases: [], mustWatch: [], genres: [] };
+    }
+
+    const filtered = filterMediaByTab(activeTab, tvShowsData);
+    const shouldShow = (section) => activeTab === "all" || activeTab === section;
+
+    return {
+      trending: shouldShow("trending") ? filtered : [],
+      newReleases: shouldShow("new") ? filtered : [],
+      mustWatch: shouldShow("top") ? filtered : [],
+      genres: shouldShow("genres") ? tvShowsData.genres : [],
+    };
+  }, [activeTab, tvShowsData, loading.tvshows, filterMediaByTab]);
+
+  // Event handlers
+  const handleTabClick = useCallback((tabId) => {
+    setActiveTab(tabId);
+  }, []);
+
+  const handleContentTypeToggle = useCallback((type) => {
+    setContentType(type);
+    setActiveTab("all");
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    const controller = new AbortController();
     
-    if (contentType === 'movies') {
-      switch (section) {
-        case 'genres': return activeTab === 'genres';
-        case 'trending': return activeTab === 'trending';
-        case 'newReleases': return activeTab === 'new';
-        case 'mustWatch': return activeTab === 'top';
-        default: return false;
-      }
+    if (contentType === "movies") {
+      setLoading(prev => ({ ...prev, movies: { genres: true, trending: true, newReleases: true, mustWatch: true } }));
+      loadMoviesData(controller.signal);
     } else {
-      switch (section) {
-        case 'genres': return activeTab === 'genres';
-        case 'trending': return activeTab === 'trending';
-        case 'newReleases': return activeTab === 'new';
-        case 'mustWatch': return activeTab === 'top';
-        default: return false;
-      }
+      setLoading(prev => ({ ...prev, tvshows: { genres: true, trending: true, newReleases: true, mustWatch: true } }));
+      loadTVShowsData(controller.signal);
     }
-  };
+
+    return () => controller.abort();
+  }, [contentType, loadMoviesData, loadTVShowsData]);
+
+  // Section visibility
+  const shouldShowSection = useCallback((section) => {
+    const sectionMap = {
+      genres: "genres",
+      trending: "trending",
+      newReleases: "new",
+      mustWatch: "top",
+    };
+    return activeTab === "all" || activeTab === sectionMap[section];
+  }, [activeTab]);
+
+  const currentTabs = tabsConfig[contentType];
+  const isMovies = contentType === "movies";
+  const currentData = isMovies ? filteredMovies : filteredTVShows;
+  const currentLoading = isMovies ? loading.movies : loading.tvshows;
+
+  const hasNoData = Object.values(currentData).every(arr => arr.length === 0);
+  const isLoading = Object.values(currentLoading).some(Boolean);
 
   return (
-    <section className={`movies-section ${contentType === 'tvshows' ? 'tv-shows-section' : ''}`}>
-      
+    <section className={`movies-section ${!isMovies ? "tv-shows-section" : ""}`}>
       <div className="section-header">
         <span className="section-title">
-          {contentType === 'movies' ? 'Movies' : 'TV Shows'}
+          {isMovies ? "Movies" : "TV Shows"}
         </span>
-        
+
         <div className="content-toggle">
           <button
-            className={`toggle-btn ${contentType === 'movies' ? 'active' : ''}`}
-            onClick={() => handleContentTypeToggle('movies')}
+            className={`toggle-btn ${isMovies ? "active" : ""}`}
+            onClick={() => handleContentTypeToggle("movies")}
           >
             Movies
           </button>
           <button
-            className={`toggle-btn ${contentType === 'tvshows' ? 'active' : ''}`}
-            onClick={() => handleContentTypeToggle('tvshows')}
+            className={`toggle-btn ${!isMovies ? "active" : ""}`}
+            onClick={() => handleContentTypeToggle("tvshows")}
           >
             TV Shows
           </button>
@@ -597,150 +616,130 @@ export default function MoviesSection() {
       </div>
 
       <nav className="movies-navigation" ref={navRef}>
-        {currentTabs.map(tab => (
+        {currentTabs.map((tab) => (
           <button
             key={tab.id}
-            className={`nav-tab ${activeTab === tab.id ? 'active' : ''}`}
+            className={`nav-tab ${activeTab === tab.id ? "active" : ""}`}
             onClick={() => handleTabClick(tab.id)}
             aria-selected={activeTab === tab.id}
           >
             {tab.label}
           </button>
         ))}
-        <div 
-          ref={indicatorRef}
-          className="active-indicator"
-          aria-hidden="true"
-        />
+        <div ref={indicatorRef} className="active-indicator" aria-hidden="true" />
       </nav>
 
       {error && (
         <div className="error-message" role="alert">
           {error}
-          <button 
-            onClick={handleRetry}
-            style={{ 
-              marginLeft: '1rem', 
-              background: 'rgba(255,255,255,0.2)',
-              border: 'none',
-              color: 'white',
-              padding: '0.3rem 0.8rem',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
-          >
+          <button onClick={handleRetry} className="retry-btn">
             Try Again
           </button>
         </div>
       )}
 
-     
-      <div className={`content-area ${contentType !== 'movies' ? 'hidden' : ''}`}>
-        {shouldShowSection('genres') && (
-          <Row 
-            title="Our Genres" 
-            items={filteredMovies.genres} 
-            isLoading={loading.movies.genres}
-            showAllButton={true}
-          />
-        )}
+      <div className={`content-area ${!isMovies ? "hidden" : ""}`}>
+        {isMovies && (
+          <>
+            {shouldShowSection("genres") && (
+              <Row
+                title="Our Genres"
+                items={filteredMovies.genres}
+                isLoading={loading.movies.genres}
+                showAllButton={true}
+              />
+            )}
 
-        {shouldShowSection('genres') && filteredMovies.genres.length > 0 && (
-          <Row 
-            title="Popular Top 10 in Genres" 
-            items={filteredMovies.genres.slice(0, 100)} 
-            isLoading={loading.movies.genres} 
-          />
-        )}
+            {shouldShowSection("genres") && filteredMovies.genres.length > 0 && (
+              <Row
+                title="Popular Top 10 in Genres"
+                items={filteredMovies.genres.slice(0, 10)}
+                isLoading={loading.movies.genres}
+              />
+            )}
 
-        {shouldShowSection('trending') && (
-          <Row 
-            title="Trending Now" 
-            items={filteredMovies.trending} 
-            isLoading={loading.movies.trending} 
-          />
-        )}
+            {shouldShowSection("trending") && (
+              <Row
+                title="Trending Now"
+                items={filteredMovies.trending}
+                isLoading={loading.movies.trending}
+              />
+            )}
 
-        {shouldShowSection('newReleases') && (
-          <Row 
-            title="New Releases" 
-            items={filteredMovies.newReleases} 
-            isLoading={loading.movies.newReleases} 
-          />
-        )}
+            {shouldShowSection("newReleases") && (
+              <Row
+                title="New Releases"
+                items={filteredMovies.newReleases}
+                isLoading={loading.movies.newReleases}
+              />
+            )}
 
-        {shouldShowSection('mustWatch') && (
-          <Row 
-            title="Must-Watch Movies" 
-            items={filteredMovies.mustWatch} 
-            isLoading={loading.movies.mustWatch} 
-          />
-        )}
-      </div>
-
-      <div className={`content-area ${contentType !== 'tvshows' ? 'hidden' : ''}`}>
-        {shouldShowSection('genres') && (
-          <Row 
-            title="TV Show Genres" 
-            items={filteredTVShows.genres} 
-            isLoading={loading.tvshows.genres}
-            showAllButton={true}
-            isTVShow={true}
-          />
-        )}
-
-        {shouldShowSection('genres') && filteredTVShows.genres.length > 0 && (
-          <Row 
-            title="Popular Top 10 in Genres" 
-            items={filteredTVShows.genres.slice(0, 100)} 
-            isLoading={loading.tvshows.genres} 
-            isTVShow={true}
-          />
-        )}
-
-        {shouldShowSection('trending') && (
-          <Row 
-            title="Trending Now" 
-            items={filteredTVShows.trending} 
-            isLoading={loading.tvshows.trending} 
-            isTVShow={true}
-          />
-        )}
-
-        {shouldShowSection('newReleases') && (
-          <Row 
-            title="New Releases" 
-            items={filteredTVShows.newReleases} 
-            isLoading={loading.tvshows.newReleases} 
-            isTVShow={true}
-          />
-        )}
-
-        {shouldShowSection('mustWatch') && (
-          <Row 
-            title="Must-Watch TV Shows" 
-            items={filteredTVShows.mustWatch} 
-            isLoading={loading.tvshows.mustWatch} 
-            isTVShow={true}
-          />
+            {shouldShowSection("mustWatch") && (
+              <Row
+                title="Must-Watch Movies"
+                items={filteredMovies.mustWatch}
+                isLoading={loading.movies.mustWatch}
+              />
+            )}
+          </>
         )}
       </div>
 
-      {(contentType === 'movies' ? 
-        filteredMovies.trending.length === 0 && 
-        filteredMovies.newReleases.length === 0 && 
-        filteredMovies.mustWatch.length === 0 && 
-        filteredMovies.genres.length === 0 
-        : 
-        filteredTVShows.trending.length === 0 && 
-        filteredTVShows.newReleases.length === 0 && 
-        filteredTVShows.mustWatch.length === 0 && 
-        filteredTVShows.genres.length === 0
-      ) && 
-      !loading.movies.trending && !loading.tvshows.trending && (
-        <div className="no-movies" style={{ marginTop: '2rem' }}>
-          <p>No {contentType === 'movies' ? 'movies' : 'TV shows'} found in this category. Try another filter.</p>
+      <div className={`content-area ${isMovies ? "hidden" : ""}`}>
+        {!isMovies && (
+          <>
+            {shouldShowSection("genres") && (
+              <Row
+                title="TV Show Genres"
+                items={filteredTVShows.genres}
+                isLoading={loading.tvshows.genres}
+                showAllButton={true}
+                isTVShow={true}
+              />
+            )}
+
+            {shouldShowSection("genres") && filteredTVShows.genres.length > 0 && (
+              <Row
+                title="Popular Top 10 in Genres"
+                items={filteredTVShows.genres.slice(0, 10)}
+                isLoading={loading.tvshows.genres}
+                isTVShow={true}
+              />
+            )}
+
+            {shouldShowSection("trending") && (
+              <Row
+                title="Trending Now"
+                items={filteredTVShows.trending}
+                isLoading={loading.tvshows.trending}
+                isTVShow={true}
+              />
+            )}
+
+            {shouldShowSection("newReleases") && (
+              <Row
+                title="New Releases"
+                items={filteredTVShows.newReleases}
+                isLoading={loading.tvshows.newReleases}
+                isTVShow={true}
+              />
+            )}
+
+            {shouldShowSection("mustWatch") && (
+              <Row
+                title="Must-Watch TV Shows"
+                items={filteredTVShows.mustWatch}
+                isLoading={loading.tvshows.mustWatch}
+                isTVShow={true}
+              />
+            )}
+          </>
+        )}
+      </div>
+
+      {hasNoData && !isLoading && (
+        <div className="no-movies">
+          <p>No {isMovies ? "movies" : "TV shows"} found in this category. Try another filter.</p>
         </div>
       )}
     </section>

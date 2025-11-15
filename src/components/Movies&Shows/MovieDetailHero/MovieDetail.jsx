@@ -1,20 +1,145 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { FaStar, FaPlay, FaPlus, FaArrowLeft, FaTimes } from 'react-icons/fa';
-import useMovie from '../../../hooks/useMovie';
-import './MovieDetail.css';
+import React, { useMemo, useState, useCallback, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  FaStar,
+  FaPlay,
+  FaPlus,
+  FaArrowLeft,
+  FaCalendar,
+  FaTimes,
+  FaClock
+} from "react-icons/fa";
+import useMovie from "../../../hooks/useMovie";
+import {
+  buildImageUrl,
+  getYearFromDate,
+  formatRating,
+  isFavorited,
+  addFavorite,
+  removeFavorite
+} from "../../../utils/helpers";
+import "./MovieDetail.css";
 
 const MovieDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data, loading, IMG } = useMovie(id);
+  const { data, loading, error } = useMovie(id);
+  
   const [showTrailer, setShowTrailer] = useState(false);
+  const [inWatchlist, setInWatchlist] = useState(false);
+
+  const movie = useMemo(() => data?.movie || {}, [data?.movie]);
+  const similar = data?.similar || [];
+  const cast = data?.cast || [];
+  const trailer = data?.trailer || null;
+
+  const posterSrc = useMemo(
+    () =>
+      buildImageUrl(
+        movie.poster_path,
+        "w500",
+        "https://via.placeholder.com/300x450/1a1a1a/666666?text=No+Image"
+      ),
+    [movie.poster_path]
+  );
+
+  const backdropSrc = useMemo(
+    () =>
+      buildImageUrl(
+        movie.backdrop_path,
+        "original",
+        "https://via.placeholder.com/1200x675/0f0f0f/333333?text=No+Backdrop"
+      ),
+    [movie.backdrop_path]
+  );
+
+  const releaseYear = useMemo(
+    () => getYearFromDate(movie.release_date),
+    [movie.release_date]
+  );
+
+  const rating = useMemo(
+    () => formatRating(movie.vote_average),
+    [movie.vote_average]
+  );
+
+  const hasTrailerValue = useMemo(() => !!trailer?.key, [trailer]);
+  const trailerUrl = useMemo(() => 
+    trailer?.key ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1` : null,
+    [trailer]
+  );
+
+  const handlePlayTrailer = useCallback(() => {
+    if (hasTrailerValue) {
+      setShowTrailer(true);
+    }
+  }, [hasTrailerValue]);
+
+  const toggleWatchlist = useCallback(() => {
+    if (!movie) return;
+    
+    const alreadyInWatchlist = isFavorited(movie.id, movie.media_type || "movie");
+    
+    if (alreadyInWatchlist) {
+      removeFavorite(movie.id, movie.media_type || "movie");
+      setInWatchlist(false);
+      window.dispatchEvent(new CustomEvent("app:toast", { 
+        detail: { message: "Removed from Watchlist", type: "info" } 
+      }));
+    } else {
+      const favItem = {
+        id: movie.id,
+        title: movie.title || movie.name,
+        poster_path: movie.poster_path,
+        vote_average: movie.vote_average,
+        release_date: movie.release_date || movie.first_air_date,
+        media_type: movie.media_type || "movie",
+      };
+      addFavorite(favItem);
+      setInWatchlist(true);
+      window.dispatchEvent(new CustomEvent("app:toast", { 
+        detail: { message: "Added to Watchlist", type: "success" } 
+      }));
+    }
+    
+    try { 
+      window.dispatchEvent(new Event("favorites:change")); 
+    } catch (err) { 
+      console.debug(err); 
+    }
+  }, [movie]);
+
+  const closeTrailer = useCallback(() => {
+    setShowTrailer(false);
+  }, []);
+
+  const gotoMovie = useCallback((movieId) => {
+    navigate(`/movie/${movieId}`);
+    window.scrollTo(0, 0);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (movie && movie.id) {
+      setInWatchlist(isFavorited(movie.id, movie.media_type || "movie"));
+    }
+  }, [movie]);
 
   if (loading)
     return (
       <div className="movie-detail-loading">
         <div className="loading-spinner"></div>
         <p>Loading movie details...</p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="movie-detail-error">
+        <h2>Failed to load</h2>
+        <p>{error}</p>
+        <button className="back-button" onClick={() => navigate(-1)}>
+          <FaArrowLeft /> Go Back
+        </button>
       </div>
     );
 
@@ -28,184 +153,217 @@ const MovieDetail = () => {
       </div>
     );
 
-  const { movie, cast, similar, trailer } = data;
-
-  const handlePlayMovie = () => {
-    if (trailer) {
-      setShowTrailer(true);
-    } else {
-
-      const searchQuery = encodeURIComponent(`${movie.title} official trailer`);
-      window.open(`https://www.youtube.com/results?search_query=${searchQuery}`, '_blank');
-    }
-  };
-
-  const handleAddToWatchlist = () => {
-    console.log('Added to watchlist:', movie.title);
-  };
-
-  const handleMovieNavigation = (newId) => {
-    navigate(`/movie/${newId}`);
-    window.scrollTo(0, 0);
-  };
-
-  const closeTrailer = () => {
-    setShowTrailer(false);
-  };
-
   return (
     <div className="movie-detail">
-      <button className="back-button" onClick={() => navigate(-1)}>
-        <FaArrowLeft /> Back
-      </button>
-
-
-      {showTrailer && trailer && (
+      {/* Trailer Modal */}
+      {showTrailer && (
         <div className="trailer-modal">
           <div className="trailer-modal-content">
             <button className="close-trailer" onClick={closeTrailer}>
               <FaTimes />
             </button>
-            <div className="trailer-container">
-              <iframe
-                src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1`}
-                title={trailer.name}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
+            {trailerUrl && (
+              <div className="trailer-video-container">
+                <iframe
+                  src={trailerUrl}
+                  title={`${movie.title} Trailer`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            )}
           </div>
+          <div className="trailer-modal-overlay" onClick={closeTrailer}></div>
         </div>
       )}
 
+      <button className="back-button" onClick={() => navigate(-1)}>
+        <FaArrowLeft /> Back
+      </button>
 
       <section className="movie-hero">
         <div className="hero-backdrop">
-          <img 
-            src={`${IMG}${movie.backdrop_path}`} 
-            alt={movie.title}
+          <img
+            src={backdropSrc}
+            alt={movie.title || "Movie"}
             className="backdrop-image"
+            loading="eager"
+            onError={(e) => {
+              const fallback =
+                "https://via.placeholder.com/1200x675/0f0f0f/333333?text=No+Backdrop";
+              if (e.target.src !== fallback && !e.target.dataset.fallbackSet) {
+                e.target.src = fallback;
+                e.target.dataset.fallbackSet = "true";
+              }
+            }}
           />
           <div className="backdrop-overlay"></div>
         </div>
-        
+
         <div className="hero-content">
           <div className="poster-container">
-            <img 
-              src={`${IMG}${movie.poster_path}`} 
-              alt={movie.title}
+            <img
+              src={posterSrc}
+              alt={movie.title || "Movie"}
               className="movie-poster"
+              loading="eager"
+              onError={(e) => {
+                const fallback =
+                  "https://via.placeholder.com/300x450/1a1a1a/666666?text=No+Image";
+                if (
+                  e.target.src !== fallback &&
+                  !e.target.dataset.fallbackSet
+                ) {
+                  e.target.src = fallback;
+                  e.target.dataset.fallbackSet = "true";
+                }
+              }}
             />
           </div>
-          
+
           <div className="movie-info">
             <h1 className="movie-title">{movie.title}</h1>
-            
+
             <div className="movie-meta">
-              <div className="rating">
+              <div className="rating" aria-label={`Rating ${rating}`}>
                 <FaStar className="star-icon" />
-                <span className="rating-value">{movie.vote_average?.toFixed(1)}</span>
+                <span className="rating-value">{rating}</span>
               </div>
-              <span className="release-year">{new Date(movie.release_date).getFullYear()}</span>
-              <span className="runtime">{movie.runtime} min</span>
+              
+              {releaseYear && (
+                <span className="release-year">
+                  <FaCalendar /> {releaseYear}
+                </span>
+              )}
+              
+              {movie.runtime && (
+                <span className="runtime">
+                  <FaClock /> {movie.runtime} min
+                </span>
+              )}
             </div>
-            
+
             <div className="genres">
-              {movie.genres?.map(genre => (
+              {movie.genres?.map((genre) => (
                 <span key={genre.id} className="genre-tag">
                   {genre.name}
                 </span>
               ))}
             </div>
-            
+
             <p className="movie-overview">{movie.overview}</p>
-            
+
             <div className="action-buttons">
-              <button className="play-button" onClick={handlePlayMovie}>
+              <button
+                className="play-button"
+                onClick={handlePlayTrailer}
+                disabled={!hasTrailerValue}
+                aria-disabled={!hasTrailerValue}
+              >
                 <FaPlay className="play-icon" />
-                {trailer ? 'Watch Trailer' : 'Watch Now'}
+                {hasTrailerValue ? "Watch Trailer" : "No Trailer"}
               </button>
-              <button className="watchlist-button" onClick={handleAddToWatchlist}>
+              
+              <button
+                className={`watchlist-button ${inWatchlist ? 'in-watchlist' : ''}`}
+                onClick={toggleWatchlist}
+                title={
+                  inWatchlist
+                    ? "Remove from Watchlist"
+                    : "Add to Watchlist"
+                }
+              >
                 <FaPlus className="plus-icon" />
-                Add to Watchlist
+                {inWatchlist ? "In Watchlist" : "Add to Watchlist"}
               </button>
             </div>
-
-            {!trailer && (
-              <div className="watch-full-movie">
-                <p>Want to watch the full movie?</p>
-                <button 
-                  className="full-movie-button"
-                  onClick={() => {
-                    const searchQuery = encodeURIComponent(`${movie.title} full movie`);
-                    window.open(`https://www.youtube.com/results?search_query=${searchQuery}`, '_blank');
-                  }}
-                >
-                  <FaPlay className="play-icon" />
-                  Search Full Movie on YouTube
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </section>
 
-      <section className="cast-section">
-        <h2 className="section-title">Top Cast</h2>
-        <div className="cast-scroll-container">
-          <div className="cast-grid">
-            {cast.map(actor => (
-              <div key={actor.id} className="cast-card">
-                <div className="actor-image-container">
-                  <img 
-                    src={actor.profile_path ? `${IMG}${actor.profile_path}` : 'https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image'} 
-                    alt={actor.name}
-                    className="actor-image"
-                  />
-                </div>
-                <div className="actor-info">
-                  <h3 className="actor-name">{actor.name}</h3>
-                  <p className="actor-character">{actor.character}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="similar-section">
-        <h2 className="section-title">Similar Movies</h2>
-        <div className="similar-scroll-container">
-          <div className="similar-grid">
-            {similar.map(movie => (
-              <div 
-                key={movie.id} 
-                className="similar-movie-card"
-                onClick={() => handleMovieNavigation(movie.id)}
-              >
-                <div className="similar-poster-container">
-                  <img 
-                    src={movie.poster_path ? `${IMG}${movie.poster_path}` : 'https://via.placeholder.com/200x300/1a1a1a/666666?text=No+Image'} 
-                    alt={movie.title}
-                    className="similar-poster"
-                  />
-                  <div className="movie-rating">
-                    <FaStar className="rating-star" />
-                    <span>{movie.vote_average?.toFixed(1)}</span>
+      {/* Cast Section */}
+      {cast.length > 0 && (
+        <section className="cast-section">
+          <h2 className="section-title">Top Cast</h2>
+          <div className="cast-scroll-container">
+            <div className="cast-grid">
+              {cast.slice(0, 12).map((actor) => (
+                <div key={actor.id} className="cast-card">
+                  <div className="actor-image-container">
+                    <img
+                      src={buildImageUrl(
+                        actor.profile_path,
+                        "w500",
+                        "https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image"
+                      )}
+                      alt={actor.name || "Actor"}
+                      className="actor-image"
+                      loading="lazy"
+                      onError={(e) => {
+                        const fallback =
+                          "https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image";
+                        if (
+                          e.target.src !== fallback &&
+                          !e.target.dataset.fallbackSet
+                        ) {
+                          e.target.src = fallback;
+                          e.target.dataset.fallbackSet = "true";
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="actor-info">
+                    <h3 className="actor-name">{actor.name}</h3>
+                    <p className="actor-character">{actor.character}</p>
                   </div>
                 </div>
-                <div className="similar-movie-info">
-                  <h3 className="similar-movie-title">{movie.title}</h3>
-                  <p className="similar-movie-year">
-                    {new Date(movie.release_date).getFullYear()}
-                  </p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* Similar Movies Section */}
+      {similar.length > 0 && (
+        <section className="similar-section">
+          <h2 className="section-title">Similar Movies</h2>
+          <div className="similar-scroll-container">
+            <div className="similar-grid">
+              {similar.map((similarMovie) => (
+                <div 
+                  key={similarMovie.id} 
+                  className="similar-movie-card"
+                  onClick={() => gotoMovie(similarMovie.id)}
+                >
+                  <div className="similar-poster-container">
+                    <img
+                      src={buildImageUrl(
+                        similarMovie.poster_path,
+                        "w300",
+                        "https://via.placeholder.com/200x300/1a1a1a/666666?text=No+Image"
+                      )}
+                      alt={similarMovie.title}
+                      className="similar-poster"
+                      loading="lazy"
+                    />
+                    <div className="movie-rating">
+                      <FaStar className="rating-star" />
+                      {formatRating(similarMovie.vote_average)}
+                    </div>
+                  </div>
+                  <div className="similar-movie-info">
+                    <h3 className="similar-movie-title">{similarMovie.title}</h3>
+                    <p className="similar-movie-year">
+                      {getYearFromDate(similarMovie.release_date)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

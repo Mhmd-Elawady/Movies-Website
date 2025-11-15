@@ -1,0 +1,6 @@
+.app-toast-container{position:fixed;right:20px;top:20px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.app-toast{background:rgba(0,0,0,0.8);color:#fff;padding:10px 14px;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.4);min-width:160px;max-width:320px;opacity:0;transform:translateY(-8px);animation:toast-in 220ms ease forwards}
+.app-toast.success{background:linear-gradient(90deg,#06b56b,#00a86b)}
+.app-toast.error{background:linear-gradient(90deg,#e25858,#d64545)}
+.app-toast.info{background:linear-gradient(90deg,#3a6df0,#2b5adf)}
+@keyframes toast-in{to{opacity:1;transform:none}}
