@@ -1,10 +1,28 @@
-/* Movie Detail Styles */
+/* ============================================
+   Movie Detail Styles - Global
+   ============================================ */
+
+:root {
+  --primary-color: #e50914;
+  --dark-bg: #0f0f0f;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --accent-gold: #ffd700;
+  --transition: all 0.3s ease;
+}
+
 .movie-detail {
   min-height: 100vh;
-  background: #0f0f0f;
-  color: #ffffff;
+  background: var(--dark-bg);
+  color: var(--text-primary);
   position: relative;
+  animation: fadeIn 0.5s ease-out;
 }
+
+/* ============================================
+   Back Button
+   ============================================ */
 
 .back-button {
   position: fixed;
@@ -19,7 +37,7 @@
   z-index: 1000;
   font-size: 16px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
@@ -32,10 +50,15 @@
   transform: translateX(-5px);
 }
 
+/* ============================================
+   Hero Section
+   ============================================ */
+
 .movie-hero {
   position: relative;
-  height: 80vh;
+  height: 100vh;
   overflow: hidden;
+  animation: fadeIn 0.6s ease-out 0.2s both;
 }
 
 .hero-backdrop {
@@ -59,12 +82,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.7) 70%,
-    #0f0f0f 100%
-  );
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 70%, var(--dark-bg) 100%);
 }
 
 .hero-content {
@@ -86,12 +104,22 @@
   width: 300px;
   border-radius: 12px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  transition: var(--transition);
+}
+
+.movie-poster:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
 }
 
 .movie-info {
   flex: 1;
   padding-bottom: 40px;
 }
+
+/* ============================================
+   Movie Info
+   ============================================ */
 
 .movie-title {
   font-size: 3.5rem;
@@ -113,32 +141,49 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 215, 0, 0.2);
+  background: rgba(255, 215, 0, 0.15);
   padding: 8px 16px;
   border-radius: 20px;
   border: 1px solid rgba(255, 215, 0, 0.3);
+  transition: var(--transition);
+}
+
+.rating:hover {
+  background: rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
 }
 
 .star-icon {
-  color: #ffd700;
+  color: var(--accent-gold);
   font-size: 1.1rem;
 }
 
 .rating-value {
   font-weight: 600;
-  color: #ffd700;
+  color: var(--accent-gold);
 }
 
-.release-year, .runtime {
+.release-year,
+.runtime {
   display: flex;
   align-items: center;
   gap: 5px;
   font-size: 1rem;
-  color: #cccccc;
+  color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.1);
   padding: 6px 12px;
   border-radius: 6px;
+  transition: var(--transition);
 }
+
+.release-year:hover,
+.runtime:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   Genres
+   ============================================ */
 
 .genres {
   display: flex;
@@ -148,28 +193,37 @@
 }
 
 .genre-tag {
-  background: rgba(229, 9, 20, 0.2);
-  color: #e50914;
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--primary-color);
   padding: 6px 16px;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 500;
   border: 1px solid rgba(229, 9, 20, 0.3);
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .genre-tag:hover {
-  background: rgba(229, 9, 20, 0.3);
+  background: rgba(229, 9, 20, 0.25);
   transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(229, 9, 20, 0.2);
 }
+
+/* ============================================
+   Overview
+   ============================================ */
 
 .movie-overview {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: #cccccc;
+  color: var(--text-secondary);
   margin-bottom: 30px;
   max-width: 600px;
 }
+
+/* ============================================
+   Action Buttons
+   ============================================ */
 
 .action-buttons {
   display: flex;
@@ -177,7 +231,8 @@
   flex-wrap: wrap;
 }
 
-.play-button, .watchlist-button {
+.play-button,
+.watchlist-button {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -187,11 +242,11 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .play-button {
-  background: #e50914;
+  background: var(--primary-color);
   color: white;
 }
 
@@ -215,140 +270,417 @@
 .watchlist-button:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .watchlist-button.in-watchlist {
   background: rgba(76, 175, 80, 0.2);
   border-color: #4caf50;
   color: #4caf50;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
 }
+/* ============================================
+   Cast Section
+   ============================================ */
 
-/* Cast Section */
-.cast-section, .similar-section {
-  padding: 60px 40px;
+.cast-section {
+  padding: 3rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  animation: fadeIn 0.6s ease-out 0.4s both;
 }
 
 .section-title {
-  font-size: 2.2rem;
-  font-weight: 600;
-  margin-bottom: 30px;
-  color: #e50914;
-  border-left: 4px solid #e50914;
-  padding-left: 15px;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  border-left: 4px solid var(--primary-color);
+  padding-left: 1rem;
+  letter-spacing: 0.5px;
 }
 
 .cast-scroll-container {
   overflow-x: auto;
-  padding-bottom: 20px;
+  padding-bottom: 1.5rem;
+  scroll-behavior: smooth;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem 1.5rem;
 }
 
 .cast-scroll-container::-webkit-scrollbar {
-  height: 8px;
+  height: 5px;
 }
 
 .cast-scroll-container::-webkit-scrollbar-track {
   background: #1a1a1a;
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 .cast-scroll-container::-webkit-scrollbar-thumb {
-  background: #e50914;
-  border-radius: 4px;
+  background: var(--primary-color);
+  border-radius: 3px;
+  transition: var(--transition);
+}
+
+.cast-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #f40612;
 }
 
 .cast-grid {
   display: flex;
-  gap: 20px;
-  padding: 10px 0;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+  min-width: max-content;
 }
+
+/* ============================================
+   Cast Cards - Optimized Design
+   ============================================ */
 
 .cast-card {
   flex: 0 0 auto;
-  width: 160px;
-  background: rgba(255, 255, 255, 0.05);
+  width: 155px;
+  background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.cast-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-color), #ec4899);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+  z-index: 2;
 }
 
 .cast-card:hover {
   transform: translateY(-5px);
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(145deg, #222222, #1a1a1a);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cast-card:hover::before {
+  transform: scaleX(1);
 }
 
 .actor-image-container {
   width: 100%;
   height: 200px;
   overflow: hidden;
+  position: relative;
+  background: #2a2a2a;
 }
 
 .actor-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: var(--transition);
+  background: linear-gradient(45deg, #2a2a2a, #1a1a1a);
 }
 
 .cast-card:hover .actor-image {
-  transform: scale(1.1);
+  transform: scale(1.08);
+}
+
+.actor-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #2a2a2a, #1a1a1a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
 }
 
 .actor-info {
-  padding: 15px;
+  padding: 1.125rem 0.875rem;
+  text-align: center;
 }
 
 .actor-name {
-  font-size: 0.95rem;
+  font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 5px;
-  color: white;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
   line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 1.95rem;
+  text-decoration: none;
 }
 
 .actor-character {
-  font-size: 0.85rem;
-  color: #cccccc;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
+ 
+  overflow: hidden;
+  min-height: 1.82rem;
+  text-decoration: none;
+  font-weight: 500;
 }
 
-/* Similar Movies Section */
-.similar-scroll-container {
-  overflow-x: auto;
-  padding-bottom: 20px;
+/* ============================================
+   Cast Card Badge
+   ============================================ */
+
+.cast-card-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.85);
+  color: var(--accent-gold);
+  padding: 0.2rem 0.4rem;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 3;
 }
 
-.similar-scroll-container::-webkit-scrollbar {
-  height: 8px;
+/* ============================================
+   Enhanced Hover Effects
+   ============================================ */
+
+.cast-card:hover .actor-name {
+  color: var(--primary-color);
 }
 
-.similar-scroll-container::-webkit-scrollbar-track {
-  background: #1a1a1a;
-  border-radius: 4px;
+.cast-card:hover .actor-character {
+  color: var(--text-primary);
 }
 
-.similar-scroll-container::-webkit-scrollbar-thumb {
-  background: #e50914;
-  border-radius: 4px;
+/* ============================================
+   Responsive Design for Cast Cards
+   ============================================ */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .cast-section {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .cast-card {
+    width: 145px;
+  }
+  
+  .actor-image-container {
+    height: 190px;
+  }
+  
+  .actor-info {
+    padding: 1rem 0.75rem;
+  }
+  
+  .actor-name {
+    font-size: 0.75rem;
+    min-height: 1.95rem;
+  }
+  
+  .actor-character {
+    font-size: 0.7rem;
+    min-height: 1.82rem;
+  }
 }
+
+/* Small Tablets */
+@media (max-width: 768px) {
+  .cast-section {
+    padding: 2rem 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.7rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .cast-grid {
+    gap: 1.2rem;
+  }
+  
+  .cast-card {
+    width: 130px;
+  }
+  
+  .actor-image-container {
+    height: 170px;
+  }
+  
+  .actor-info {
+    padding: 0.875rem 0.625rem;
+  }
+  
+  .actor-name {
+    font-size: 0.8rem;
+    min-height: 1.8rem;
+  }
+  
+  .actor-character {
+    font-size: 0.7rem;
+    min-height: 1.6rem;
+  }
+}
+
+/* Mobile Phones */
+@media (max-width: 480px) {
+  .cast-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .cast-grid {
+    gap: 0.75rem;
+  }
+  
+  .cast-card {
+    width: 110px;
+  }
+  
+  .actor-image-container {
+    height: 140px;
+  }
+  
+  .actor-info {
+    padding: 0.625rem 0.5rem;
+  }
+  
+  .actor-name {
+    font-size: 0.75rem;
+    min-height: 1.6rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .actor-character {
+    font-size: 0.65rem;
+    min-height: 1.4rem;
+  }
+  
+  .cast-card-badge {
+    top: 0.4rem;
+    right: 0.4rem;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+  }
+}
+
+/* Small Mobile Phones */
+@media (max-width: 360px) {
+  .cast-section {
+    padding: 1.25rem 0.75rem;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
+  }
+  
+  .cast-card {
+    width: 100px;
+  }
+  
+  .actor-image-container {
+    height: 130px;
+  }
+  
+  .actor-info {
+    padding: 0.5rem;
+  }
+  
+  .actor-name {
+    font-size: 0.7rem;
+    min-height: 1.4rem;
+  }
+  
+  .actor-character {
+    font-size: 0.6rem;
+    min-height: 1.2rem;
+  }
+}
+
+/* ============================================
+   Focus States for Accessibility
+   ============================================ */
+
+.cast-card:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .cast-card,
+  .actor-image {
+    transition: none;
+  }
+  
+  .cast-card:hover {
+    transform: none;
+  }
+  
+  .cast-card:hover .actor-image {
+    transform: none;
+  }
+}
+
+/* ============================================
+   Touch Device Optimizations
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+  .cast-card:hover {
+    transform: none;
+    background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+  }
+  
+  .cast-card:active {
+    transform: scale(0.95);
+    background: linear-gradient(145deg, #222222, #1a1a1a);
+  }
+  
+  .cast-card:hover::before {
+    transform: scaleX(0);
+  }
+}
+
+/* ============================================
+   Similar Movies
+   ============================================ */
 
 .similar-grid {
-  display: flex;
   gap: 25px;
-  padding: 10px 0;
 }
 
 .similar-movie-card {
   flex: 0 0 auto;
   width: 200px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
   border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -370,7 +702,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: var(--transition);
 }
 
 .similar-movie-card:hover .similar-poster {
@@ -390,10 +722,11 @@
   font-size: 0.8rem;
   font-weight: 600;
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .rating-star {
-  color: #ffd700;
+  color: var(--accent-gold);
   font-size: 0.7rem;
 }
 
@@ -411,47 +744,14 @@
 
 .similar-movie-year {
   font-size: 0.85rem;
-  color: #cccccc;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-/* Loading and Error States */
-.movie-detail-loading, .movie-detail-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
-  text-align: center;
-  padding: 40px;
-}
+/* ============================================
+   Trailer Modal
+   ============================================ */
 
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.3);
-  border-top: 5px solid #e50914;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.movie-detail-error h2 {
-  color: #e50914;
-  margin-bottom: 15px;
-}
-
-.movie-detail-error p {
-  color: #cccccc;
-  margin-bottom: 20px;
-}
-
-/* Trailer Modal */
 .trailer-modal {
   position: fixed;
   top: 0;
@@ -462,6 +762,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .trailer-modal-overlay {
@@ -470,7 +771,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(10px);
 }
 
@@ -482,8 +783,9 @@
   background: #1a1a1a;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideUp 0.3s ease-out;
 }
 
 .close-trailer {
@@ -502,11 +804,11 @@
   cursor: pointer;
   z-index: 1002;
   font-size: 1.2rem;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .close-trailer:hover {
-  background: #e50914;
+  background: var(--primary-color);
   transform: scale(1.1);
 }
 
@@ -526,110 +828,10 @@
   border: none;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .hero-content {
-    padding: 40px 30px;
-    gap: 30px;
-  }
-  
-  .movie-poster {
-    width: 250px;
-  }
-  
-  .movie-title {
-    font-size: 3rem;
-  }
-}
+/* ============================================
+   Animations
+   ============================================ */
 
-@media (max-width: 768px) {
-  .hero-content {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 30px 20px;
-    gap: 25px;
-  }
-  
-  .movie-poster {
-    width: 200px;
-  }
-  
-  .movie-title {
-    font-size: 2.2rem;
-  }
-  
-  .movie-meta {
-    justify-content: center;
-  }
-  
-  .cast-section, .similar-section {
-    padding: 40px 20px;
-  }
-  
-  .section-title {
-    font-size: 1.8rem;
-  }
-  
-  .action-buttons {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .back-button {
-    top: 10px;
-    left: 10px;
-    padding: 10px 15px;
-    font-size: 14px;
-  }
-  
-  .movie-hero {
-    height: auto;
-    min-height: 70vh;
-  }
-  
-  .movie-poster {
-    width: 150px;
-  }
-  
-  .movie-title {
-    font-size: 1.8rem;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .play-button, .watchlist-button {
-    width: 100%;
-    max-width: 250px;
-    justify-content: center;
-  }
-  
-  .cast-card {
-    width: 140px;
-  }
-  
-  .similar-movie-card {
-    width: 160px;
-  }
-  
-  .trailer-modal-content {
-    width: 95%;
-    margin: 20px;
-  }
-  
-  .close-trailer {
-    top: 10px;
-    right: 10px;
-    width: 35px;
-    height: 35px;
-  }
-}
-
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -641,15 +843,21 @@
   }
 }
 
-.movie-detail {
-  animation: fadeIn 0.5s ease-out;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.movie-hero, .cast-section, .similar-section {
-  animation: fadeIn 0.6s ease-out 0.2s both;
-}
+/* ============================================
+   Custom Scrollbars
+   ============================================ */
 
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -660,10 +868,1048 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e50914;
+  background: var(--primary-color);
   border-radius: 4px;
+  transition: var(--transition);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #f40612;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+/* ============================================
+   Movie Detail Styles - Global
+   ============================================ */
+
+:root {
+  --primary-color: #e50914;
+  --dark-bg: #0f0f0f;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --accent-gold: #ffd700;
+  --transition: all 0.3s ease;
+}
+
+.movie-detail {
+  min-height: 100vh;
+  background: var(--dark-bg);
+  color: var(--text-primary);
+  position: relative;
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* ============================================
+   Back Button
+   ============================================ */
+
+.back-button {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: var(--transition);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-button:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: translateX(-3px);
+}
+
+/* ============================================
+   Hero Section
+   ============================================ */
+
+.movie-hero {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.hero-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.backdrop-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.6);
+}
+
+.backdrop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 70%, var(--dark-bg) 100%);
+}
+
+.hero-content {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+  padding: 3rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.poster-container {
+  flex-shrink: 0;
+}
+
+.movie-poster {
+  width: 250px;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  transition: var(--transition);
+}
+
+.movie-poster:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+}
+
+.movie-info {
+  flex: 1;
+  padding-bottom: 2rem;
+}
+
+/* ============================================
+   Movie Info
+   ============================================ */
+
+.movie-title {
+  font-size: clamp(1.8rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.movie-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 215, 0, 0.15);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  transition: var(--transition);
+}
+
+.rating:hover {
+  background: rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.star-icon {
+  color: var(--accent-gold);
+  font-size: 1rem;
+}
+
+.rating-value {
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.release-year,
+.runtime {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.release-year:hover,
+.runtime:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================
+   Genres
+   ============================================ */
+
+.genres {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.genre-tag {
+  background: rgba(229, 9, 20, 0.15);
+  color: var(--primary-color);
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid rgba(229, 9, 20, 0.3);
+  transition: var(--transition);
+}
+
+.genre-tag:hover {
+  background: rgba(229, 9, 20, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(229, 9, 20, 0.2);
+}
+
+/* ============================================
+   Overview
+   ============================================ */
+
+.movie-overview {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  max-width: 600px;
+}
+
+/* ============================================
+   Action Buttons
+   ============================================ */
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.play-button,
+.watchlist-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.play-button {
+  background: var(--primary-color);
+  color: white;
+}
+
+.play-button:hover:not(:disabled) {
+  background: #f40612;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4);
+}
+
+.play-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.watchlist-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.watchlist-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.watchlist-button.in-watchlist {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: #4caf50;
+  color: #4caf50;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.2);
+}
+
+/* ============================================
+   Cast Section
+   ============================================ */
+
+.cast-section,
+.similar-section {
+  padding: 3rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.section-title {
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  border-left: 4px solid var(--primary-color);
+  padding-left: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.cast-scroll-container,
+.similar-scroll-container {
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-behavior: smooth;
+}
+
+.cast-scroll-container::-webkit-scrollbar,
+.similar-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.cast-scroll-container::-webkit-scrollbar-track,
+.similar-scroll-container::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.cast-scroll-container::-webkit-scrollbar-thumb,
+.similar-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.cast-scroll-container::-webkit-scrollbar-thumb:hover,
+.similar-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #f40612;
+}
+
+.cast-grid,
+.similar-grid {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+/* ============================================
+   Cast Cards
+   ============================================ */
+
+.cast-card {
+  flex: 0 0 auto;
+  width: 140px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: var(--transition);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cast-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.actor-image-container {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.actor-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.cast-card:hover .actor-image {
+  transform: scale(1.1);
+}
+
+.actor-info {
+  padding: 0.75rem;
+}
+
+/* ============================================
+   Similar Movies
+   ============================================ */
+
+.similar-grid {
+  gap: 1.25rem;
+}
+
+.similar-movie-card {
+  flex: 0 0 auto;
+  width: 180px;
+  background: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: var(--transition);
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.similar-movie-card:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.similar-poster-container {
+  position: relative;
+  width: 100%;
+  height: 270px;
+  overflow: hidden;
+}
+
+.similar-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.similar-movie-card:hover .similar-poster {
+  transform: scale(1.1);
+}
+
+.movie-rating {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0.25rem 0.5rem;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rating-star {
+  color: var(--accent-gold);
+  font-size: 0.65rem;
+}
+
+.similar-movie-info {
+  padding: 0.75rem;
+}
+
+.similar-movie-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: white;
+  line-height: 1.3;
+}
+
+.similar-movie-year {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ============================================
+   Trailer Modal
+   ============================================ */
+
+.trailer-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.trailer-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.trailer-modal-content {
+  position: relative;
+  z-index: 1001;
+  width: 90%;
+  max-width: 800px;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: slideUp 0.3s ease-out;
+}
+
+.close-trailer {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1002;
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.close-trailer:hover {
+  background: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.trailer-video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+}
+
+.trailer-video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ============================================
+   Custom Scrollbars
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f40612;
+}
+
+/* ========== MEDIA QUERIES ========== */
+
+/* Large Tablets and Small Laptops (1024px - 1200px) */
+@media (min-width: 1024px) {
+  .hero-content {
+    padding: 3rem 2rem;
+    gap: 2.5rem;
+  }
+
+  .movie-poster {
+    width: 280px;
+  }
+
+  .cast-section,
+  .similar-section {
+    padding: 4rem 2rem;
+  }
+}
+
+/* Tablets (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .hero-content {
+    padding: 2.5rem 1.5rem;
+    gap: 2rem;
+  }
+
+  .movie-poster {
+    width: 220px;
+  }
+
+  .cast-card {
+    width: 150px;
+  }
+
+  .similar-movie-card {
+    width: 160px;
+  }
+}
+
+/* Small Tablets and Large Phones (600px - 768px) */
+@media (min-width: 600px) and (max-width: 768px) {
+  .hero-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2rem 1rem;
+    gap: 1.5rem;
+  }
+
+  .movie-poster {
+    width: 200px;
+  }
+
+  .movie-meta {
+    justify-content: center;
+  }
+
+  .cast-section,
+  .similar-section {
+    padding: 3rem 1rem;
+  }
+
+  .action-buttons {
+    justify-content: center;
+  }
+
+  .cast-card {
+    width: 130px;
+  }
+
+  .actor-image-container {
+    height: 160px;
+  }
+
+  .similar-movie-card {
+    width: 150px;
+  }
+
+  .similar-poster-container {
+    height: 220px;
+  }
+}
+
+/* Mobile Phones (480px - 600px) */
+@media (min-width: 480px) and (max-width: 600px) {
+  .back-button {
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .movie-hero {
+    height: auto;
+    min-height: 70vh;
+  }
+
+  .movie-poster {
+    width: 160px;
+  }
+
+  .movie-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .play-button,
+  .watchlist-button {
+    width: 100%;
+    max-width: 200px;
+    justify-content: center;
+  }
+
+  .cast-card {
+    width: 120px;
+  }
+
+  .actor-image-container {
+    height: 150px;
+  }
+
+  .similar-movie-card {
+    width: 140px;
+  }
+
+  .similar-poster-container {
+    height: 200px;
+  }
+}
+
+/* Small Mobile Phones (320px - 480px) */
+@media (max-width: 480px) {
+  .back-button {
+    top: 0.5rem;
+    left: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .hero-content {
+    padding: 1.5rem 0.75rem;
+    gap: 1rem;
+  }
+
+  .movie-poster {
+    width: 140px;
+  }
+
+  .movie-title {
+    font-size: 1.5rem;
+  }
+
+  .movie-overview {
+    font-size: 0.9rem;
+  }
+
+  .cast-section,
+  .similar-section {
+    padding: 2rem 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    padding-left: 0.5rem;
+  }
+
+  .cast-card {
+    width: 110px;
+  }
+
+  .actor-image-container {
+    height: 140px;
+  }
+
+  .actor-info {
+    padding: 0.5rem;
+  }
+
+  .similar-movie-card {
+    width: 130px;
+  }
+
+  .similar-poster-container {
+    height: 180px;
+  }
+
+  .similar-movie-info {
+    padding: 0.5rem;
+  }
+
+  .similar-movie-title {
+    font-size: 0.8rem;
+  }
+
+  .trailer-modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .close-trailer {
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra Small Phones (under 320px) */
+@media (max-width: 320px) {
+  .hero-content {
+    padding: 1rem 0.5rem;
+  }
+
+  .movie-poster {
+    width: 120px;
+  }
+
+  .movie-title {
+    font-size: 1.3rem;
+  }
+
+  .cast-card {
+    width: 100px;
+  }
+
+  .actor-image-container {
+    height: 120px;
+  }
+
+  .similar-movie-card {
+    width: 110px;
+  }
+
+  .similar-poster-container {
+    height: 150px;
+  }
+}
+
+/* Landscape Orientation for Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .movie-hero {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .hero-content {
+    padding: 2rem 1rem;
+  }
+
+  .movie-poster {
+    width: 120px;
+  }
+
+  .movie-title {
+    font-size: 1.5rem;
+  }
+
+  .movie-overview {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .backdrop-image,
+  .movie-poster,
+  .actor-image,
+  .similar-poster {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .movie-detail,
+  .movie-hero,
+  .movie-poster,
+  .cast-card,
+  .similar-movie-card,
+  .play-button,
+  .watchlist-button,
+  .close-trailer,
+  .genre-tag,
+  .rating,
+  .release-year,
+  .runtime {
+    animation: none;
+    transition: none;
+  }
+
+  .movie-poster:hover,
+  .cast-card:hover,
+  .similar-movie-card:hover,
+  .actor-image,
+  .similar-poster {
+    transform: none;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .movie-poster:hover,
+  .cast-card:hover,
+  .similar-movie-card:hover {
+    transform: none;
+  }
+
+  .play-button:hover,
+  .watchlist-button:hover {
+    transform: none;
+  }
+
+  .play-button:active,
+  .watchlist-button:active {
+    transform: scale(0.95);
+  }
+
+  .genre-tag:hover,
+  .rating:hover,
+  .release-year:hover,
+  .runtime:hover {
+    transform: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .movie-detail {
+    background: white !important;
+    color: black !important;
+  }
+
+  .back-button,
+  .action-buttons,
+  .trailer-modal {
+    display: none !important;
+  }
+
+  .movie-hero {
+    height: auto;
+  }
+
+  .backdrop-image {
+    filter: brightness(1);
+  }
+
+  .backdrop-overlay {
+    background: none;
+  }
+
+  .movie-title {
+    color: black !important;
+    text-shadow: none !important;
+  }
+
+  .movie-overview {
+    color: #666 !important;
+  }
+}
+
+/* Foldable Devices Support */
+@media (max-width: 280px) {
+  .hero-content {
+    padding: 0.75rem 0.25rem;
+  }
+
+  .movie-poster {
+    width: 100px;
+  }
+
+  .cast-card {
+    width: 90px;
+  }
+
+  .actor-image-container {
+    height: 100px;
+  }
+
+  .similar-movie-card {
+    width: 100px;
+  }
+
+  .similar-poster-container {
+    height: 130px;
+  }
+}
+
+/* Very Large Text Accessibility */
+@media (prefers-contrast: high) {
+  .movie-title {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  }
+
+  .play-button,
+  .watchlist-button {
+    border: 2px solid #fff;
+  }
+}
+
+/* Ultra Wide Screens (1920px and up) */
+@media (min-width: 1920px) {
+  .hero-content {
+    max-width: 1400px;
+  }
+
+  .movie-poster {
+    width: 320px;
+  }
+
+  .cast-section,
+  .similar-section {
+    max-width: 1400px;
+  }
+
+  .cast-card {
+    width: 180px;
+  }
+
+  .actor-image-container {
+    height: 240px;
+  }
+
+  .similar-movie-card {
+    width: 220px;
+  }
+
+  .similar-poster-container {
+    height: 330px;
+  }
 }

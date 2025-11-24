@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import MyNavbar from "../components/Homesection/Navbar/MyNavbar.jsx";
-import { getFavorites, removeFavorite } from "../utils/helpers";
+import { getFavorites, removeFavorite, buildImageUrl } from "../utils/helpers";
 import { Link } from "react-router-dom";
 import "./Watchlist.css";
 import { useSelector, useDispatch } from "react-redux";
@@ -86,8 +86,12 @@ export default function Watchlist() {
               >
                 <Link to={it.media_type === "tv" ? `/tv/${it.id}` : `/movie/${it.id}`}>
                   <img
-                    src={it.poster_path || it.posterUrl || "https://via.placeholder.com/200x300?text=No+Image"}
-                    alt={it.title}
+                    src={
+                      it.poster_path
+                        ? buildImageUrl(it.poster_path, "w500", "https://via.placeholder.com/200x300?text=No+Image")
+                        : (it.posterUrl || "https://via.placeholder.com/200x300?text=No+Image")
+                    }
+                    alt={it.title || it.name || "No title"}
                     loading="lazy"
                     className="watchlist-card-img"
                   />

@@ -43,6 +43,69 @@ export const apiClient = axios.create({
   },
 });
 
+// Rate limit management - handle 429 errors with intelligent backoff
+const rateLimitManager = {
+  resetTime: null,
+  retryQueue: [],
+  isWaiting: false,
+
+  isRateLimited: () => {
+    if (!rateLimitManager.resetTime) return false;
+    const now = Date.now();
+    if (now >= rateLimitManager.resetTime) {
+      rateLimitManager.resetTime = null;
+      return false;
+    }
+    return true;
+  },
+
+  getWaitTime: () => {
+    if (!rateLimitManager.resetTime) return 0;
+    return Math.max(0, rateLimitManager.resetTime - Date.now());
+  },
+
+  setRateLimitReset: (retryAfter) => {
+    const waitMs = Math.min(60000, (retryAfter || 60) * 1000);
+    rateLimitManager.resetTime = Date.now() + waitMs;
+  },
+
+  addRetry: (resolve, reject, config) => {
+    rateLimitManager.retryQueue.push({ resolve, reject, config });
+    rateLimitManager.processQueue();
+  },
+
+  processQueue: async () => {
+    if (rateLimitManager.isWaiting || rateLimitManager.retryQueue.length === 0) {
+      return;
+    }
+
+    if (rateLimitManager.isRateLimited()) {
+      const waitTime = rateLimitManager.getWaitTime();
+      rateLimitManager.isWaiting = true;
+      console.log(`Rate limited. Waiting ${Math.ceil(waitTime / 1000)}s before retrying queued requests...`);
+      
+      setTimeout(() => {
+        rateLimitManager.isWaiting = false;
+        rateLimitManager.processQueue();
+      }, waitTime + 100);
+      return;
+    }
+
+    const { resolve, reject, config } = rateLimitManager.retryQueue.shift();
+    try {
+      const response = await apiClient.request(config);
+      resolve(response);
+    } catch (error) {
+      reject(error);
+    }
+
+    // Continue processing queue
+    if (rateLimitManager.retryQueue.length > 0) {
+      setTimeout(() => rateLimitManager.processQueue(), 100);
+    }
+  },
+};
+
 // CRITICAL FIX: Add request interceptor to ensure proper URL construction and logging
 apiClient.interceptors.request.use(
   (config) => {
@@ -132,10 +195,15 @@ apiClient.interceptors.response.use(
 
       // Handle specific error codes
       if (status === 429) {
-        console.error(
-          "API Rate Limit Exceeded. Please wait before making more requests."
-        );
-        error.message = "Too many requests. Please try again later.";
+        // Rate limit error - use intelligent backoff
+        const retryAfter = parseInt(error.response.headers['retry-after']) || 60;
+        rateLimitManager.setRateLimitReset(retryAfter);
+        
+        // Return a promise that will be resolved when rate limit is lifted
+        return new Promise((resolve, reject) => {
+          console.warn(`Rate limited (429). Retry after ${retryAfter}s. Request queued for retry.`);
+          rateLimitManager.addRetry(resolve, reject, error.config);
+        });
       } else if (status === 401) {
         console.error("API Authentication Failed. Check your API key.");
         error.message =
@@ -225,83 +293,205 @@ export function buildImageUrl(path, size = "w500") {
 
 // Normalization helpers: map different API response shapes into the UI-friendly shape
 export function normalizeMovie(raw = {}) {
-  // Support multiple possible shapes by checking for common keys
-  const id = raw.id || raw.movie_id || null;
-  const title = raw.title || raw.name || raw.movie_title || "";
-  const overview = raw.overview || raw.description || raw.summary || "";
-  const poster_path = raw.poster_path || raw.poster || raw.posterUrl || null;
-  const backdrop_path =
-    raw.backdrop_path || raw.backdrop || raw.backdropUrl || null;
-  const release_date =
-    raw.release_date || raw.first_release || raw.published_at || null;
-  const vote_average =
-    typeof raw.vote_average === "number"
-      ? raw.vote_average
-      : raw.rating || raw.score || 0;
-  const runtime = raw.runtime || raw.duration || null;
-  // genres may be array of ids or array of {id,name}
-  let genres = [];
-  if (Array.isArray(raw.genres)) {
-    genres = raw.genres.map((g) =>
-      typeof g === "object" ? g : { id: g, name: String(g) }
-    );
-  } else if (Array.isArray(raw.genre_ids)) {
-    genres = raw.genre_ids.map((id) => ({ id, name: String(id) }));
-  }
+  try {
+    // Validate input is actually an object
+    if (typeof raw !== 'object' || raw === null) {
+      return createEmptyMovieNormalized();
+    }
 
+    // Safely extract and validate all fields with fallbacks
+    const id = parseInt(raw?.id || raw?.movie_id, 10) || null;
+    const title = String(raw?.title || raw?.name || raw?.movie_title || "").trim();
+    const overview = String(raw?.overview || raw?.description || raw?.summary || "").trim();
+    
+    // Validate image paths start with '/' (TMDB format)
+    const poster_path = raw?.poster_path && String(raw.poster_path).startsWith('/') 
+      ? raw.poster_path 
+      : null;
+    const backdrop_path = raw?.backdrop_path && String(raw.backdrop_path).startsWith('/') 
+      ? raw.backdrop_path 
+      : null;
+    
+    // Validate date format (YYYY-MM-DD)
+    const release_date = raw?.release_date && /^\d{4}-\d{2}-\d{2}$/.test(raw.release_date) 
+      ? raw.release_date 
+      : null;
+    
+    // Validate rating is number between 0-10
+    const vote_average = typeof raw?.vote_average === 'number' && raw.vote_average >= 0 && raw.vote_average <= 10
+      ? parseFloat(raw.vote_average.toFixed(1))
+      : (typeof raw?.rating === 'number' ? parseFloat(raw.rating.toFixed(1)) : null);
+    
+    const runtime = parseInt(raw?.runtime || raw?.duration, 10) || null;
+    const budget = parseInt(raw?.budget, 10) || null;
+    const revenue = parseInt(raw?.revenue, 10) || null;
+    const status = raw?.status ? String(raw.status).trim() : null;
+
+    // Normalize genres - handle multiple input formats
+    let genres = [];
+    if (Array.isArray(raw?.genres)) {
+      genres = raw.genres
+        .filter(g => g && typeof g === 'object')
+        .map(g => ({ 
+          id: parseInt(g.id, 10) || 0, 
+          name: String(g.name || '').trim() 
+        }))
+        .filter(g => g.id > 0 && g.name.length > 0);
+    } else if (Array.isArray(raw?.genre_ids)) {
+      genres = raw.genre_ids
+        .filter(id => id && parseInt(id, 10) > 0)
+        .map(id => ({ id: parseInt(id, 10), name: `Genre ${id}` }));
+    }
+
+    return {
+      id,
+      title,
+      overview,
+      poster_path,
+      backdrop_path,
+      posterUrl: poster_path ? buildImageUrl(poster_path, 'w500') : null,
+      backdropUrl: backdrop_path ? buildImageUrl(backdrop_path, 'original') : null,
+      release_date,
+      vote_average,
+      runtime,
+      budget,
+      revenue,
+      status,
+      genres,
+      media_type: 'movie',
+    };
+  } catch (error) {
+    console.error('Error normalizing movie data:', error);
+    return createEmptyMovieNormalized();
+  }
+}
+
+function createEmptyMovieNormalized() {
   return {
-    id,
-    title,
-    overview,
-    poster_path,
-    backdrop_path,
-    posterUrl: buildImageUrl(poster_path),
-    backdropUrl: buildImageUrl(backdrop_path, "original"),
-    release_date,
-    vote_average,
-    runtime,
-    genres,
-    raw,
+    id: null,
+    title: '',
+    overview: '',
+    poster_path: null,
+    backdrop_path: null,
+    posterUrl: null,
+    backdropUrl: null,
+    release_date: null,
+    vote_average: null,
+    runtime: null,
+    budget: null,
+    revenue: null,
+    status: null,
+    genres: [],
+    media_type: 'movie',
   };
 }
 
 export function normalizeTV(raw = {}) {
-  const id = raw.id || raw.tv_id || null;
-  const name = raw.name || raw.title || raw.tv_name || "";
-  const overview = raw.overview || raw.description || raw.summary || "";
-  const poster_path = raw.poster_path || raw.poster || raw.posterUrl || null;
-  const backdrop_path =
-    raw.backdrop_path || raw.backdrop || raw.backdropUrl || null;
-  const first_air_date =
-    raw.first_air_date || raw.air_date || raw.published_at || null;
-  const vote_average =
-    typeof raw.vote_average === "number"
-      ? raw.vote_average
-      : raw.rating || raw.score || 0;
-  const episode_run_time = raw.episode_run_time || raw.runtime || null;
+  try {
+    // Validate input is actually an object
+    if (typeof raw !== 'object' || raw === null) {
+      return createEmptyTVNormalized();
+    }
 
-  let genres = [];
-  if (Array.isArray(raw.genres)) {
-    genres = raw.genres.map((g) =>
-      typeof g === "object" ? g : { id: g, name: String(g) }
-    );
-  } else if (Array.isArray(raw.genre_ids)) {
-    genres = raw.genre_ids.map((id) => ({ id, name: String(id) }));
+    // Safely extract and validate all fields with fallbacks
+    const id = parseInt(raw?.id || raw?.tv_id, 10) || null;
+    const name = String(raw?.name || raw?.title || raw?.tv_name || "").trim();
+    const overview = String(raw?.overview || raw?.description || raw?.summary || "").trim();
+    
+    // Validate image paths start with '/' (TMDB format)
+    const poster_path = raw?.poster_path && String(raw.poster_path).startsWith('/') 
+      ? raw.poster_path 
+      : null;
+    const backdrop_path = raw?.backdrop_path && String(raw.backdrop_path).startsWith('/') 
+      ? raw.backdrop_path 
+      : null;
+    
+    // Validate date formats (YYYY-MM-DD)
+    const first_air_date = raw?.first_air_date && /^\d{4}-\d{2}-\d{2}$/.test(raw.first_air_date) 
+      ? raw.first_air_date 
+      : null;
+    const last_air_date = raw?.last_air_date && /^\d{4}-\d{2}-\d{2}$/.test(raw.last_air_date) 
+      ? raw.last_air_date 
+      : null;
+    
+    // Validate rating is number between 0-10
+    const vote_average = typeof raw?.vote_average === 'number' && raw.vote_average >= 0 && raw.vote_average <= 10
+      ? parseFloat(raw.vote_average.toFixed(1))
+      : (typeof raw?.rating === 'number' ? parseFloat(raw.rating.toFixed(1)) : null);
+    
+    const number_of_seasons = parseInt(raw?.number_of_seasons, 10) || 0;
+    const number_of_episodes = parseInt(raw?.number_of_episodes, 10) || 0;
+    
+    // Handle episode_run_time - can be array or number
+    let episode_run_time = null;
+    if (Array.isArray(raw?.episode_run_time) && raw.episode_run_time.length > 0) {
+      episode_run_time = parseInt(raw.episode_run_time[0], 10) || null;
+    } else if (typeof raw?.episode_run_time === 'number') {
+      episode_run_time = raw.episode_run_time;
+    } else if (typeof raw?.runtime === 'number') {
+      episode_run_time = raw.runtime;
+    }
+    
+    const status = raw?.status ? String(raw.status).trim() : null;
+
+    // Normalize genres - handle multiple input formats
+    let genres = [];
+    if (Array.isArray(raw?.genres)) {
+      genres = raw.genres
+        .filter(g => g && typeof g === 'object')
+        .map(g => ({ 
+          id: parseInt(g.id, 10) || 0, 
+          name: String(g.name || '').trim() 
+        }))
+        .filter(g => g.id > 0 && g.name.length > 0);
+    } else if (Array.isArray(raw?.genre_ids)) {
+      genres = raw.genre_ids
+        .filter(id => id && parseInt(id, 10) > 0)
+        .map(id => ({ id: parseInt(id, 10), name: `Genre ${id}` }));
+    }
+
+    return {
+      id,
+      name,
+      overview,
+      poster_path,
+      backdrop_path,
+      posterUrl: poster_path ? buildImageUrl(poster_path, 'w500') : null,
+      backdropUrl: backdrop_path ? buildImageUrl(backdrop_path, 'original') : null,
+      first_air_date,
+      last_air_date,
+      vote_average,
+      episode_run_time,
+      number_of_seasons,
+      number_of_episodes,
+      status,
+      genres,
+      media_type: 'tv',
+    };
+  } catch (error) {
+    console.error('Error normalizing TV data:', error);
+    return createEmptyTVNormalized();
   }
+}
 
+function createEmptyTVNormalized() {
   return {
-    id,
-    name,
-    overview,
-    poster_path,
-    backdrop_path,
-    posterUrl: buildImageUrl(poster_path),
-    backdropUrl: buildImageUrl(backdrop_path, "original"),
-    first_air_date,
-    vote_average,
-    episode_run_time,
-    genres,
-    raw,
+    id: null,
+    name: '',
+    overview: '',
+    poster_path: null,
+    backdrop_path: null,
+    posterUrl: null,
+    backdropUrl: null,
+    first_air_date: null,
+    last_air_date: null,
+    vote_average: null,
+    episode_run_time: null,
+    number_of_seasons: 0,
+    number_of_episodes: 0,
+    status: null,
+    genres: [],
+    media_type: 'tv',
   };
 }
 

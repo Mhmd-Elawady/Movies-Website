@@ -7,10 +7,6 @@ import App from './App.jsx'
 import { Provider } from 'react-redux';
 import { store } from './store/store.js';
 
-// Note: API authentication is handled by apiClient in services/tmdb.js
-// Using API key authentication instead of Bearer token to avoid conflicts
-
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>

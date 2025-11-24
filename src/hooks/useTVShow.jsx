@@ -19,7 +19,7 @@ const useTVShow = (id) => {
     const numericId = parseNumericId(id);
     if (!numericId) {
       setLoading(false);
-      setError("Invalid TV show ID");
+      setError(null);
       return;
     }
 
@@ -69,10 +69,12 @@ const useTVShow = (id) => {
           { data: tvShowData },
           { data: creditsData },
           { data: videosData },
+          { data: similarData },
         ] = await Promise.all([
           fetchWithRetry(`/tv/${numericId}`),
           fetchWithRetry(`/tv/${numericId}/credits`),
           fetchWithRetry(`/tv/${numericId}/videos`),
+          fetchWithRetry(`/tv/${numericId}/similar`),
         ]);
 
         if (!isMounted) return;
@@ -107,6 +109,16 @@ const useTVShow = (id) => {
           cast: normalizedCast,
           crew: normalizedCrew,
         };
+
+        // Normalize similar shows (keep limited set)
+        const normalizedSimilar = Array.isArray(similarData?.results)
+          ? similarData.results
+              .filter((item) => item && item.id)
+              .slice(0, 12)
+              .map((item) => normalizeTV(item))
+          : [];
+
+        normalized.similar = normalizedSimilar;
 
         setData(normalized);
         setTrailers(trailerVideos);

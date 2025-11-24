@@ -194,32 +194,287 @@
   transition: width 0.1s linear;
   border-radius: 0 5px 5px 0;
 }
+.MainSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #111;
+  padding: 1rem 0;
+  position: relative;
+}
 
-@media (max-width: 768px) {
+.banner-box {
+  position: relative;
+  width: 95%;
+  max-width: 1250px;
+  height: 500px;
+  border-radius: 12px;
+  margin: 80px auto 60px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(229, 9, 20, 0.3);
+  transition: all 0.5s ease;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.banner-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.banner-box:hover img {
+  transform: scale(1.05);
+}
+
+.banner-box .gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.7) 30%,
+    rgba(0, 0, 0, 0.3) 60%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+.banner-box .content {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  z-index: 2;
+  text-align: center;
+  max-width: 800px;
+  width: 90%;
+}
+
+.banner-box .content h2 {
+  font-size: 1.3rem;
+  font-weight: 900;
+  margin-bottom: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.8);
+  line-height: 1.2;
+}
+
+.banner-box .content p {
+  font-size: 0.85rem;
+  color: #ddd;
+  margin-bottom: 1.25rem;
+  line-height: 1.6;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  font-weight: 300;
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  margin-top: 0.875rem;
+}
+
+.banner-box .btn-play {
+  background: linear-gradient(135deg, #e50914, #b20710);
+  color: #fff;
+  font-weight: bold;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
+  min-width: 140px;
+}
+
+.banner-box .btn-play:hover {
+  background: linear-gradient(135deg, #f40612, #e50914);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.7);
+}
+
+.banner-box .plus-btn {
+  background: black;
+  color: #fff;
+  font-weight: bold;
+  width: 42px;
+  height: 42px;
+  border: 2px solid #1f1f1f;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-box .plus-btn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
+}
+
+.nav-arrow {
+  position: absolute;
+  top: 100%;
+  transform: translateY(-150%);
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  color: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 3;
+  font-size: 1.3rem;
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+  border: 2px solid #1f1f1f;
+}
+
+.nav-arrow:hover {
+  background: #e50914;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.nav-arrow.prev {
+  left: 1.5rem;
+}
+
+.nav-arrow.next {
+  right: 1.5rem;
+}
+
+.progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  z-index: 3;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #e50914, #ff6b6b);
+  width: 0%;
+  transition: width 0.1s linear;
+  border-radius: 0 5px 5px 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========== MEDIA QUERIES ========== */
+
+/* Large Tablets and Small Laptops (1024px - 1200px) */
+@media (min-width: 1024px) {
+  .banner-box {
+    height: 600px;
+    margin: 100px auto 80px;
+  }
+  
+  .banner-box .content {
+    bottom: 3rem;
+  }
+  
+  .banner-box .content h2 {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+  }
+  
+  .banner-box .content p {
+    font-size: 0.9rem;
+  }
+  
+  .banner-box .btn-play {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    min-width: 150px;
+  }
+  
+  .banner-box .plus-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+  }
+  
+  .nav-arrow {
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Tablets (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .banner-box {
+    height: 550px;
+    margin: 90px auto 70px;
+  }
+  
+  .banner-box .content {
+    bottom: 2.5rem;
+  }
+  
+  .banner-box .content h2 {
+    font-size: 1.4rem;
+  }
+  
+  .banner-box .content p {
+    font-size: 0.875rem;
+  }
+}
+
+/* Small Tablets and Large Phones (600px - 768px) */
+@media (min-width: 600px) and (max-width: 768px) {
   .MainSection {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
 
   .banner-box {
-    width: 95%;
     height: 500px;
-    margin: 100px auto 50px;
+    margin: 80px auto 60px;
   }
 
   .banner-box .content {
-    max-width: 90%;
     bottom: 2rem;
   }
 
   .banner-box .content h2 {
     font-size: 1.3rem;
     letter-spacing: 2px;
-    margin-bottom: 1rem;
   }
 
   .banner-box .content p {
-    font-size: 0.8rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
   }
 
   .button-container {
@@ -227,20 +482,20 @@
   }
 
   .banner-box .btn-play {
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.75rem 1.3rem;
+    font-size: 0.95rem;
     min-width: 130px;
   }
 
   .banner-box .plus-btn {
-    width: 45px;
-    height: 45px;
+    width: 42px;
+    height: 42px;
     font-size: 1.3rem;
   }
 
   .nav-arrow {
-    width: 45px;
-    height: 45px;
+    width: 42px;
+    height: 42px;
     font-size: 1.3rem;
   }
 
@@ -253,10 +508,182 @@
   }
 }
 
-@media (max-width: 480px) {
+/* Mobile Phones (480px - 600px) */
+@media (min-width: 480px) and (max-width: 600px) {
   .banner-box {
     height: 450px;
-    margin: 80px auto 30px;
+    margin: 70px auto 50px;
+    border-radius: 10px;
+  }
+
+  .banner-box .content {
+    bottom: 1.5rem;
+    width: 95%;
+  }
+
+  .banner-box .content h2 {
+    font-size: 1.2rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.75rem;
+  }
+
+  .banner-box .content p {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .button-container {
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .banner-box .btn-play {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    min-width: 120px;
+    letter-spacing: 1px;
+  }
+
+  .banner-box .plus-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .nav-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    transform: translateY(-140%);
+  }
+
+  .nav-arrow.prev {
+    left: 0.75rem;
+  }
+
+  .nav-arrow.next {
+    right: 0.75rem;
+  }
+}
+
+/* Small Mobile Phones (320px - 480px) */
+@media (max-width: 480px) {
+  .MainSection {
+    min-height: 80vh;
+    padding: 0.5rem 0;
+  }
+
+  .banner-box {
+    height: 400px;
+    margin: 60px auto 40px;
+    border-radius: 8px;
+    width: 92%;
+  }
+
+  .banner-box .content {
+    bottom: 1.25rem;
+    width: 95%;
+  }
+
+  .banner-box .content h2 {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+  }
+
+  .banner-box .content p {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    margin-bottom: 0.875rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .button-container {
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .banner-box .btn-play {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    min-width: 110px;
+    letter-spacing: 0.5px;
+  }
+
+  .banner-box .plus-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+
+  .nav-arrow {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+    transform: translateY(-130%);
+  }
+
+  .nav-arrow.prev {
+    left: 0.5rem;
+  }
+
+  .nav-arrow.next {
+    right: 0.5rem;
+  }
+
+  .progress-bar {
+    height: 3px;
+  }
+}
+
+/* Extra Small Phones (under 320px) */
+@media (max-width: 320px) {
+  .banner-box {
+    height: 350px;
+    margin: 50px auto 30px;
+  }
+
+  .banner-box .content h2 {
+    font-size: 1rem;
+  }
+
+  .banner-box .content p {
+    font-size: 0.7rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .banner-box .btn-play {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    min-width: 100px;
+  }
+
+  .banner-box .plus-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+
+  .nav-arrow {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+}
+
+/* Landscape Orientation for Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .MainSection {
+    min-height: 120vh;
+  }
+
+  .banner-box {
+    height: 70vh;
+    margin: 60px auto 40px;
   }
 
   .banner-box .content {
@@ -264,41 +691,189 @@
   }
 
   .banner-box .content h2 {
-    font-size: 1.2rem;
-    letter-spacing: 1px;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
   }
 
   .banner-box .content p {
     font-size: 0.75rem;
-    line-height: 1.5;
+    margin-bottom: 1rem;
+    -webkit-line-clamp: 2;
   }
 
   .button-container {
-    gap: 0.6rem;
-  }
-
-  .banner-box .btn-play {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.9rem;
-    min-width: 120px;
-  }
-
-  .banner-box .plus-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 1.1rem;
-  }
-
-  .nav-arrow {
-    width: 40px;
-    height: 40px;
-    font-size: 1.1rem;
+    gap: 0.5rem;
   }
 }
 
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .banner-box img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
 
-.banner-box {
-  animation: fadeIn 0.8s ease-in-out;
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .banner-box,
+  .banner-box img,
+  .btn-play,
+  .plus-btn,
+  .nav-arrow {
+    transition: none;
+    animation: none;
+  }
+  
+  .banner-box:hover img {
+    transform: none;
+  }
+  
+  .btn-play:hover,
+  .plus-btn:hover,
+  .nav-arrow:hover {
+    transform: none;
+  }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .banner-box:hover img {
+    transform: none;
+  }
+  
+  .btn-play:hover,
+  .plus-btn:hover {
+    transform: none;
+    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
+  }
+  
+  .btn-play:active,
+  .plus-btn:active {
+    transform: scale(0.95);
+  }
+  
+  .nav-arrow:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
+  
+  .nav-arrow:active {
+    background: #e50914;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .MainSection {
+    background: white !important;
+    min-height: auto;
+  }
+  
+  .banner-box {
+    box-shadow: none;
+    border: 2px solid #333;
+  }
+  
+  .banner-box .gradient-overlay {
+    display: none;
+  }
+  
+  .banner-box .content h2 {
+    color: black;
+    text-shadow: none;
+  }
+  
+  .banner-box .content p {
+    color: #666;
+    text-shadow: none;
+  }
+  
+  .button-container {
+    display: none;
+  }
+  
+  .nav-arrow {
+    display: none;
+  }
+  
+  .progress-bar {
+    display: none;
+  }
+}
+
+/* Foldable Devices Support */
+@media (max-width: 280px) {
+  .banner-box {
+    height: 300px;
+    margin: 40px auto 20px;
+  }
+  
+  .banner-box .content h2 {
+    font-size: 0.9rem;
+  }
+  
+  .banner-box .content p {
+    font-size: 0.65rem;
+  }
+  
+  .banner-box .btn-play {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 90px;
+  }
+  
+  .banner-box .plus-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+  
+  .nav-arrow {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Very Large Text Accessibility */
+@media (prefers-contrast: high) {
+  .banner-box .content h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  }
+  
+  .banner-box .content p {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  }
+  
+  .btn-play {
+    border: 2px solid #fff;
+  }
+  
+  .plus-btn {
+    border: 2px solid #fff;
+  }
+}
+
+/* Ultra Wide Screens (1920px and up) */
+@media (min-width: 1920px) {
+  .banner-box {
+    max-width: 1400px;
+    height: 700px;
+    margin: 120px auto 100px;
+  }
+  
+  .banner-box .content h2 {
+    font-size: 1.8rem;
+  }
+  
+  .banner-box .content p {
+    font-size: 1rem;
+  }
+  
+  .banner-box .btn-play {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-width: 160px;
+  }
 }
 
 @keyframes fadeIn {

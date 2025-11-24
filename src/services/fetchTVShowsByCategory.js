@@ -1,23 +1,107 @@
-import { apiClient, IMAGE_BASE_URL, normalizeTV } from "./tmdb";
+import { apiClient, normalizeTV } from "./tmdb";
 import {
   buildImageUrl,
   getYearFromDate,
   formatRating,
   createBoundedCache,
+  WEEKLY_TTL_MS,
 } from "../utils/helpers";
 
-// Bounded cache for TV show details
-const tvDetailsCache = createBoundedCache(100);
+// Bounded cache for TV show details — now using weekly TTL
+const tvDetailsCache = createBoundedCache(100, WEEKLY_TTL_MS);
 
-// Helper function to fetch TV show details with caching
+/**
+ * Helper function to fetch TV show details with caching and validation
+ */
 async function fetchTVShowDetails(tvId, signal) {
   if (!tvId) return null;
-  if (tvDetailsCache.has(tvId)) return tvDetailsCache.get(tvId);
+  
   try {
+    // Check cache first (with TTL expiration)
+    if (tvDetailsCache.has(tvId)) {
+      const cached = tvDetailsCache.get(tvId);
+      if (cached) return cached;
+    }
+    
     const { data } = await apiClient.get(`/tv/${tvId}`, { signal });
-    tvDetailsCache.set(tvId, data);
-    return data;
-  } catch {
+    
+    // Validate response has required fields
+    if (data && data.id) {
+      tvDetailsCache.set(tvId, data);
+      return data;
+    }
+    return null;
+  } catch (error) {
+    // Log only non-canceled errors
+    if (error?.name !== 'CanceledError' && error?.name !== 'AbortError') {
+      console.debug(`Failed to fetch TV show details for ID ${tvId}`);
+    }
+    return null;
+  }
+}
+
+/**
+ * Format episodes info string
+ */
+function formatEpisodes(seasons, episodes) {
+  if (!seasons || !episodes) return null;
+  const seasonPlural = seasons > 1 ? "s" : "";
+  const episodePlural = episodes > 1 ? "s" : "";
+  return `${seasons} Season${seasonPlural} • ${episodes} Episode${episodePlural}`;
+}
+
+/**
+ * Build consistent TV show card data from raw and detailed data
+ */
+function buildTVShowCard(show, details) {
+  try {
+    const normalized = normalizeTV(show || {});
+    const normalizedDetails = normalizeTV(details || {});
+
+    if (!normalized.id) return null; // Skip if no ID
+
+    // Get genre name - try multiple sources
+    const genreName =
+      normalized.genres?.[0]?.name ||
+      normalizedDetails.genres?.[0]?.name ||
+      "TV Show";
+
+    // Format episodes info
+    const episodesInfo =
+      formatEpisodes(
+        normalizedDetails.number_of_seasons,
+        normalizedDetails.number_of_episodes
+      ) ||
+      formatEpisodes(show?.number_of_seasons, show?.number_of_episodes);
+
+    const duration = normalizedDetails.episode_run_time
+      ? `${normalizedDetails.episode_run_time}m`
+      : "Unknown";
+
+    // Prefer detailed vote_average over basic, but use whichever is available
+    const finalRating = normalizedDetails.vote_average ?? normalized.vote_average;
+
+    return {
+      id: normalized.id,
+      title: normalized.name || "Unknown",
+      img: normalized.posterUrl || buildImageUrl(show?.poster_path, "w500"),
+      rating: formatRating(finalRating), // Formatted string for display (e.g., "8.5")
+      vote_average: finalRating,         // Raw number for logic/storage (e.g., 8.5)
+      duration,
+      year: getYearFromDate(normalized.first_air_date) || "Unknown",
+      genre: genreName,
+      episodes: episodesInfo,
+      type: "tvshow",
+      backdrop_path: normalized.backdrop_path,
+      overview: normalized.overview,
+      first_air_date: normalized.first_air_date,
+      last_air_date: normalized.last_air_date,
+      number_of_seasons: normalized.number_of_seasons,
+      number_of_episodes: normalized.number_of_episodes,
+      tvShowId: normalized.id, // For navigation
+    };
+  } catch (error) {
+    console.error('Error building TV show card:', error);
     return null;
   }
 }
@@ -47,11 +131,12 @@ export async function fetchTVShowsByCategory(category, signal) {
       return [];
     }
 
+    // Handle genres - fetch one representative show per genre
     if (category === "genres") {
       const genresWithImages = await Promise.all(
         (data.genres || []).map(async (genre) => {
           try {
-            const { data: shows } = await apiClient.get(`/discover/tv`, {
+            const { data: showsData } = await apiClient.get(`/discover/tv`, {
               params: {
                 with_genres: genre.id,
                 sort_by: "popularity.desc",
@@ -60,206 +145,101 @@ export async function fetchTVShowsByCategory(category, signal) {
               signal,
             });
 
+            // Find first valid show for this genre
             const safeShow =
-              (shows.results || []).find((s) => !s.adult && s.poster_path) ||
-              (shows.results || []).find((s) => !s.adult) ||
-              (shows.results || [])[0];
+              (showsData.results || []).find((s) => s?.id && !s.adult && s.poster_path) ||
+              (showsData.results || []).find((s) => s?.id && !s.adult) ||
+              (showsData.results || [])[0];
 
-            if (!safeShow) {
+            if (!safeShow?.id) {
               throw new Error(`No valid TV show found for genre ${genre.name}`);
             }
 
             const details = await fetchTVShowDetails(safeShow.id, signal);
-            const normalized = normalizeTV(safeShow || {});
-            const normalizedDetails = normalizeTV(details || {});
+            const card = buildTVShowCard(safeShow, details);
+            
+            if (!card) {
+              throw new Error('Failed to build TV show card');
+            }
 
-            // Format episodes info if available
-            const episodesInfo =
-              details?.number_of_seasons && details?.number_of_episodes
-                ? `${details.number_of_seasons} Season${
-                    details.number_of_seasons > 1 ? "s" : ""
-                  } • ${details.number_of_episodes} Episode${
-                    details.number_of_episodes > 1 ? "s" : ""
-                  }`
-                : undefined;
-
+            // Override genre and ID for category view
             return {
-              id: genre.id,
-              title: genre.name,
-              img:
-                normalized.posterUrl ||
-                buildImageUrl(
-                  safeShow?.poster_path,
-                  "w500",
-                  `https://via.placeholder.com/500x750/1a1a1a/ffffff?text=${encodeURIComponent(
-                    genre.name
-                  )}`
-                ),
-              rating: formatRating(
-                normalized.vote_average || safeShow?.vote_average
-              ),
-              duration: normalizedDetails.episode_run_time?.[0]
-                ? `${normalizedDetails.episode_run_time[0]}m`
-                : details?.episode_run_time?.[0]
-                ? `${details.episode_run_time[0]}m`
-                : "Unknown",
-              year:
-                getYearFromDate(
-                  normalized.first_air_date || safeShow?.first_air_date
-                ) || "Unknown",
+              ...card,
               genre: genre.name,
-              episodes: episodesInfo,
-              type: "tvshow",
-              // Include TV show ID for navigation
-              tvShowId: normalized.id || safeShow.id,
+              id: genre.id, // Use genre ID for category identification
+              categoryShow: true, // Mark as category genre
             };
-          } catch {
+          } catch (error) {
+            // Return fallback for this genre
+            const isCanceled = error?.name === 'CanceledError' || error?.name === 'AbortError';
+            if (!isCanceled) {
+              console.debug(`Error fetching genre ${genre.name}:`, error.message);
+            }
+            
             return {
               id: genre.id,
               title: genre.name,
-              img: `https://via.placeholder.com/500x750/1a1a1a/ffffff?text=${encodeURIComponent(
-                genre.name
-              )}`,
+              img: `https://via.placeholder.com/500x750/1a1a1a/ffffff?text=${encodeURIComponent(genre.name)}`,
               rating: "N/A",
               duration: "Unknown",
               year: "Unknown",
               genre: genre.name,
               type: "tvshow",
+              categoryShow: true,
             };
           }
         })
       );
-      return genresWithImages;
+      
+      return genresWithImages.filter(g => g != null);
     }
 
+    // Handle other categories - trending, newReleases, mustWatch
     const shows = Array.isArray(data.results)
       ? data.results
           .filter((show) => show && show.id && !show.adult && show.poster_path)
-          .slice(0, 50)
+          .slice(0, 50) // Limit to 50 items for performance
       : [];
 
     if (shows.length === 0) {
+      console.debug(`No valid results for TV category: ${category}`);
       return [];
     }
 
-    // Fetch details for shows in parallel batches to optimize performance
+    // Fetch details for all shows in parallel
     const showsWithDetails = await Promise.all(
       shows.map(async (show) => {
         try {
           const details = await fetchTVShowDetails(show.id, signal);
-          const normalized = normalizeTV(show || {});
-          const normalizedDetails = normalizeTV(details || {});
+          const card = buildTVShowCard(show, details);
 
-          // Extract first genre name if available, otherwise use "TV Show"
-          const genreName =
-            (show.genres && show.genres.length > 0 && show.genres[0].name) ||
-            (normalized.genres &&
-              normalized.genres.length > 0 &&
-              normalized.genres[0].name) ||
-            (normalizedDetails.genres &&
-              normalizedDetails.genres.length > 0 &&
-              normalizedDetails.genres[0].name) ||
-            "TV Show";
-
-          // Format episodes info if available
-          const episodesInfo =
-            normalizedDetails.number_of_seasons &&
-            normalizedDetails.number_of_episodes
-              ? `${normalizedDetails.number_of_seasons} Season${
-                  normalizedDetails.number_of_seasons > 1 ? "s" : ""
-                } • ${normalizedDetails.number_of_episodes} Episode${
-                  normalizedDetails.number_of_episodes > 1 ? "s" : ""
-                }`
-              : details?.number_of_seasons && details?.number_of_episodes
-              ? `${details.number_of_seasons} Season${
-                  details.number_of_seasons > 1 ? "s" : ""
-                } • ${details.number_of_episodes} Episode${
-                  details.number_of_episodes > 1 ? "s" : ""
-                }`
-              : undefined;
-
-          return {
-            id: normalized.id || show.id,
-            title: normalized.name || show.name || "Unknown",
-            img:
-              normalized.posterUrl || buildImageUrl(show.poster_path, "w500"),
-            rating: formatRating(normalized.vote_average || show.vote_average),
-            duration: normalizedDetails.episode_run_time?.[0]
-              ? `${normalizedDetails.episode_run_time[0]}m`
-              : details?.episode_run_time?.[0]
-              ? `${details.episode_run_time[0]}m`
-              : "Unknown",
-            year:
-              getYearFromDate(
-                normalized.first_air_date || show.first_air_date
-              ) || "Unknown",
-            genre: genreName,
-            episodes: episodesInfo,
-            type: "tvshow",
-            // Include additional fields for better data handling
-            backdrop_path: normalized.backdrop_path || show.backdrop_path,
-            overview: normalized.overview || show.overview,
-            first_air_date: normalized.first_air_date || show.first_air_date,
-            number_of_seasons:
-              normalizedDetails.number_of_seasons ||
-              details?.number_of_seasons ||
-              show.number_of_seasons,
-            number_of_episodes:
-              normalizedDetails.number_of_episodes ||
-              details?.number_of_episodes ||
-              show.number_of_episodes,
-          };
-        } catch (error) {
-          const isCanceled =
-            error?.name === "CanceledError" ||
-            error?.name === "AbortError" ||
-            error?.code === "ERR_CANCELED" ||
-            error?.message === "canceled";
-          if (!isCanceled) {
-            console.error(`Error processing TV show ${show.id}:`, error);
-          } else if (import.meta?.env?.DEV) {
-            console.debug(`Processing TV show ${show.id} canceled`);
+          // Debug: log show rating
+          if (import.meta?.env?.DEV) {
+            console.log(`Show: ${show.name || 'Unknown'}, ID: ${show.id}, Rating (API): ${show.vote_average}, Rating (Details): ${details?.vote_average}, Final Rating: ${card?.vote_average}`);
           }
 
-          // Return basic show data even if details fail or were canceled
-          const genreName =
-            show.genres && show.genres.length > 0
-              ? show.genres[0].name
-              : "TV Show";
+          return card;
+        } catch (error) {
+          const isCanceled = error?.name === 'CanceledError' || error?.name === 'AbortError';
+          if (!isCanceled) {
+            console.debug(`Error processing show ${show.id}:`, error.message);
+          }
 
-          return {
-            id: show.id,
-            title: show.name || "Unknown",
-            img: buildImageUrl(show.poster_path, "w500"),
-            rating: formatRating(show.vote_average),
-            duration: "Unknown",
-            year: getYearFromDate(show.first_air_date) || "Unknown",
-            genre: genreName,
-            type: "tvshow",
-            backdrop_path: show.backdrop_path,
-            overview: show.overview,
-            first_air_date: show.first_air_date,
-            number_of_seasons: show.number_of_seasons,
-            number_of_episodes: show.number_of_episodes,
-          };
+          // Return basic card without details
+          return buildTVShowCard(show, null);
         }
       })
     );
 
     return showsWithDetails.filter((show) => show != null && show.id);
-  } catch (err) {
-    const isCanceled =
-      err?.name === "CanceledError" ||
-      err?.name === "AbortError" ||
-      err?.code === "ERR_CANCELED" ||
-      err?.message === "canceled";
-    if (isCanceled) {
-      if (import.meta?.env?.DEV) {
-        console.debug(`Fetch for TV category ${category} was canceled`);
-      }
-      return [];
+  } catch (error) {
+    const isCanceled = error?.name === 'CanceledError' || error?.name === 'AbortError';
+    if (!isCanceled) {
+      console.error(`Error fetching TV category ${category}:`, error.message || error);
+    } else if (import.meta?.env?.DEV) {
+      console.debug(`Fetch for TV category ${category} was canceled`);
     }
-    console.error(`Error fetching TV shows ${category}:`, err.message || err);
+    
     // Return empty array on error to prevent UI crashes
     return [];
   }

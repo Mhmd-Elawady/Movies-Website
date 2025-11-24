@@ -7,7 +7,9 @@ import Support from "../pages/Support";
 import Subscription from "../pages/Subscription";
 import MovieDetail from "../components/Movies&Shows/MovieDetailHero/MovieDetail";
 import TVDetail from '../components/Movies&Shows/ShowsOpenHero/TVDetail';
+import Actor from "../components/Actor/Actor";
 import Watchlist from "../pages/Watchlist";
+import Category from "../pages/Category";
 import { Route, Routes } from "react-router-dom";
 
 export default function AppRoutes() {
@@ -22,6 +24,8 @@ export default function AppRoutes() {
         <Route path="/subscription" element={<Subscription />} />
         <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="/tv/:id" element={<TVDetail />} />
+        <Route path="/category/:name" element={<Category />} />
+        <Route path="/actor/:id" element={<Actor />} />
         <Route path="/watchlist" element={<Watchlist />} />
       </Routes>
     </>

@@ -1,8 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import bgImage from '../../../assets/SubContainer.png';
 import './StreamVibe.css';
 
 export default function StreamVibe() {
+  const navigate = useNavigate();
   return (
     <section className="hero" aria-label="StreamVibe Hero Section">
       <div className="hero-image">
@@ -19,7 +21,11 @@ export default function StreamVibe() {
         <p>
           StreamVibe offers the ultimate streaming experience, delivering your favorite movies and shows on demand, anytime, anywhere. Enjoy blockbusters, classics, and exclusive series, with personalized watchlists to keep your content at your fingertips.
         </p>
-        <button className="cta-btn" aria-label="Start watching StreamVibe now">
+        <button
+          className="cta-btn"
+          aria-label="Start watching StreamVibe now"
+          onClick={() => navigate('/movies_shows')}
+        >
           Start Watching Now
         </button>
       </div>

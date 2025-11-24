@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { apiClient, IMAGE_BASE_URL } from "../../../services/tmdb";
+import { apiClient } from "../../../services/tmdb";
+import { buildImageUrl } from "../../../utils/helpers";
 import { useNavigate } from "react-router-dom";
 import "./CategorySlider.css";
 const categories = [
@@ -28,7 +29,7 @@ export default function CategorySlider() {
   const navigate = useNavigate();
   const sliderRef = useRef(null);
 
-  const imageBaseUrl = IMAGE_BASE_URL;
+  // imageBaseUrl replaced by buildImageUrl usage
 
   // small in-memory cache to avoid re-fetching category grids during a session
   // keyed by category id -> array of movies
@@ -191,17 +192,40 @@ export default function CategorySlider() {
                       .fill(0)
                       .map((_, i) => <div key={i} className="loading-cell" />)
                   : moviesByCategory[cat.id]?.map((movie, i) => (
-                      <img
-                        key={movie.id || i}
-                        src={
-                          movie.poster_path
-                            ? imageBaseUrl + movie.poster_path
-                            : "/placeholder-movie.jpg"
-                        }
-                        alt={movie.title || "Movie poster"}
-                        loading="lazy"
-                      />
-                    ))}
+                        <button
+                          key={movie.id || i}
+                          type="button"
+                          className="category-thumb"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            try {
+                              const id = movie.id || movie.movie_id;
+                              const mediaType = movie.media_type || (movie.title ? 'movie' : 'tv');
+                              if (id) {
+                                navigate(mediaType === 'tv' ? `/tv/${id}` : `/movie/${id}`);
+                              }
+                            } catch (err) {
+                              console.debug('Navigation error', err);
+                            }
+                          }}
+                          aria-label={movie.title || movie.name || 'Open details'}
+                          title={movie.title || movie.name || ''}
+                        >
+                          <img
+                            src={
+                              movie?.poster_path
+                                ? buildImageUrl(movie.poster_path, "w300")
+                                : "https://via.placeholder.com/300x450/1a1a1a/ffffff?text=No+Image"
+                            }
+                            alt={movie.title || movie.name || "Poster"}
+                            loading="lazy"
+                            onError={(e) => {
+                              const fallback = "https://via.placeholder.com/300x450/1a1a1a/ffffff?text=No+Image";
+                              if (e.target.src !== fallback) e.target.src = fallback;
+                            }}
+                          />
+                        </button>
+                      ))}
               </div>
               <div className="category-footer">
                 <span>{cat.name}</span>

@@ -68,7 +68,7 @@ const Row = memo(function Row({
         id: itemId,
         title: item.title || item.name || "",
         poster_path: item.img || item.poster_path || null,
-        vote_average: item.rating != null ? Number(item.rating) : null,
+        vote_average: item.vote_average != null ? item.vote_average : (item.rating != null ? Number(item.rating) : null),
         release_date: item.release_date || item.year || null,
         media_type,
       };
@@ -204,13 +204,7 @@ const Row = memo(function Row({
                     onLoad={handleImageLoad}
                   />
                   <div className="card-overlay"></div>
-                  <div className="card-badge">
-                    {isTVShow
-                      ? "TV"
-                      : item.rating && item.rating !== "N/A"
-                      ? `${item.rating}/10`
-                      : "NEW"}
-                  </div>
+                  
                   <button
                     className={`add-to-watchlist ${isAdded ? "added" : ""}`}
                     onClick={(e) => handleAddToWatchlist(item, e)}
@@ -240,18 +234,13 @@ const Row = memo(function Row({
                         {episodesInfo.seasons && (
                           <div className="episodes-info">
                             <span className="seasons">{episodesInfo.seasons}</span>
-                            {episodesInfo.episodes && (
-                              <>
-                                <span className="separator">•</span>
-                                <span className="episodes">{episodesInfo.episodes}</span>
-                              </>
-                            )}
+                            {/* Episodes count intentionally omitted for TV shows */}
                           </div>
                         )}
                       </div>
                       <div className="compact-meta-row">
                         <span className="year">{item.year || "Unknown"}</span>
-                        <span className="genre">{item.genre || "TV Show"}</span>
+                        <span className="genre">{episodesInfo.episodes || item.episodes || "Unknown"}</span>
                       </div>
                     </div>
                   ) : (

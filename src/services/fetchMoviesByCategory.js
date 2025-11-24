@@ -5,20 +5,77 @@ import {
   formatRating,
   buildImageUrl,
   createBoundedCache,
+  WEEKLY_TTL_MS,
 } from "../utils/helpers";
 
-// Bounded cache for movie details to prevent memory leaks
-const detailsCache = createBoundedCache(100);
+// Bounded cache for movie details — now using weekly TTL
+const detailsCache = createBoundedCache(100, WEEKLY_TTL_MS);
 
-// Helper function to fetch movie details with caching
+/**
+ * Helper function to fetch movie details with caching and validation
+ */
 async function fetchMovieDetails(movieId, signal) {
   if (!movieId) return null;
-  if (detailsCache.has(movieId)) return detailsCache.get(movieId);
+  
   try {
+    // Check cache first (with TTL expiration)
+    if (detailsCache.has(movieId)) {
+      const cached = detailsCache.get(movieId);
+      if (cached) return cached;
+    }
+    
     const { data } = await apiClient.get(`/movie/${movieId}`, { signal });
-    detailsCache.set(movieId, data);
-    return data;
-  } catch {
+    
+    // Validate response has required fields
+    if (data && data.id) {
+      detailsCache.set(movieId, data);
+      return data;
+    }
+    return null;
+  } catch (error) {
+    // Log only non-canceled errors
+    if (error?.name !== 'CanceledError' && error?.name !== 'AbortError') {
+      console.debug(`Failed to fetch movie details for ID ${movieId}`);
+    }
+    return null;
+  }
+}
+
+/**
+ * Build consistent movie card data from raw and detailed data
+ */
+function buildMovieCard(movie, details) {
+  try {
+    const normalized = normalizeMovie(movie || {});
+    const normalizedDetails = normalizeMovie(details || {});
+
+    if (!normalized.id) return null; // Skip if no ID
+
+    // Get genre name - try multiple sources
+    const genreName = 
+      normalized.genres?.[0]?.name ||
+      normalizedDetails.genres?.[0]?.name ||
+      "Movie";
+
+    // Prefer detailed vote_average over basic, but use whichever is available
+    const finalRating = normalizedDetails.vote_average ?? normalized.vote_average;
+
+    return {
+      id: normalized.id,
+      title: normalized.title || "Unknown",
+      img: normalized.posterUrl || buildImageUrl(movie?.poster_path, "w500"),
+      rating: formatRating(finalRating), // Formatted string for display (e.g., "8.5")
+      vote_average: finalRating,         // Raw number for logic/storage (e.g., 8.5)
+      duration: formatDuration(normalizedDetails.runtime),
+      year: getYearFromDate(normalized.release_date) || "Unknown",
+      genre: genreName,
+      backdrop_path: normalized.backdrop_path,
+      overview: normalized.overview,
+      release_date: normalized.release_date,
+      movieId: normalized.id, // For navigation
+    };
+  } catch (error) {
+    console.error('Error building movie card:', error);
     return null;
   }
 }
@@ -48,13 +105,12 @@ export async function fetchMoviesByCategory(category, signal) {
       return [];
     }
 
+    // Handle genres - fetch one representative movie per genre
     if (category === "genres") {
-      // For each genre pick one representative movie (first non-adult if possible).
-      // Use Promise.all but reuse cached movie details to reduce pressure.
       const genresWithImages = await Promise.all(
         (data.genres || []).map(async (genre) => {
           try {
-            const { data: movies } = await apiClient.get(`/discover/movie`, {
+            const { data: moviesData } = await apiClient.get(`/discover/movie`, {
               params: {
                 with_genres: genre.id,
                 sort_by: "popularity.desc",
@@ -63,160 +119,100 @@ export async function fetchMoviesByCategory(category, signal) {
               signal,
             });
 
+            // Find first valid movie for this genre
             const safeMovie =
-              (movies.results || []).find((m) => !m.adult && m.poster_path) ||
-              (movies.results || []).find((m) => !m.adult) ||
-              (movies.results || [])[0];
+              (moviesData.results || []).find((m) => m?.id && !m.adult && m.poster_path) ||
+              (moviesData.results || []).find((m) => m?.id && !m.adult) ||
+              (moviesData.results || [])[0];
 
-            if (!safeMovie) {
+            if (!safeMovie?.id) {
               throw new Error(`No valid movie found for genre ${genre.name}`);
             }
 
             const details = await fetchMovieDetails(safeMovie.id, signal);
-            const normalized = normalizeMovie(safeMovie || {});
-            const normalizedDetails = normalizeMovie(details || {});
+            const card = buildMovieCard(safeMovie, details);
+            
+            if (!card) {
+              throw new Error('Failed to build movie card');
+            }
 
+            // Override genre for category view
             return {
-              id: genre.id,
-              title: genre.name,
-              img:
-                normalized.posterUrl ||
-                buildImageUrl(
-                  safeMovie?.poster_path,
-                  "w500",
-                  `https://via.placeholder.com/500x750/1a1a1a/ffffff?text=${encodeURIComponent(
-                    genre.name
-                  )}`
-                ),
-              rating: formatRating(normalized.vote_average),
-              duration: formatDuration(normalizedDetails.runtime),
-              year: getYearFromDate(normalized.release_date) || "Unknown",
+              ...card,
               genre: genre.name,
-              // Include movie ID for navigation
-              movieId: normalized.id || safeMovie.id,
+              id: genre.id, // Use genre ID for category identification
+              categoryMovie: true, // Mark as category genre
             };
-          } catch {
-            // return a safe fallback for this genre
+          } catch (error) {
+            // Return fallback for this genre
+            const isCanceled = error?.name === 'CanceledError' || error?.name === 'AbortError';
+            if (!isCanceled) {
+              console.debug(`Error fetching genre ${genre.name}:`, error.message);
+            }
+            
             return {
               id: genre.id,
               title: genre.name,
-              img: `https://via.placeholder.com/500x750/1a1a1a/ffffff?text=${encodeURIComponent(
-                genre.name
-              )}`,
+              img: `https://via.placeholder.com/500x750/1a1a1a/ffffff?text=${encodeURIComponent(genre.name)}`,
               rating: "N/A",
               duration: "Unknown",
               year: "Unknown",
               genre: genre.name,
+              categoryMovie: true,
             };
           }
         })
       );
-      return genresWithImages;
+      
+      return genresWithImages.filter(g => g != null);
     }
 
-    // Other categories - increase limit for better data display
+    // Handle other categories - trending, newReleases, mustWatch
     const results = Array.isArray(data.results)
       ? data.results
-          .filter(
-            (movie) => movie && movie.id && !movie.adult && movie.poster_path
-          )
-          .slice(0, 50) // Increased from 20 to 50 for better coverage
+          .filter((movie) => movie && movie.id && !movie.adult && movie.poster_path)
+          .slice(0, 50) // Limit to 50 items for performance
       : [];
 
     if (results.length === 0) {
+      console.debug(`No valid results for category: ${category}`);
       return [];
     }
 
+    // Fetch details for all movies in parallel
     const moviesWithDetails = await Promise.all(
       results.map(async (movie) => {
         try {
           const details = await fetchMovieDetails(movie.id, signal);
-          const normalized = normalizeMovie(movie || {});
-          const normalizedDetails = normalizeMovie(details || {});
-
-          // Extract first genre name if available, otherwise use "Movie"
-          const genreName =
-            (movie.genres && movie.genres.length > 0 && movie.genres[0].name) ||
-            (normalized.genres &&
-              normalized.genres.length > 0 &&
-              normalized.genres[0].name) ||
-            (normalizedDetails.genres &&
-              normalizedDetails.genres.length > 0 &&
-              normalizedDetails.genres[0].name) ||
-            "Movie";
-
-          return {
-            id: normalized.id || movie.id,
-            title: normalized.title || movie.title || movie.name || "Unknown",
-            img:
-              normalized.posterUrl || buildImageUrl(movie.poster_path, "w500"),
-            rating: formatRating(normalized.vote_average || movie.vote_average),
-            duration: formatDuration(
-              normalizedDetails.runtime || details?.runtime
-            ),
-            year:
-              getYearFromDate(normalized.release_date || movie.release_date) ||
-              "Unknown",
-            genre: genreName,
-            // Include additional fields for better data handling
-            backdrop_path: normalized.backdrop_path || movie.backdrop_path,
-            overview: normalized.overview || movie.overview,
-            release_date: normalized.release_date || movie.release_date,
-          };
-        } catch (error) {
-          const isCanceled =
-            error?.name === "CanceledError" ||
-            error?.name === "AbortError" ||
-            error?.code === "ERR_CANCELED" ||
-            error?.message === "canceled";
-          if (!isCanceled) {
-            console.error(`Error processing movie ${movie.id}:`, error);
-          } else if (import.meta?.env?.DEV) {
-            console.debug(`Processing movie ${movie.id} canceled`);
+          const card = buildMovieCard(movie, details);
+          
+          // Debug: log movie rating
+          if (import.meta?.env?.DEV) {
+            console.log(`Movie: ${movie.title || 'Unknown'}, ID: ${movie.id}, Rating (API): ${movie.vote_average}, Rating (Details): ${details?.vote_average}, Final Rating: ${card?.vote_average}`);
           }
-
-          // Return basic movie data even if details fail or were canceled
-          const normalized = normalizeMovie(movie || {});
-          const genreName =
-            (movie.genres && movie.genres.length > 0 && movie.genres[0].name) ||
-            (normalized.genres &&
-              normalized.genres.length > 0 &&
-              normalized.genres[0].name) ||
-            "Movie";
-
-          return {
-            id: normalized.id || movie.id,
-            title: normalized.title || movie.title || movie.name || "Unknown",
-            img:
-              normalized.posterUrl || buildImageUrl(movie.poster_path, "w500"),
-            rating: formatRating(normalized.vote_average || movie.vote_average),
-            duration: "Unknown",
-            year:
-              getYearFromDate(normalized.release_date || movie.release_date) ||
-              "Unknown",
-            genre: genreName,
-            backdrop_path: normalized.backdrop_path || movie.backdrop_path,
-            overview: normalized.overview || movie.overview,
-            release_date: normalized.release_date || movie.release_date,
-          };
+          
+          return card;
+        } catch (error) {
+          const isCanceled = error?.name === 'CanceledError' || error?.name === 'AbortError';
+          if (!isCanceled) {
+            console.debug(`Error processing movie ${movie.id}:`, error.message);
+          }
+          
+          // Return basic card without details
+          return buildMovieCard(movie, null);
         }
       })
     );
 
     return moviesWithDetails.filter((movie) => movie != null && movie.id);
-  } catch (err) {
-    const isCanceled =
-      err?.name === "CanceledError" ||
-      err?.name === "AbortError" ||
-      err?.code === "ERR_CANCELED" ||
-      err?.message === "canceled";
-    if (isCanceled) {
-      if (import.meta?.env?.DEV) {
-        console.debug(`Fetch for category ${category} was canceled`);
-      }
-      return [];
+  } catch (error) {
+    const isCanceled = error?.name === 'CanceledError' || error?.name === 'AbortError';
+    if (!isCanceled) {
+      console.error(`Error fetching category ${category}:`, error.message || error);
+    } else if (import.meta?.env?.DEV) {
+      console.debug(`Fetch for category ${category} was canceled`);
     }
-    console.error(`Error fetching ${category}:`, err.message || err);
+    
     // Return empty array on error to prevent UI crashes
     return [];
   }

@@ -1,9 +1,9 @@
-import { apiClient } from "../services/tmdb";
+import { apiClient, normalizeMovie } from "../services/tmdb";
 
 /**
- * Search for a movie by name and return structured data
+ * Search for a movie by name and return normalized movie data
  * @param {string} movieName - The name of the movie to search for
- * @returns {Promise<Object>} Movie data with title, release year, rating, and genre
+ * @returns {Promise<Object>} Normalized movie data using normalizeMovie function
  */
 export const getMovieData = async (movieName) => {
   try {
@@ -23,23 +23,15 @@ export const getMovieData = async (movieName) => {
       throw new Error(`Movie "${movieName}" not found`);
     }
 
-    // Get the first result (best match)
-    const movie = response.data.results[0];
+    // Get the first result (best match) and normalize it
+    const rawMovie = response.data.results[0];
+    const normalizedMovie = normalizeMovie(rawMovie);
 
-    // Extract the required data
-    const result = {
-      "Movie Title": movie.title || "N/A",
-      "Release Year": movie.release_date ? new Date(movie.release_date).getFullYear() : "N/A",
-      "IMDb Rating": movie.vote_average ? movie.vote_average.toFixed(1) : "N/A",
+    // Return normalized movie with search-specific metadata
+    return {
+      ...normalizedMovie,
+      searchMatch: true,
     };
-
-    // Genre is optional - would need a separate call to get genre names
-    // For now, including it if available from the search response
-    if (movie.genres && Array.isArray(movie.genres)) {
-      result.Genre = movie.genres.map((g) => g.name).join(", ");
-    }
-
-    return result;
   } catch (error) {
     console.error("Error fetching movie data:", error);
     throw error;
@@ -81,8 +73,14 @@ export const getYearFromDate = (dateString) => {
  * @returns {string} Formatted rating or 'N/A'
  */
 export const formatRating = (rating) => {
+  // Return N/A only if rating is null, undefined, or NaN
   if (rating == null || isNaN(rating)) return "N/A";
-  return parseFloat(rating).toFixed(1);
+  // Convert to number if it's a string
+  const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
+  // If still NaN after conversion, return N/A
+  if (isNaN(numRating)) return "N/A";
+  // Format to 1 decimal place
+  return numRating.toFixed(1);
 };
 
 /**
@@ -139,27 +137,78 @@ export const findTrailer = (videos) => {
   );
 };
 
+// Weekly TTL constant (7 days) in milliseconds
+export const WEEKLY_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 604800000 ms
+
 /**
- * Create a bounded cache with size limit
- * @param {number} maxSize - Maximum cache size
- * @returns {Map} Bounded cache Map
+ * Create a bounded cache with size limit and optional TTL (time-to-live)
+ * @param {number} maxSize - Maximum cache size (default 50)
+ * @param {number} ttlMs - Time-to-live in milliseconds (default: weekly = WEEKLY_TTL_MS)
+ * @returns {Object} Bounded cache with TTL support
  */
-export const createBoundedCache = (maxSize = 50) => {
+export const createBoundedCache = (maxSize = 50, ttlMs = WEEKLY_TTL_MS) => {
   const cache = new Map();
+  const timestamps = new Map();
+
+  const isExpired = (key) => {
+    if (!ttlMs) return false; // TTL disabled if ttlMs is 0 or falsy
+    const timestamp = timestamps.get(key);
+    if (!timestamp) return false;
+    return Date.now() - timestamp > ttlMs;
+  };
+
+  const cleanExpired = () => {
+    const keysToDelete = [];
+    for (const key of cache.keys()) {
+      if (isExpired(key)) {
+        keysToDelete.push(key);
+      }
+    }
+    keysToDelete.forEach(key => {
+      cache.delete(key);
+      timestamps.delete(key);
+    });
+  };
 
   return {
-    get: (key) => cache.get(key),
+    get: (key) => {
+      cleanExpired();
+      if (isExpired(key)) {
+        cache.delete(key);
+        timestamps.delete(key);
+        return undefined;
+      }
+      return cache.get(key);
+    },
     set: (key, value) => {
+      cleanExpired();
       if (cache.size >= maxSize && !cache.has(key)) {
         // Remove oldest entry (first key)
         const firstKey = cache.keys().next().value;
         cache.delete(firstKey);
+        timestamps.delete(firstKey);
       }
       cache.set(key, value);
+      timestamps.set(key, Date.now());
     },
-    has: (key) => cache.has(key),
-    clear: () => cache.clear(),
+    has: (key) => {
+      cleanExpired();
+      if (isExpired(key)) {
+        cache.delete(key);
+        timestamps.delete(key);
+        return false;
+      }
+      return cache.has(key);
+    },
+    clear: () => {
+      cache.clear();
+      timestamps.clear();
+    },
     size: () => cache.size,
+    invalidate: (key) => {
+      cache.delete(key);
+      timestamps.delete(key);
+    },
   };
 };
 
