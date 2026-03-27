@@ -97,14 +97,14 @@ const Row = memo(function Row({
     }
   }, [isTVShow, dispatch]);
 
-  // Card click handler
+ 
 const handleCardClick = useCallback((item) => {
   if (!item) return;
   
   const rawId = item.id || item.movieId || item.tvShowId;
   const itemId = parseNumericId(rawId);
   
-  // ← أضف السطرين دول
+ 
   console.log("RAW ID:", rawId);
   console.log("PARSED ID:", itemId);
   console.log("FULL ITEM:", item);
