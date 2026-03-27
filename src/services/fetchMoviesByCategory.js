@@ -72,6 +72,8 @@ function buildMovieCard(movie, details) {
       backdrop_path: normalized.backdrop_path,
       overview: normalized.overview,
       release_date: normalized.release_date,
+      poster_path: normalized.poster_path,
+      media_type: "movie",
       movieId: normalized.id, // For navigation
     };
   } catch (error) {

@@ -379,7 +379,7 @@ export default function MoviesSection() {
         episodes: item.episodes || "Unknown",
         year: item.year || "Unknown",
         genre: item.genre || (isTVShow ? "TV Show" : "Movie"),
-        type: isTVShow ? "tvshow" : "movie",
+        media_type: isTVShow ? "tv" : "movie",
       }));
   }, []);
 

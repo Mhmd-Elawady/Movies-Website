@@ -91,13 +91,14 @@ function buildTVShowCard(show, details) {
       year: getYearFromDate(normalized.first_air_date) || "Unknown",
       genre: genreName,
       episodes: episodesInfo,
-      type: "tvshow",
       backdrop_path: normalized.backdrop_path,
       overview: normalized.overview,
       first_air_date: normalized.first_air_date,
       last_air_date: normalized.last_air_date,
       number_of_seasons: normalized.number_of_seasons,
       number_of_episodes: normalized.number_of_episodes,
+      poster_path: normalized.poster_path,
+      media_type: "tv",
       tvShowId: normalized.id, // For navigation
     };
   } catch (error) {
@@ -184,7 +185,7 @@ export async function fetchTVShowsByCategory(category, signal) {
               duration: "Unknown",
               year: "Unknown",
               genre: genre.name,
-              type: "tvshow",
+              media_type: "tv",
               categoryShow: true,
             };
           }

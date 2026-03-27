@@ -10,7 +10,7 @@ import { store } from './store/store.js';
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter basename="/Movies-Website">
         <App />
       </BrowserRouter>
     </Provider>
