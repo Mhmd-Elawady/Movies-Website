@@ -133,7 +133,7 @@ export default function SupportPage() {
 
   return (
     <div className="support-container d-flex justify-content-center align-items-center">
-      <div className="container support-box row text-light">
+      <div className="container support-box row text-light gx-3 gx-md-4 gx-lg-5">
        
         <section 
           className="col-md-6 left-section mb-4 mb-md-0"

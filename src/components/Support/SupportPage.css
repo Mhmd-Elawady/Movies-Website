@@ -1,4 +1,9 @@
-/* Base Styles */
+/* =========================================
+   SUPPORT PAGE — RESPONSIVE STYLES
+   Clean, unified, fully responsive
+   ========================================= */
+
+/* ── Base Styles ── */
 .support-container {
   min-height: 100vh;
   background: black;
@@ -9,7 +14,12 @@
 .support-box {
   max-width: 1200px;
   margin: 0 auto;
+  animation: fadeIn 0.6s ease-out;
+
+
 }
+
+/* ── Left Section ── */
 
 .left-section h2 {
   font-size: 2.5rem;
@@ -33,15 +43,18 @@
 }
 
 .left-section img {
-  width: 80%;
+  width: 100%;
   height: auto;
+  display: block;
   transition: transform 0.4s ease;
   object-fit: cover;
 }
+
 .left-section img:hover {
   transform: scale(1.05);
 }
 
+/* ── Right Section ── */
 .right-section {
   background: linear-gradient(145deg, #1a1a1a 0%, #222 100%);
   border-radius: 16px;
@@ -52,11 +65,12 @@
   padding: 2.5rem;
 }
 
-/* Form Styles */
+/* ── Form Styles ── */
 .form-label {
   font-weight: 500;
   color: #e9ecef;
   margin-bottom: 0.5rem;
+  display: block;
 }
 
 .form-control,
@@ -67,6 +81,7 @@
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 0.95rem;
+  width: 100%;
   transition: all 0.2s ease;
 }
 
@@ -79,6 +94,7 @@
   background-color: #2d2d2d;
   border-color: #e50914;
   box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+  outline: none;
 }
 
 .form-control.is-invalid {
@@ -86,9 +102,23 @@
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
+/* ── Form Row ── */
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-row .col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Checkbox ── */
 .form-check-input {
   background-color: #2d2d2d;
   border: 2px solid #404040;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .form-check-input:checked {
@@ -104,6 +134,14 @@
   border-color: #dc3545;
 }
 
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+}
+
+/* ── Submit Button ── */
 .btn-danger {
   background: linear-gradient(135deg, #e50914 0%, #b0060f 100%);
   border: none;
@@ -111,6 +149,9 @@
   padding: 1rem;
   font-weight: 600;
   font-size: 1.1rem;
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -133,12 +174,16 @@
   cursor: not-allowed;
 }
 
+/* ── Validation Feedback ── */
 .invalid-feedback {
   font-size: 0.875rem;
   font-weight: 500;
+  color: #dc3545;
+  display: block;
+  margin-top: 0.25rem;
 }
 
-/* Animations */
+/* ── Animation ── */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -150,16 +195,18 @@
   }
 }
 
-.support-box {
-  animation: fadeIn 0.6s ease-out;
-}
 
-/* Responsive Styles */
+/* =========================================
+   MEDIA QUERIES
+   ========================================= */
+
+/* Ultra Wide (1920px+) */
 @media (min-width: 1920px) {
   .support-container {
     max-width: 1600px;
     margin: 0 auto;
     padding: 4rem 2rem;
+    margin-top: 110px;
   }
 
   .support-box {
@@ -190,22 +237,329 @@
   }
 }
 
-/* Other Media Queries for Responsiveness */
+/* Large Desktop (1200px - 1920px) — Default styles apply */
+
+/* Laptop (1024px - 1200px) */
+@media (max-width: 1200px) {
+  .support-box {
+    max-width: 960px;
+    
+  }
+
+  .left-section h2 {
+    font-size: 2.2rem;
+  }
+}
+
+/* Tablet Landscape (768px - 1024px) */
+@media (max-width: 1024px) {
+  .support-container {
+    padding: 2rem 1.5rem;
+    margin-top: 90px;
+  }
+
+  .left-section h2 {
+    font-size: 2rem;
+  }
+
+  .left-section p {
+    font-size: 0.95rem;
+  }
+
+  .right-section {
+    padding: 2rem;
+  }
+
+  .form-control,
+  .form-select {
+    font-size: 0.9rem;
+    padding: 0.7rem 0.9rem;
+  }
+
+  .btn-danger {
+    font-size: 1rem;
+    padding: 0.9rem;
+  }
+}
+
+/* Tablet Portrait (768px - 1024px) */
 @media (max-width: 768px) {
+  .support-container {
+    padding: 1.5rem 1rem;
+    margin-top: 80px;
+  }
+
+  .support-box {
+    /* Stack layout: left on top, right below */
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .left-section {
+    text-align: center;
+  }
+
+  .left-section h2 {
+    font-size: 1.8rem;
+  }
+
+  .left-section p {
+    font-size: 0.925rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .left-section img {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  .right-section {
+    padding: 1.75rem;
+    border-radius: 12px;
+  }
+
+  /* Stack form rows on tablet */
   .form-row {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
   }
 
   .form-row .col {
     width: 100%;
   }
 
-  /* Apply smaller styles for devices under 768px */
-  // Add more styles as needed
+  .btn-danger {
+    font-size: 1rem;
+    padding: 0.875rem;
+  }
 }
 
-/* Printing Styles */
+/* Large Phone (480px - 768px) */
+@media (max-width: 600px) {
+  .support-container {
+    padding: 1.25rem 0.875rem;
+    margin-top: 70px;
+  }
+
+  .left-section h2 {
+    font-size: 1.6rem;
+    letter-spacing: -0.3px;
+  }
+
+  .left-section p {
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .left-section img {
+    width: 90%;
+  }
+
+  .right-section {
+    padding: 1.5rem;
+    border-radius: 10px;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.7rem 0.875rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  .form-check {
+    gap: 0.6rem;
+  }
+
+  .btn-danger {
+    font-size: 0.95rem;
+    padding: 0.875rem;
+  }
+}
+
+/* Small Phone (max 480px) */
+@media (max-width: 480px) {
+  .support-container {
+    padding: 1rem 0.75rem;
+    margin-top: 60px;
+  }
+
+  .left-section h2 {
+    font-size: 1.4rem;
+  }
+
+  .left-section p {
+    font-size: 0.875rem;
+  }
+
+  .left-section img {
+    width: 100%;
+  }
+
+  .right-section {
+    padding: 1.25rem;
+    border-radius: 8px;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.875rem;
+    min-height: 44px;
+    border-radius: 6px;
+  }
+
+  .invalid-feedback {
+    font-size: 0.8rem;
+  }
+
+  .form-check {
+    min-height: 44px;
+  }
+
+  .btn-danger {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+    min-height: 44px;
+    border-radius: 6px;
+  }
+}
+
+/* Very Small Phone (max 320px) */
+@media (max-width: 320px) {
+  .support-container {
+    padding: 0.75rem 0.5rem;
+    margin-top: 55px;
+  }
+
+  .left-section h2 {
+    font-size: 1.25rem;
+  }
+
+  .left-section p {
+    font-size: 0.825rem;
+  }
+
+  .right-section {
+    padding: 1rem;
+  }
+
+  .form-control,
+  .form-select {
+    font-size: 0.825rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .btn-danger {
+    font-size: 0.875rem;
+    padding: 0.7rem;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .support-container {
+    margin-top: 60px;
+    padding: 1rem;
+  }
+
+  .left-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .left-section img {
+    max-height: 200px;
+    width: auto;
+    margin: 0 auto;
+  }
+
+  .right-section {
+    padding: 1.25rem;
+  }
+}
+
+
+/* =========================================
+   ACCESSIBILITY & SPECIAL MEDIA QUERIES
+   ========================================= */
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .left-section img,
+  .btn-danger,
+  .form-control,
+  .form-select {
+    transition: none !important;
+  }
+
+  .support-box {
+    animation: none !important;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .left-section img:hover {
+    transform: none;
+  }
+}
+
+/* High Contrast */
+@media (prefers-contrast: high) {
+  .form-control,
+  .form-select {
+    border-color: #fff;
+  }
+
+  .form-label {
+    color: #fff;
+  }
+
+  .left-section p {
+    color: #ccc;
+  }
+
+  .btn-danger {
+    border: 2px solid #fff;
+  }
+
+  .right-section {
+    border-color: #555;
+  }
+}
+
+/* Touch Devices */
+@media (hover: none) and (pointer: coarse) {
+  .left-section img:hover {
+    transform: none;
+  }
+
+  .btn-danger:hover:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn-danger:active:not(:disabled) {
+    transform: scale(0.98);
+    background: linear-gradient(135deg, #f40612 0%, #c50e1b 100%);
+  }
+}
+
+/* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .left-section img {
+    image-rendering: -webkit-optimize-contrast;
+  }
+}
+
+/* Print */
 @media print {
   .support-container {
     background: white !important;
@@ -214,9 +568,13 @@
     margin-top: 0 !important;
   }
 
-  .left-section h2,
-  .left-section p {
+  .left-section h2 {
+    -webkit-text-fill-color: black !important;
     color: black !important;
+  }
+
+  .left-section p {
+    color: #444 !important;
   }
 
   .right-section {
@@ -235,53 +593,8 @@
   .btn-danger {
     display: none !important;
   }
-}
 
-/* Accessibility and Motion Adjustments */
-@media (prefers-reduced-motion: reduce) {
-  .left-section img,
-  .btn-danger,
-  .form-control,
-  .form-select {
-    transition: none;
-  }
-
-  .support-box {
-    animation: none;
-  }
-
-  .btn-danger:hover:not(:disabled) {
-    transform: none;
-  }
-}
-
-/* Ensure touch device compatibility */
-@media (hover: none) and (pointer: coarse) {
-  .left-section img:hover,
-  .btn-danger:hover:not(:disabled) {
-    transform: none;
-    box-shadow: none;
-  }
-
-  .btn-danger:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-}
-
-/* Responsive Adjustments for Forms */
-@media (max-width: 480px) {
-  .form-control,
-  .form-select {
-    min-height: 44px; /* Minimum touch target size */
-  }
-
-  .btn-danger {
-    min-height: 44px; /* Minimum touch target size */
-  }
-
-  .form-check {
-    min-height: 44px; /* Minimum touch target size for checkboxes */
-    display: flex;
-    align-items: center;
+  .image-container {
+    box-shadow: none !important;
   }
 }
