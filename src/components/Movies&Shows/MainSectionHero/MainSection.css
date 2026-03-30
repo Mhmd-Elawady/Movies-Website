@@ -1,46 +1,59 @@
+/* =========================================
+   MAIN SECTION — RESPONSIVE BANNER STYLES
+   Clean, unified, no duplicates
+   ========================================= */
 
+/* ── Base Reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Main Section ── */
 .MainSection {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   background-color: #111;
-  padding: 2rem 0;
+  padding: 1rem 0;
   position: relative;
 }
 
-
+/* ── Banner Box ── */
 .banner-box {
   position: relative;
-  width: 100%;
+  width: 95%;
   max-width: 1250px;
   height: 650px;
   border-radius: 15px;
   margin: 110px auto 100px;
   overflow: hidden;
   box-shadow: 0 8px 30px rgba(229, 9, 20, 0.3);
-  transition: all 0.5s ease;
+  transition: box-shadow 0.5s ease;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
-
+/* ── Banner Image ── */
 .banner-box img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
+  display: block;
 }
 
 .banner-box:hover img {
   transform: scale(1.05);
 }
 
-
+/* ── Gradient Overlay ── */
 .banner-box .gradient-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.95) 0%,
@@ -51,7 +64,7 @@
   z-index: 1;
 }
 
-
+/* ── Content Block ── */
 .banner-box .content {
   position: absolute;
   bottom: 3rem;
@@ -65,18 +78,17 @@
 }
 
 .banner-box .content h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 900;
   margin-bottom: 1rem;
   text-transform: uppercase;
   letter-spacing: 3px;
   text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.8);
-  background-clip: text;
   line-height: 1.2;
 }
 
 .banner-box .content p {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #ddd;
   margin-bottom: 1.5rem;
   line-height: 1.7;
@@ -84,20 +96,22 @@
   font-weight: 300;
 }
 
+/* ── Button Container ── */
 .button-container {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
 }
 
-
+/* ── Play Button ── */
 .banner-box .btn-play {
   background: linear-gradient(135deg, #e50914, #b20710);
   color: #fff;
   font-weight: bold;
-  padding: 0.7rem 1rem;
+  padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -115,7 +129,11 @@
   box-shadow: 0 10px 30px rgba(229, 9, 20, 0.7);
 }
 
+.banner-box .btn-play:active {
+  transform: scale(0.97);
+}
 
+/* ── Plus Button ── */
 .banner-box .plus-btn {
   background: black;
   color: #fff;
@@ -130,7 +148,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
- 
+  flex-shrink: 0;
 }
 
 .banner-box .plus-btn:hover {
@@ -140,17 +158,20 @@
   box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
 }
 
+.banner-box .plus-btn:active {
+  transform: scale(0.95);
+}
 
+/* ── Navigation Arrows ── */
 .nav-arrow {
   position: absolute;
-  top: 100%;
-  transform: translateY(-150%);
+  bottom: 1.5rem;         /* ← ثابت جوه البانر من الأسفل */
   background: rgba(0, 0, 0, 0.6);
-  border: none;
+  border: 2px solid #1f1f1f;
   color: white;
-  width:45px;
+  width: 45px;
   height: 45px;
-  border-radius: 10%;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -160,12 +181,16 @@
   font-size: 1.5rem;
   font-weight: bold;
   backdrop-filter: blur(10px);
-  border: 2px solid #1f1f1f;
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .nav-arrow:hover {
   background: #e50914;
   border-color: rgba(255, 255, 255, 0.4);
+}
+
+.nav-arrow:active {
+  transform: scale(0.95);
 }
 
 .nav-arrow.prev {
@@ -176,7 +201,7 @@
   right: 2rem;
 }
 
-
+/* ── Progress Bar ── */
 .progress-bar {
   position: absolute;
   bottom: 0;
@@ -194,193 +219,8 @@
   transition: width 0.1s linear;
   border-radius: 0 5px 5px 0;
 }
-.MainSection {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #111;
-  padding: 1rem 0;
-  position: relative;
-}
 
-.banner-box {
-  position: relative;
-  width: 95%;
-  max-width: 1250px;
-  height: 500px;
-  border-radius: 12px;
-  margin: 80px auto 60px;
-  overflow: hidden;
-  box-shadow: 0 8px 30px rgba(229, 9, 20, 0.3);
-  transition: all 0.5s ease;
-  animation: fadeIn 0.8s ease-in-out;
-}
-
-.banner-box img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.banner-box:hover img {
-  transform: scale(1.05);
-}
-
-.banner-box .gradient-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.95) 0%,
-    rgba(0, 0, 0, 0.7) 30%,
-    rgba(0, 0, 0, 0.3) 60%,
-    transparent 100%
-  );
-  z-index: 1;
-}
-
-.banner-box .content {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #fff;
-  z-index: 2;
-  text-align: center;
-  max-width: 800px;
-  width: 90%;
-}
-
-.banner-box .content h2 {
-  font-size: 1.3rem;
-  font-weight: 900;
-  margin-bottom: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 3px 3px 15px rgba(0, 0, 0, 0.8);
-  line-height: 1.2;
-}
-
-.banner-box .content p {
-  font-size: 0.85rem;
-  color: #ddd;
-  margin-bottom: 1.25rem;
-  line-height: 1.6;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-  font-weight: 300;
-}
-
-.button-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.875rem;
-  margin-top: 0.875rem;
-}
-
-.banner-box .btn-play {
-  background: linear-gradient(135deg, #e50914, #b20710);
-  color: #fff;
-  font-weight: bold;
-  padding: 0.7rem 1.2rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
-  min-width: 140px;
-}
-
-.banner-box .btn-play:hover {
-  background: linear-gradient(135deg, #f40612, #e50914);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.7);
-}
-
-.banner-box .plus-btn {
-  background: black;
-  color: #fff;
-  font-weight: bold;
-  width: 42px;
-  height: 42px;
-  border: 2px solid #1f1f1f;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1.3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.banner-box .plus-btn:hover {
-  background: #e50914;
-  border-color: #e50914;
-  transform: translateY(-2px) scale(1.1);
-  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
-}
-
-.nav-arrow {
-  position: absolute;
-  top: 100%;
-  transform: translateY(-150%);
-  background: rgba(0, 0, 0, 0.6);
-  border: none;
-  color: white;
-  width: 42px;
-  height: 42px;
-  border-radius: 10%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 3;
-  font-size: 1.3rem;
-  font-weight: bold;
-  backdrop-filter: blur(10px);
-  border: 2px solid #1f1f1f;
-}
-
-.nav-arrow:hover {
-  background: #e50914;
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.nav-arrow.prev {
-  left: 1.5rem;
-}
-
-.nav-arrow.next {
-  right: 1.5rem;
-}
-
-.progress-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  z-index: 3;
-}
-
-.progress {
-  height: 100%;
-  background: linear-gradient(90deg, #e50914, #ff6b6b);
-  width: 0%;
-  transition: width 0.1s linear;
-  border-radius: 0 5px 5px 0;
-}
-
+/* ── Fade In Animation ── */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -392,69 +232,81 @@
   }
 }
 
-/* ========== MEDIA QUERIES ========== */
 
-/* Large Tablets and Small Laptops (1024px - 1200px) */
-@media (min-width: 1024px) {
+/* =========================================
+   MEDIA QUERIES
+   ========================================= */
+
+/* Ultra Wide (1920px+) */
+@media (min-width: 1920px) {
+  .banner-box {
+    max-width: 1500px;
+    height: 750px;
+    margin: 120px auto 100px;
+  }
+
+  .banner-box .content h2 {
+    font-size: 2rem;
+  }
+
+  .banner-box .content p {
+    font-size: 1.05rem;
+  }
+
+  .banner-box .btn-play {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-width: 170px;
+  }
+}
+
+/* Large Desktop (1200px - 1920px) — Default styles apply */
+
+/* Laptop & Large Tablet (1024px - 1200px) */
+@media (max-width: 1200px) {
   .banner-box {
     height: 600px;
     margin: 100px auto 80px;
   }
-  
-  .banner-box .content {
-    bottom: 3rem;
-  }
-  
-  .banner-box .content h2 {
-    font-size: 1.5rem;
-    letter-spacing: 3px;
-  }
-  
-  .banner-box .content p {
-    font-size: 0.9rem;
-  }
-  
-  .banner-box .btn-play {
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    min-width: 150px;
-  }
-  
-  .banner-box .plus-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 1.5rem;
-  }
-  
-  .nav-arrow {
-    width: 45px;
-    height: 45px;
-    font-size: 1.5rem;
-  }
 }
 
-/* Tablets (768px - 1024px) */
-@media (min-width: 768px) and (max-width: 1024px) {
+/* Tablet Landscape (768px - 1024px) */
+@media (max-width: 1024px) {
   .banner-box {
     height: 550px;
     margin: 90px auto 70px;
+    border-radius: 12px;
   }
-  
+
   .banner-box .content {
     bottom: 2.5rem;
   }
-  
+
   .banner-box .content h2 {
     font-size: 1.4rem;
+    letter-spacing: 2px;
   }
-  
+
   .banner-box .content p {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+  }
+
+  .banner-box .btn-play {
+    padding: 0.75rem 1.3rem;
+    font-size: 0.95rem;
+    min-width: 140px;
+  }
+
+  .banner-box .plus-btn,
+  .nav-arrow {
+    width: 42px;
+    height: 42px;
+    font-size: 1.3rem;
   }
 }
 
-/* Small Tablets and Large Phones (600px - 768px) */
-@media (min-width: 600px) and (max-width: 768px) {
+/* Tablet Portrait (600px - 768px) */
+@media (max-width: 768px) {
   .MainSection {
     padding: 0.5rem 0;
   }
@@ -462,41 +314,36 @@
   .banner-box {
     height: 500px;
     margin: 80px auto 60px;
+    border-radius: 10px;
+    width: 94%;
   }
 
   .banner-box .content {
     bottom: 2rem;
+    width: 92%;
   }
 
   .banner-box .content h2 {
     font-size: 1.3rem;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
   }
 
   .banner-box .content p {
-    font-size: 0.85rem;
-  }
-
-  .button-container {
-    gap: 0.8rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
   }
 
   .banner-box .btn-play {
-    padding: 0.75rem 1.3rem;
-    font-size: 0.95rem;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
     min-width: 130px;
   }
 
-  .banner-box .plus-btn {
-    width: 42px;
-    height: 42px;
-    font-size: 1.3rem;
-  }
-
+  .banner-box .plus-btn,
   .nav-arrow {
-    width: 42px;
-    height: 42px;
-    font-size: 1.3rem;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
   }
 
   .nav-arrow.prev {
@@ -508,54 +355,48 @@
   }
 }
 
-/* Mobile Phones (480px - 600px) */
-@media (min-width: 480px) and (max-width: 600px) {
+/* Large Phone (480px - 600px) */
+@media (max-width: 600px) {
   .banner-box {
     height: 450px;
     margin: 70px auto 50px;
     border-radius: 10px;
+    width: 93%;
   }
 
   .banner-box .content {
-    bottom: 1.5rem;
+    bottom: 1.75rem;
     width: 95%;
   }
 
   .banner-box .content h2 {
     font-size: 1.2rem;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
     margin-bottom: 0.75rem;
   }
 
   .banner-box .content p {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     line-height: 1.5;
     margin-bottom: 1rem;
   }
 
   .button-container {
     gap: 0.6rem;
-    flex-wrap: wrap;
   }
 
   .banner-box .btn-play {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.9rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.875rem;
     min-width: 120px;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
   }
 
-  .banner-box .plus-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
-  }
-
+  .banner-box .plus-btn,
   .nav-arrow {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
-    transform: translateY(-140%);
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
   }
 
   .nav-arrow.prev {
@@ -567,11 +408,11 @@
   }
 }
 
-/* Small Mobile Phones (320px - 480px) */
+/* Small Phone (max 480px) */
 @media (max-width: 480px) {
   .MainSection {
     min-height: 80vh;
-    padding: 0.5rem 0;
+    padding: 0.25rem 0;
   }
 
   .banner-box {
@@ -583,18 +424,18 @@
 
   .banner-box .content {
     bottom: 1.25rem;
-    width: 95%;
+    width: 96%;
   }
 
   .banner-box .content h2 {
     font-size: 1.1rem;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     margin-bottom: 0.5rem;
   }
 
   .banner-box .content p {
-    font-size: 0.75rem;
-    line-height: 1.4;
+    font-size: 0.78rem;
+    line-height: 1.45;
     margin-bottom: 0.875rem;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -605,26 +446,21 @@
   .button-container {
     gap: 0.5rem;
     flex-wrap: wrap;
+    justify-content: center;
   }
 
   .banner-box .btn-play {
     padding: 0.6rem 1rem;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     min-width: 110px;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
   }
 
-  .banner-box .plus-btn {
-    width: 38px;
-    height: 38px;
-    font-size: 1.1rem;
-  }
-
+  .banner-box .plus-btn,
   .nav-arrow {
-    width: 38px;
-    height: 38px;
-    font-size: 1.1rem;
-    transform: translateY(-130%);
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
   }
 
   .nav-arrow.prev {
@@ -635,12 +471,16 @@
     right: 0.5rem;
   }
 
+  .nav-arrow {
+    bottom: 1rem;
+  }
+
   .progress-bar {
     height: 3px;
   }
 }
 
-/* Extra Small Phones (under 320px) */
+/* Very Small Phone (max 320px) */
 @media (max-width: 320px) {
   .banner-box {
     height: 350px;
@@ -652,38 +492,63 @@
   }
 
   .banner-box .content p {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     -webkit-line-clamp: 2;
   }
 
   .banner-box .btn-play {
     padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     min-width: 100px;
   }
 
-  .banner-box .plus-btn {
-    width: 35px;
-    height: 35px;
-    font-size: 1rem;
-  }
-
+  .banner-box .plus-btn,
   .nav-arrow {
-    width: 35px;
-    height: 35px;
-    font-size: 1rem;
+    width: 33px;
+    height: 33px;
+    font-size: 0.95rem;
   }
 }
 
-/* Landscape Orientation for Mobile */
+/* Foldable / Ultra-Narrow (max 280px) */
+@media (max-width: 280px) {
+  .banner-box {
+    height: 300px;
+    margin: 40px auto 20px;
+  }
+
+  .banner-box .content h2 {
+    font-size: 0.9rem;
+  }
+
+  .banner-box .content p {
+    font-size: 0.67rem;
+  }
+
+  .banner-box .btn-play {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 90px;
+  }
+
+  .banner-box .plus-btn,
+  .nav-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Landscape Mobile */
 @media (max-height: 500px) and (orientation: landscape) {
   .MainSection {
-    min-height: 120vh;
+    min-height: auto;
+    padding: 0.5rem 0;
   }
 
   .banner-box {
-    height: 70vh;
-    margin: 60px auto 40px;
+    height: 75vh;
+    margin: 55px auto 35px;
   }
 
   .banner-box .content {
@@ -692,17 +557,97 @@
 
   .banner-box .content h2 {
     font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
   }
 
   .banner-box .content p {
-    font-size: 0.75rem;
-    margin-bottom: 1rem;
+    font-size: 0.76rem;
+    margin-bottom: 0.75rem;
     -webkit-line-clamp: 2;
   }
 
   .button-container {
     gap: 0.5rem;
+  }
+}
+
+
+/* =========================================
+   ACCESSIBILITY & SPECIAL MEDIA QUERIES
+   ========================================= */
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .banner-box,
+  .banner-box img,
+  .btn-play,
+  .plus-btn,
+  .nav-arrow {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .banner-box:hover img {
+    transform: none;
+  }
+
+  .btn-play:hover,
+  .plus-btn:hover,
+  .nav-arrow:hover {
+    transform: none;
+  }
+}
+
+/* High Contrast */
+@media (prefers-contrast: high) {
+  .banner-box .content h2 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 1);
+  }
+
+  .banner-box .content p {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 1);
+    color: #fff;
+  }
+
+  .btn-play,
+  .plus-btn {
+    border: 2px solid #fff;
+  }
+
+  .nav-arrow {
+    border: 2px solid #fff;
+  }
+}
+
+/* Touch Devices */
+@media (hover: none) and (pointer: coarse) {
+  .banner-box:hover img {
+    transform: none;
+  }
+
+  .btn-play:hover,
+  .plus-btn:hover {
+    transform: none;
+    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
+  }
+
+  .btn-play:active {
+    transform: scale(0.96);
+    background: linear-gradient(135deg, #f40612, #e50914);
+  }
+
+  .plus-btn:active {
+    transform: scale(0.95);
+    background: #e50914;
+    border-color: #e50914;
+  }
+
+  .nav-arrow:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .nav-arrow:active {
+    background: #e50914;
   }
 }
 
@@ -713,176 +658,37 @@
   }
 }
 
-/* Reduced Motion for Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .banner-box,
-  .banner-box img,
-  .btn-play,
-  .plus-btn,
-  .nav-arrow {
-    transition: none;
-    animation: none;
-  }
-  
-  .banner-box:hover img {
-    transform: none;
-  }
-  
-  .btn-play:hover,
-  .plus-btn:hover,
-  .nav-arrow:hover {
-    transform: none;
-  }
-}
-
-/* Touch Device Optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .banner-box:hover img {
-    transform: none;
-  }
-  
-  .btn-play:hover,
-  .plus-btn:hover {
-    transform: none;
-    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.5);
-  }
-  
-  .btn-play:active,
-  .plus-btn:active {
-    transform: scale(0.95);
-  }
-  
-  .nav-arrow:hover {
-    background: rgba(0, 0, 0, 0.6);
-  }
-  
-  .nav-arrow:active {
-    background: #e50914;
-  }
-}
-
-/* Print Styles */
+/* Print */
 @media print {
   .MainSection {
     background: white !important;
     min-height: auto;
   }
-  
+
   .banner-box {
     box-shadow: none;
     border: 2px solid #333;
+    height: auto;
+    min-height: 300px;
   }
-  
+
   .banner-box .gradient-overlay {
     display: none;
   }
-  
+
   .banner-box .content h2 {
     color: black;
     text-shadow: none;
   }
-  
+
   .banner-box .content p {
-    color: #666;
+    color: #444;
     text-shadow: none;
   }
-  
-  .button-container {
-    display: none;
-  }
-  
-  .nav-arrow {
-    display: none;
-  }
-  
+
+  .button-container,
+  .nav-arrow,
   .progress-bar {
     display: none;
-  }
-}
-
-/* Foldable Devices Support */
-@media (max-width: 280px) {
-  .banner-box {
-    height: 300px;
-    margin: 40px auto 20px;
-  }
-  
-  .banner-box .content h2 {
-    font-size: 0.9rem;
-  }
-  
-  .banner-box .content p {
-    font-size: 0.65rem;
-  }
-  
-  .banner-box .btn-play {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
-    min-width: 90px;
-  }
-  
-  .banner-box .plus-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 0.9rem;
-  }
-  
-  .nav-arrow {
-    width: 32px;
-    height: 32px;
-    font-size: 0.9rem;
-  }
-}
-
-/* Very Large Text Accessibility */
-@media (prefers-contrast: high) {
-  .banner-box .content h2 {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-  }
-  
-  .banner-box .content p {
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-  }
-  
-  .btn-play {
-    border: 2px solid #fff;
-  }
-  
-  .plus-btn {
-    border: 2px solid #fff;
-  }
-}
-
-/* Ultra Wide Screens (1920px and up) */
-@media (min-width: 1920px) {
-  .banner-box {
-    max-width: 1400px;
-    height: 700px;
-    margin: 120px auto 100px;
-  }
-  
-  .banner-box .content h2 {
-    font-size: 1.8rem;
-  }
-  
-  .banner-box .content p {
-    font-size: 1rem;
-  }
-  
-  .banner-box .btn-play {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-    min-width: 160px;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
