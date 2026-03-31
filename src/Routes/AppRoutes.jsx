@@ -8,7 +8,7 @@ import Subscription from "../pages/Subscription";
 import MovieDetail from "../components/Movies&Shows/MovieDetailHero/MovieDetail";
 import TVDetail from '../components/Movies&Shows/ShowsOpenHero/TVDetail';
 import Actor from "../components/Actor/Actor";
-import Watchlist from "../pages/Watchlist";
+import Watchlist from "../components/Watchlist/Watchlist";
 import Category from "../pages/Category";
 import { Route, Routes } from "react-router-dom";
 
