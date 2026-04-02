@@ -85,7 +85,6 @@ export default function Actor() {
             />
           </div>
 
-          {/* ✅ Fixed: was "actor-summar-a" (typo) → now matches CSS class */}
           <div className="actor-summary-a">
             <h1 className="actor-name-a">{person.name}</h1>
 

@@ -1,170 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ============================================
+   Design Tokens
+   ============================================ */
+:root {
+  --red:        #e50914;
+  --red-deep:   #b80710;
+  --red-glow:   rgba(229, 9, 20, 0.35);
+  --red-dim:    rgba(229, 9, 20, 0.1);
+
+  --void:       #080809;
+  --surface:    #111318;
+  --glass:      rgba(255, 255, 255, 0.04);
+  --rule:       rgba(255, 255, 255, 0.08);
+
+  --ink:        #f0ede8;
+  --ink-2:      #9ca3af;
+
+  --ease:       cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --t:          0.3s var(--ease);
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Outfit', sans-serif;
+}
+
+/* ============================================
+   Container
+   ============================================ */
 .banner-container {
-  background-color: #000000;
-  padding: 40px 20px;
-  text-align: center;
+  background-color: var(--void);
+  padding: 3rem 2rem;
+  font-family: var(--font-body);
   position: relative;
   overflow: hidden;
 }
 
+/* Subtle ambient grain */
+.banner-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+
+/* ============================================
+   Inner Card
+   ============================================ */
 .banner-content {
   background: url('../../../assets/BackgroundImages.png') no-repeat center center;
   background-size: cover;
-  padding: 70px;
-  border-radius: 10px;
-  color: white;
+  border-radius: 16px;
+  color: var(--ink);
   max-width: 1200px;
   margin: 0 auto;
+  padding: 5rem 4rem;
   position: relative;
   z-index: 1;
+  overflow: hidden;
+
+  /* Flex layout for vertical stacking */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 340px;
+  gap: 0;
+
+  /* Elegant border */
+  border: 1px solid var(--rule);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 40px 80px rgba(0, 0, 0, 0.6);
 }
+
+/* Cinematic dark gradient overlay */
 .banner-content::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: -1;
-}
-.heding {
-  font-size: 2em;
-  margin-bottom: 20px;
-  text-align: start;
-  font-weight: 700;
-  background: linear-gradient(135deg, #fff 0%, #e5e7eb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    rgba(8, 8, 9, 0.82) 0%,
+    rgba(8, 8, 9, 0.60) 55%,
+    rgba(8, 8, 9, 0.25) 100%
+  );
+  z-index: 0;
+  border-radius: inherit;
 }
 
-.par {
-  font-size: 1rem;
-  margin-bottom: 30px;
-  color: #d1d5db;
-  text-align: start;
-  line-height: 1.6;
-  max-width: 600px;
-}
-
-.start-trial-button {
-  background: linear-gradient(135deg, #e50914 0%, #b80710 100%);
-  color: white;
-  border: none;
-  padding: 15px 20px;
-  font-size: 1.1em;
-  border-radius: 8px;
-  cursor: pointer;
-  float: left;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
-  position: relative;
-  
-  overflow: hidden;
-}
-
-.start-trial-button::before {
+/* Red atmospheric glow — bottom-left corner */
+.banner-content::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+  bottom: -60px;
+  left: -60px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(229, 9, 20, 0.14) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.start-trial-button:hover {
-  background: linear-gradient(135deg, #f40612 0%, #d90410 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4);
-}
-
-.start-trial-button:hover::before {
-  left: 100%;
-}
-
-.start-trial-button:active {
-  transform: translateY(0);
-}
-
-.banner-container {
-  background-color: #000000;
-  padding: 2rem 1rem;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.banner-content {
-  background: url('../../../assets/BackgroundImages.png') no-repeat center center;
-  background-size: cover;
-  padding: 4rem 2rem;
-  border-radius: 12px;
-  color: white;
-  max-width: 1200px;
-  margin: 0 auto;
+/* All direct children sit above overlays */
+.banner-content > * {
   position: relative;
   z-index: 1;
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
+}
+
+/* ============================================
+   Eyebrow Label
+   ============================================ */
+.banner-eyebrow {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 1rem;
+
+  /* Subtle left rule */
+  padding-left: 28px;
+  position: relative;
+}
+
+.banner-eyebrow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 1px;
+  background: var(--red);
+}
+
+/* ============================================
+   Heading
+   ============================================ */
+.heding {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 600;
+  font-style: italic;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 1.25rem;
+  max-width: 560px;
+
+  /* Crisp white — no gradient clip to ensure visibility */
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   Paragraph
+   ============================================ */
+.par {
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--ink-2);
+  margin: 0 0 2.25rem;
+  max-width: 500px;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================
+   CTA Button
+   ============================================ */
+.start-trial-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  background: linear-gradient(135deg, var(--red) 0%, var(--red-deep) 100%);
+  color: #fff;
+  border: none;
+  padding: 0.9rem 2.25rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  box-shadow:
+    0 4px 20px var(--red-glow),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+
+  transition: transform var(--t), box-shadow var(--t), background var(--t);
+  min-width: 200px;
   justify-content: center;
 }
 
-.banner-content::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%);
-  z-index: -1;
-  border-radius: 12px;
-}
-
-.heding {
-  font-size: 2.5rem;
-  margin-bottom: 1.5rem;
-  text-align: start;
-  font-weight: 700;
-  background: linear-gradient(135deg, #fff 0%, #e5e7eb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
-  max-width: 600px;
-}
-
-.par {
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-  color: #d1d5db;
-  text-align: start;
-  line-height: 1.6;
-  max-width: 600px;
-}
-
-.start-trial-button {
-  background: linear-gradient(135deg, #e50914 0%, #b80710 100%);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  align-self: flex-start;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
-  position: relative;
-  overflow: hidden;
-  min-width: 180px;
-}
-
+/* Shine sweep on hover */
 .start-trial-button::before {
   content: '';
   position: absolute;
@@ -172,327 +209,257 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.22),
+    transparent
+  );
+  transition: left 0.55s var(--ease);
+}
+
+/* Arrow icon pseudo */
+.start-trial-button::after {
+  content: '→';
+  font-size: 1rem;
+  transition: transform var(--t);
+  display: inline-block;
 }
 
 .start-trial-button:hover {
-  background: linear-gradient(135deg, #f40612 0%, #d90410 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(229, 9, 20, 0.4);
+  background: linear-gradient(135deg, #f40612 0%, var(--red-deep) 100%);
+  transform: translateY(-3px);
+  box-shadow:
+    0 10px 32px var(--red-glow),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
 
 .start-trial-button:hover::before {
   left: 100%;
 }
 
+.start-trial-button:hover::after {
+  transform: translateX(4px);
+}
+
 .start-trial-button:active {
   transform: translateY(0);
+  box-shadow: 0 4px 16px var(--red-glow);
 }
 
-/* ========== MEDIA QUERIES ========== */
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 
-/* Large Tablets and Small Laptops (1024px - 1200px) */
-@media (max-width: 1200px) {
+/* ── Large Desktop 1440+ ── */
+@media (min-width: 1440px) {
   .banner-content {
-    padding: 3.5rem 2rem;
-    margin: 0 1rem;
-  }
-  
-  .heding {
-    font-size: 2.2rem;
+    padding: 6rem 5rem;
+    min-height: 400px;
   }
 }
 
-/* Tablets (768px - 1024px) */
-@media (max-width: 1024px) {
-  .banner-container {
-    padding: 1.5rem 1rem;
-  }
-  
+/* ── XL Screens 1920+ ── */
+@media (min-width: 1920px) {
+  .banner-container { padding: 3.5rem 2rem; }
   .banner-content {
-    padding: 3rem 1.5rem;
-    min-height: 250px;
+    max-width: 1400px;
+    padding: 7rem 6rem;
+    min-height: 460px;
   }
-  
+  .heding { font-size: 4rem; max-width: 680px; }
+  .par { font-size: 1.15rem; max-width: 580px; }
+  .start-trial-button { padding: 1rem 2.75rem; font-size: 0.95rem; min-width: 220px; }
+}
+
+/* ── Tablet Landscape 1024–1199 ── */
+@media (max-width: 1199px) {
+  .banner-content {
+    padding: 4rem 3rem;
+  }
+}
+
+/* ── Tablet Portrait 768–1023 ── */
+@media (max-width: 1023px) {
+  .banner-container { padding: 2rem 1.25rem; }
+  .banner-content {
+    padding: 3.5rem 2.5rem;
+    min-height: 280px;
+  }
+  .heding { max-width: 480px; }
+  .par    { max-width: 480px; }
+}
+
+/* ── Small Tablet / Large Phone 600–767 ── */
+@media (max-width: 767px) {
+  .banner-container { padding: 1.5rem 1rem; }
+
+  .banner-content {
+    padding: 3rem 2rem;
+    min-height: 240px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .banner-eyebrow { padding-left: 0; }
+  .banner-eyebrow::before { display: none; }
+
   .heding {
-    font-size: 2rem;
-    max-width: 500px;
+    font-size: clamp(1.75rem, 5vw, 2.4rem);
+    max-width: 100%;
+    text-align: center;
   }
-  
+
   .par {
-    font-size: 1rem;
-    max-width: 500px;
+    text-align: center;
+    max-width: 100%;
   }
-  
+
   .start-trial-button {
-    padding: 0.875rem 1.75rem;
-    font-size: 1rem;
+    width: 100%;
+    max-width: 280px;
   }
 }
 
-/* Small Tablets and Large Phones (600px - 768px) */
-@media (max-width: 768px) {
-  .banner-container {
-    padding: 1.5rem 0.75rem;
-  }
-  
+/* ── Mobile 480–599 ── */
+@media (max-width: 599px) {
+  .banner-container { padding: 1.25rem 0.75rem; }
+
   .banner-content {
     padding: 2.5rem 1.5rem;
-    text-align: center;
     min-height: 200px;
+    border-radius: 12px;
   }
-  
-  .heding {
-    font-size: 1.8rem;
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
+
   .par {
-    text-align: center;
-    font-size: 0.95rem;
-    margin-left: auto;
-    margin-right: auto;
+    font-size: 0.92rem;
+    margin-bottom: 1.75rem;
   }
-  
+
   .start-trial-button {
-    align-self: center;
-    margin: 0 auto;
-    width: 100%;
-    max-width: 250px;
+    padding: 0.8rem 1.75rem;
+    font-size: 0.85rem;
+    max-width: 260px;
   }
 }
 
-/* Mobile Phones (480px - 600px) */
-@media (max-width: 600px) {
-  .banner-container {
-    padding: 1rem 0.5rem;
-  }
-  
+/* ── Small Mobile 375–479 ── */
+@media (max-width: 479px) {
+  .banner-container { padding: 1rem 0.625rem; }
+
   .banner-content {
-    padding: 2rem 1rem;
+    padding: 2rem 1.25rem;
     min-height: 180px;
-    border-radius: 8px;
+    border-radius: 10px;
   }
-  
-  .heding {
-    font-size: 1.6rem;
-    margin-bottom: 1rem;
-  }
-  
-  .par {
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
-  }
-  
+
+  .par { font-size: 0.88rem; }
+
   .start-trial-button {
     padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
-    max-width: 220px;
+    font-size: 0.82rem;
+    max-width: 240px;
+    min-width: unset;
+    width: 100%;
   }
 }
 
-/* Small Mobile Phones (320px - 480px) */
-@media (max-width: 480px) {
-  .banner-container {
-    padding: 0.75rem 0.25rem;
-  }
-  
+/* ── Tiny Mobile < 375 ── */
+@media (max-width: 374px) {
+  .banner-container { padding: 0.75rem 0.5rem; }
+
   .banner-content {
-    padding: 1.5rem 0.75rem;
-    min-height: 160px;
-    border-radius: 6px;
+    padding: 1.75rem 1rem;
+    border-radius: 8px;
   }
-  
-  .heding {
-    font-size: 1.4rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .par {
-    font-size: 0.85rem;
-    margin-bottom: 1.25rem;
-  }
-  
+
+  .heding { font-size: 1.5rem; }
+  .par    { font-size: 0.82rem; }
+
   .start-trial-button {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.9rem;
-    max-width: 200px;
-    min-width: 160px;
-  }
-}
-
-/* Extra Small Phones (under 320px) */
-@media (max-width: 320px) {
-  .banner-container {
-    padding: 0.5rem 0.125rem;
-  }
-  
-  .banner-content {
-    padding: 1.25rem 0.5rem;
-    min-height: 140px;
-  }
-  
-  .heding {
-    font-size: 1.25rem;
-  }
-  
-  .par {
+    padding: 0.65rem 1.25rem;
     font-size: 0.8rem;
   }
-  
-  .start-trial-button {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    max-width: 180px;
-  }
 }
 
-/* Landscape Orientation for Mobile */
+/* ── Landscape Mobile ── */
 @media (max-height: 500px) and (orientation: landscape) {
   .banner-content {
-    padding: 1.5rem 2rem;
-    min-height: 120px;
+    padding: 1.75rem 2.5rem;
+    min-height: 130px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
   }
-  
+
+  .banner-eyebrow { display: none; }
+
   .heding {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 0;
+    max-width: 55%;
   }
-  
-  .par {
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
-  }
-  
+
+  .par { display: none; }
+
   .start-trial-button {
-    padding: 0.5rem 1.5rem;
-    font-size: 0.9rem;
+    margin-left: auto;
+    max-width: 200px;
   }
 }
 
-/* High DPI Screens (Retina) */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .banner-content {
-    background-size: cover;
-    image-rendering: -webkit-optimize-contrast;
+/* ── Touch Devices ── */
+@media (hover: none) and (pointer: coarse) {
+  .start-trial-button:hover {
+    transform: none;
+    box-shadow: 0 4px 20px var(--red-glow);
   }
-}
-
-/* Reduced Motion for Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .start-trial-button {
-    transition: none;
+  .start-trial-button:active {
+    transform: scale(0.97);
   }
-  
-  .start-trial-button::before {
+  .start-trial-button::after {
     display: none;
   }
-  
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .start-trial-button,
+  .start-trial-button::before,
+  .start-trial-button::after {
+    transition: none !important;
+    animation: none !important;
+  }
   .start-trial-button:hover {
     transform: none;
   }
 }
 
-/* Dark Mode Consistency */
-@media (prefers-color-scheme: dark) {
-  .banner-container {
-    background-color: #000000;
+/* ── High Contrast ── */
+@media (prefers-contrast: high) {
+  .banner-content {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  .start-trial-button {
+    outline: 2px solid #fff;
   }
 }
 
-/* Print Styles */
+/* ── Print ── */
 @media print {
-  .banner-container {
-    background: white !important;
-    padding: 1rem !important;
-  }
-  
+  .banner-container { background: white !important; }
   .banner-content {
     background: none !important;
     border: 2px solid #333 !important;
     color: black !important;
+    min-height: unset !important;
   }
-  
-  .banner-content::before {
-    display: none;
-  }
-  
-  .heding {
-    background: none !important;
-    -webkit-text-fill-color: black !important;
-    color: black !important;
-  }
-  
-  .par {
-    color: #333 !important;
-  }
-  
-  .start-trial-button {
-    background: #333 !important;
-    color: white !important;
-    box-shadow: none !important;
-  }
-}
-
-/* Touch Device Optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .start-trial-button:hover {
-    transform: none;
-    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
-  }
-  
-  .start-trial-button:active {
-    transform: scale(0.98);
-  }
-}
-
-/* Large Desktop Screens (1920px and up) */
-@media (min-width: 1920px) {
-  .banner-container {
-    padding: 3rem 2rem;
-  }
-  
-  .banner-content {
-    padding: 5rem 3rem;
-    max-width: 1400px;
-    min-height: 400px;
-  }
-  
-  .heding {
-    font-size: 3rem;
-    max-width: 700px;
-  }
-  
-  .par {
-    font-size: 1.2rem;
-    max-width: 700px;
-  }
-  
-  .start-trial-button {
-    padding: 1.25rem 2.5rem;
-    font-size: 1.2rem;
-    min-width: 200px;
-  }
-}
-
-/* Ultra Wide Screens (2560px and up) */
-@media (min-width: 2560px) {
-  .banner-content {
-    max-width: 1600px;
-    padding: 6rem 4rem;
-  }
-  
-  .heding {
-    font-size: 3.5rem;
-    max-width: 800px;
-  }
-  
-  .par {
-    font-size: 1.3rem;
-    max-width: 800px;
-  }
+  .banner-content::before,
+  .banner-content::after { display: none; }
+  .heding  { color: black !important; text-shadow: none; }
+  .par     { color: #333 !important; }
+  .start-trial-button { background: #333 !important; box-shadow: none !important; }
+  .start-trial-button::before,
+  .start-trial-button::after { display: none; }
 }
