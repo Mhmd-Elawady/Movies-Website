@@ -26,21 +26,20 @@ function getVisibleCards() {
   const w = window.innerWidth;
   if (w < 480)  return 1;
   if (w < 768)  return 2;
-  if (w < 1024) return 4;
+  if (w < 1024) return 3;
   return 4;
 }
 
 export default function CategorySlider() {
   const [moviesByCategory, setMoviesByCategory] = useState({});
-  const [loading, setLoading]         = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleCards, setVisibleCards] = useState(getVisibleCards);
+  const [loading, setLoading]                   = useState(true);
+  const [currentIndex, setCurrentIndex]         = useState(0);
+  const [visibleCards, setVisibleCards]         = useState(getVisibleCards);
 
-  const navigate    = useNavigate();
-  const sliderRef   = useRef(null);
+  const navigate        = useNavigate();
   const categoriesCache = useRef(new Map());
 
-
+  /* ── Responsive resize ── */
   useEffect(() => {
     const onResize = () => {
       const next = getVisibleCards();
@@ -50,11 +49,11 @@ export default function CategorySlider() {
         return Math.min(prev, max);
       });
     };
-
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  /* ── Fetch ── */
   const fetchMovies = useCallback(async (signal) => {
     try {
       setLoading(true);
@@ -75,7 +74,6 @@ export default function CategorySlider() {
         if (categoriesCache.current.has(cat.id)) {
           return { [cat.id]: categoriesCache.current.get(cat.id) };
         }
-
         try {
           const { data } = await apiClient.get(`/discover/movie`, {
             params: { with_genres: cat.id, sort_by: "popularity.desc", page: 1 },
@@ -90,18 +88,14 @@ export default function CategorySlider() {
             error?.name === "AbortError" ||
             error?.code === "ERR_CANCELED" ||
             error?.message === "canceled";
-          if (isCanceled) {
-            if (import.meta?.env?.DEV) console.debug(`Fetch for ${cat.name} canceled`);
-            categoriesCache.current.set(cat.id, []);
-            return { [cat.id]: [] };
-          }
+          if (isCanceled) return { [cat.id]: [] };
           console.error(`Error fetching ${cat.name}`, error);
           categoriesCache.current.set(cat.id, []);
           return { [cat.id]: [] };
         }
       });
 
-      const results  = await Promise.all(promises);
+      const results    = await Promise.all(promises);
       const moviesData = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
       setMoviesByCategory(moviesData);
     } catch (error) {
@@ -119,51 +113,59 @@ export default function CategorySlider() {
         err?.name === "AbortError" ||
         err?.code === "ERR_CANCELED" ||
         err?.message === "canceled";
-      if (isCanceled) {
-        if (import.meta?.env?.DEV) console.debug("Category fetch canceled");
-        return;
-      }
-      console.error("Category fetch error:", err);
+      if (!isCanceled) console.error("Category fetch error:", err);
     });
     return () => controller.abort();
   }, [fetchMovies]);
 
+  /* ── Navigation ── */
   const maxIndex = Math.max(0, categories.length - visibleCards);
+  const totalDots = Math.ceil(categories.length / visibleCards);
+  const activeDot = Math.round(currentIndex / visibleCards);
 
   const handleNext = () => setCurrentIndex((prev) => Math.min(prev + 1, maxIndex));
   const handlePrev = () => setCurrentIndex((prev) => Math.max(prev - 1, 0));
-  const goToSlide  = (index) => setCurrentIndex(Math.min(index * visibleCards, maxIndex));
+  const goToSlide  = (index) =>
+    setCurrentIndex(Math.min(index * visibleCards, maxIndex));
 
   const handleCategoryClick = (categoryName) =>
     navigate(`/category/${categoryName.toLowerCase()}`);
 
-  const visibleCategories = categories.slice(currentIndex, currentIndex + visibleCards);
-  const totalDots = Math.ceil(categories.length / visibleCards);
+  const visibleCategories = categories.slice(
+    currentIndex,
+    currentIndex + visibleCards
+  );
 
   return (
-    <section className="category-slider">
+    <section className="category-slider" aria-label="Browse by category">
+      {/* Header */}
       <div className="slider-header">
-        <h2>Explore our wide variety of categories</h2>
+        <h2>
+          Explore our wide variety of{" "}
+          <em>categories</em>
+        </h2>
         <p>
           Whether you're looking for a comedy to make you laugh, a drama to make
           you think, or a documentary to learn something new
         </p>
       </div>
 
+      {/* Slider */}
       <div className="slider-wrapper">
         <button
           className="slider-arrow slider-arrow-prev"
           onClick={handlePrev}
           disabled={currentIndex === 0}
-          aria-label="Previous"
+          aria-label="Previous categories"
         >
           ‹
         </button>
 
         <div
           className="slider-container"
-          ref={sliderRef}
           style={{ "--visible": visibleCards }}
+          aria-live="polite"
+          aria-atomic="true"
         >
           {visibleCategories.map((cat) => (
             <div
@@ -172,9 +174,11 @@ export default function CategorySlider() {
               onClick={() => handleCategoryClick(cat.name)}
               role="button"
               tabIndex={0}
+              aria-label={`Browse ${cat.name} movies`}
               onKeyDown={(e) => e.key === "Enter" && handleCategoryClick(cat.name)}
             >
-              <div className="images-grid">
+              {/* 2×2 poster grid */}
+              <div className="images-grid" aria-hidden="true">
                 {loading
                   ? Array(4).fill(0).map((_, i) => (
                       <div key={i} className="loading-cell" />
@@ -188,25 +192,35 @@ export default function CategorySlider() {
                           e.stopPropagation();
                           try {
                             const id = movie.id || movie.movie_id;
-                            const mediaType = movie.media_type || (movie.title ? "movie" : "tv");
-                            if (id) navigate(mediaType === "tv" ? `/tv/${id}` : `/movie/${id}`);
+                            const mediaType =
+                              movie.media_type ||
+                              (movie.title ? "movie" : "tv");
+                            if (id)
+                              navigate(
+                                mediaType === "tv"
+                                  ? `/tv/${id}`
+                                  : `/movie/${id}`
+                              );
                           } catch (err) {
                             console.debug("Navigation error", err);
                           }
                         }}
                         aria-label={movie.title || movie.name || "Open details"}
                         title={movie.title || movie.name || ""}
+                        tabIndex={-1}
                       >
                         <img
                           src={
                             movie?.poster_path
                               ? buildImageUrl(movie.poster_path, "w300")
-                              : "https://via.placeholder.com/300x450/1a1a1a/ffffff?text=No+Image"
+                              : "https://via.placeholder.com/300x450/111214/333?text=+"
                           }
-                          alt={movie.title || movie.name || "Poster"}
+                          alt={movie.title || movie.name || "Movie poster"}
                           loading="lazy"
+                          decoding="async"
                           onError={(e) => {
-                            const fb = "https://via.placeholder.com/300x450/1a1a1a/ffffff?text=No+Image";
+                            const fb =
+                              "https://via.placeholder.com/300x450/111214/333?text=+";
                             if (e.target.src !== fb) e.target.src = fb;
                           }}
                         />
@@ -214,9 +228,10 @@ export default function CategorySlider() {
                     ))}
               </div>
 
+              {/* Footer label */}
               <div className="category-footer">
                 <span>{cat.name}</span>
-                <span className="arrow">→</span>
+                <span className="arrow" aria-hidden="true">→</span>
               </div>
             </div>
           ))}
@@ -226,21 +241,22 @@ export default function CategorySlider() {
           className="slider-arrow slider-arrow-next"
           onClick={handleNext}
           disabled={currentIndex >= maxIndex}
-          aria-label="Next"
+          aria-label="Next categories"
         >
           ›
         </button>
       </div>
 
-      <div className="slider-dots">
+      {/* Dots */}
+      <div className="slider-dots" role="tablist" aria-label="Category pages">
         {Array.from({ length: totalDots }).map((_, index) => (
           <button
             key={index}
-            className={`slider-dot ${
-              Math.floor(currentIndex / visibleCards) === index ? "active" : ""
-            }`}
+            className={`slider-dot ${activeDot === index ? "active" : ""}`}
             onClick={() => goToSlide(index)}
-            aria-label={`Go to page ${index + 1}`}
+            role="tab"
+            aria-selected={activeDot === index}
+            aria-label={`Page ${index + 1} of ${totalDots}`}
           />
         ))}
       </div>
