@@ -1,188 +1,85 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { apiClient, IMAGE_BASE_URL, normalizeTV } from "../services/tmdb";
-import {
-  findTrailer,
-  parseNumericId,
-  createBoundedCache,
-} from "../utils/helpers";
+import { createBoundedCache } from "../utils/helpers";
+import useFetch, { fetchWithRetry } from "./UseFetch";
 
-// Bounded cache to prevent memory leaks
-const tvCache = createBoundedCache(50);
+const cache = createBoundedCache(50);
+
+/** Fetch and normalize all TV-show-related data from TMDB */
+async function fetchTVShow(id, signal) {
+  const get = (url) =>
+    fetchWithRetry(() => apiClient.get(url, { signal }));
+
+  const [
+    { data: show },
+    { data: credits },
+    { data: videos },
+    { data: similar },
+  ] = await Promise.all([
+    get(`/tv/${id}`),
+    get(`/tv/${id}/credits`),
+    get(`/tv/${id}/videos`),
+    get(`/tv/${id}/similar`),
+  ]);
+
+  if (!show?.id) throw new Error("Invalid TV show data received from API");
+
+  const trailers = (videos?.results ?? []).filter(
+    (v) => v?.type === "Trailer" && v?.site === "YouTube" && v?.key
+  );
+
+  return {
+    tvShow: normalizeTV(show),
+    cast: (credits?.cast ?? []).filter((a) => a?.id).slice(0, 12),
+    crew: (credits?.crew ?? []).filter((p) => p?.id).slice(0, 6),
+    similar: (similar?.results ?? [])
+      .filter((s) => s?.id)
+      .slice(0, 12)
+      .map(normalizeTV),
+    trailers,
+  };
+}
+
+// ─────────────────────────────────────────────
 
 const useTVShow = (id) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [trailers, setTrailers] = useState([]);
+  const { data, loading, error } = useFetch(id, fetchTVShow, cache);
 
-  useEffect(() => {
-    const numericId = parseNumericId(id);
-    if (!numericId) {
-      setLoading(false);
-      setError(null);
-      return;
-    }
+  const trailers = data?.trailers ?? [];
 
-    // Check cache first
-    if (tvCache.has(numericId)) {
-      const cached = tvCache.get(numericId);
-      setData(cached.data || null);
-      setTrailers(cached.trailers || []);
-      setLoading(false);
-      setError(null);
-      return;
-    }
+  const getTrailerUrl = useCallback(
+    () => (trailers[0]?.key ? `https://www.youtube.com/embed/${trailers[0].key}` : null),
+    [trailers]
+  );
 
-    const controller = new AbortController();
-    let isMounted = true;
+  const hasTrailer = useCallback(() => trailers.length > 0, [trailers.length]);
 
-    const fetchTVShowData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const getAllTrailers = useMemo(
+    () =>
+      trailers.map((t) => ({
+        id:   t.id,
+        key:  t.key,
+        name: t.name,
+        url:  `https://www.youtube.com/embed/${t.key}`,
+      })),
+    [trailers]
+  );
 
-        // Add retry mechanism for network failures
-        const fetchWithRetry = async (url, retries = 2) => {
-          for (let i = 0; i <= retries; i++) {
-            try {
-              const response = await apiClient.get(url, {
-                signal: controller.signal,
-              });
-              return response;
-            } catch (err) {
-              // If it's the last retry or not a network error, throw
-              if (
-                i === retries ||
-                (err.response && err.response.status < 500)
-              ) {
-                throw err;
-              }
-              // Wait before retrying (exponential backoff)
-              await new Promise((resolve) =>
-                setTimeout(resolve, 1000 * (i + 1))
-              );
-            }
-          }
-        };
-
-        const [
-          { data: tvShowData },
-          { data: creditsData },
-          { data: videosData },
-          { data: similarData },
-        ] = await Promise.all([
-          fetchWithRetry(`/tv/${numericId}`),
-          fetchWithRetry(`/tv/${numericId}/credits`),
-          fetchWithRetry(`/tv/${numericId}/videos`),
-          fetchWithRetry(`/tv/${numericId}/similar`),
-        ]);
-
-        if (!isMounted) return;
-
-        // Validate API responses
-        if (!tvShowData || !tvShowData.id) {
-          throw new Error("Invalid TV show data received from API");
-        }
-
-        // Extract trailer videos with validation
-        const trailerVideos = Array.isArray(videosData?.results)
-          ? videosData.results.filter(
-              (video) =>
-                video &&
-                video.type === "Trailer" &&
-                video.site === "YouTube" &&
-                video.key
-            )
-          : [];
-
-        // Validate and normalize data
-        const normalizedShow = normalizeTV(tvShowData || {});
-        const normalizedCast = Array.isArray(creditsData?.cast)
-          ? creditsData.cast.filter((actor) => actor && actor.id).slice(0, 12)
-          : [];
-        const normalizedCrew = Array.isArray(creditsData?.crew)
-          ? creditsData.crew.filter((person) => person && person.id).slice(0, 6)
-          : [];
-
-        const normalized = {
-          tvShow: normalizedShow,
-          cast: normalizedCast,
-          crew: normalizedCrew,
-        };
-
-        // Normalize similar shows (keep limited set)
-        const normalizedSimilar = Array.isArray(similarData?.results)
-          ? similarData.results
-              .filter((item) => item && item.id)
-              .slice(0, 12)
-              .map((item) => normalizeTV(item))
-          : [];
-
-        normalized.similar = normalizedSimilar;
-
-        setData(normalized);
-        setTrailers(trailerVideos);
-        tvCache.set(numericId, { data: normalized, trailers: trailerVideos });
-      } catch (err) {
-        if (err.name !== "AbortError" && isMounted) {
-          console.error("Error fetching TV show data:", err);
-          setError(err.message || "Failed to fetch TV show data");
-          setData(null);
-          setTrailers([]);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchTVShowData();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [id]);
-
-  // Memoized helper functions to prevent unnecessary re-renders
-  const getTrailerUrl = useCallback(() => {
-    if (trailers.length > 0 && trailers[0]?.key) {
-      return `https://www.youtube.com/embed/${trailers[0].key}`;
-    }
-    return null;
-  }, [trailers]);
-
-  const hasTrailer = useCallback(() => {
-    return trailers.length > 0;
-  }, [trailers.length]);
-
-  const getAllTrailers = useMemo(() => {
-    return trailers.map((trailer) => ({
-      id: trailer.id,
-      key: trailer.key,
-      name: trailer.name,
-      url: `https://www.youtube.com/embed/${trailer.key}`,
-    }));
-  }, [trailers]);
-
-  const getMainCast = useMemo(() => {
-    return data?.cast?.slice(0, 8) || [];
-  }, [data?.cast]);
+  const getMainCast = useMemo(() => data?.cast?.slice(0, 8) ?? [], [data?.cast]);
 
   const getShowInfo = useMemo(() => {
-    if (!data?.tvShow) return null;
-
+    const s = data?.tvShow;
+    if (!s) return null;
     return {
-      title: data.tvShow.name,
-      overview: data.tvShow.overview,
-      rating: data.tvShow.vote_average,
-      genres: data.tvShow.genres,
-      firstAirDate: data.tvShow.first_air_date,
-      lastAirDate: data.tvShow.last_air_date,
-      episodes: data.tvShow.number_of_episodes,
-      seasons: data.tvShow.number_of_seasons,
-      status: data.tvShow.status,
+      title:        s.name,
+      overview:     s.overview,
+      rating:       s.vote_average,
+      genres:       s.genres,
+      firstAirDate: s.first_air_date,
+      lastAirDate:  s.last_air_date,
+      episodes:     s.number_of_episodes,
+      seasons:      s.number_of_seasons,
+      status:       s.status,
     };
   }, [data?.tvShow]);
 
