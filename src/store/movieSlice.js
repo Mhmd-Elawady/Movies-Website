@@ -1,24 +1,23 @@
+/**
+ * movieSlice.js
+ * Stores banner data and the TMDB image base URL for global access.
+ */
+
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    bannerData : [],
-    imageURL : ""
-}
+  bannerData: [],
+  imageURL:   "",
+};
 
-export const movieSlice = createSlice({
-    name : 'movieo',
-    initialState,
-    reducers : {
-        setBannerData : (state,action)=>{
-            state.bannerData = action.payload
-        },
-        setImageURL : (state,action) =>{
-            state.imageURL = action.payload
-        }
-    }
-})
+const movieSlice = createSlice({
+  name: "movieo",
+  initialState,
+  reducers: {
+    setBannerData: (state, action) => { state.bannerData = action.payload; },
+    setImageURL:   (state, action) => { state.imageURL   = action.payload; },
+  },
+});
 
-export const { setBannerData, setImageURL } = movieSlice.actions
-
-
-export default movieSlice.reducer
+export const { setBannerData, setImageURL } = movieSlice.actions;
+export default movieSlice.reducer;
