@@ -1,301 +1,236 @@
-import { apiClient, normalizeMovie } from "../services/tmdb";
-
 /**
- * Search for a movie by name and return normalized movie data
- * @param {string} movieName - The name of the movie to search for
- * @returns {Promise<Object>} Normalized movie data using normalizeMovie function
+ * helpers.js
+ * Shared utility functions: formatting, caching, favorites, and media helpers.
  */
-export const getMovieData = async (movieName) => {
-  try {
-    if (!movieName || typeof movieName !== "string") {
-      throw new Error("Movie name must be a non-empty string");
-    }
 
-    // Search for the movie
-    const response = await apiClient.get("/search/movie", {
-      params: {
-        query: movieName,
-        page: 1,
-      },
-    });
+// ── Formatting ────────────────────────────────────────────────────────────────
 
-    if (!response.data || !response.data.results || response.data.results.length === 0) {
-      throw new Error(`Movie "${movieName}" not found`);
-    }
-
-    // Get the first result (best match) and normalize it
-    const rawMovie = response.data.results[0];
-    const normalizedMovie = normalizeMovie(rawMovie);
-
-    // Return normalized movie with search-specific metadata
-    return {
-      ...normalizedMovie,
-      searchMatch: true,
-    };
-  } catch (error) {
-    console.error("Error fetching movie data:", error);
-    throw error;
-  }
-};
-
-/**
- * Format runtime in minutes to "Xh Ym" format
- * @param {number} runtime - Runtime in minutes
- * @returns {string} Formatted duration string
- */
+/** "Xh Ym" from minutes, or "Unknown" if invalid. */
 export const formatDuration = (runtime) => {
   if (!runtime || runtime <= 0) return "Unknown";
-  const hours = Math.floor(runtime / 60);
-  const minutes = runtime % 60;
-  return hours > 0
-    ? `${hours}h ${minutes > 0 ? `${minutes}m` : ""}`.trim()
-    : `${minutes}m`;
+  const h = Math.floor(runtime / 60);
+  const m = runtime % 60;
+  return h > 0 ? `${h}h${m > 0 ? ` ${m}m` : ""}` : `${m}m`;
 };
 
-/**
- * Extract year from date string
- * @param {string} dateString - Date string (YYYY-MM-DD format)
- * @returns {number|null} Year or null if invalid
- */
+/** Year from "YYYY-MM-DD", or null if invalid. */
 export const getYearFromDate = (dateString) => {
   if (!dateString) return null;
-  try {
-    const year = new Date(dateString).getFullYear();
-    return isNaN(year) ? null : year;
-  } catch {
-    return null;
-  }
+  const year = new Date(dateString).getFullYear();
+  return isNaN(year) ? null : year;
 };
 
-/**
- * Format rating to 1 decimal place
- * @param {number} rating - Rating value
- * @returns {string} Formatted rating or 'N/A'
- */
+/** Rating to 1 decimal place, or "N/A". */
 export const formatRating = (rating) => {
-  // Return N/A only if rating is null, undefined, or NaN
-  if (rating == null || isNaN(rating)) return "N/A";
-  // Convert to number if it's a string
-  const numRating = typeof rating === 'string' ? parseFloat(rating) : rating;
-  // If still NaN after conversion, return N/A
-  if (isNaN(numRating)) return "N/A";
-  // Format to 1 decimal place
-  return numRating.toFixed(1);
+  const n = typeof rating === "string" ? parseFloat(rating) : rating;
+  return n == null || isNaN(n) ? "N/A" : n.toFixed(1);
 };
 
-/**
- * Build image URL with fallback
- * @param {string} path - Image path from API
- * @param {string} size - Image size (default: 'w500')
- * @param {string} fallback - Fallback placeholder URL
- * @returns {string} Complete image URL
- */
-export const buildImageUrl = (
-  path,
-  size = "w500",
-  fallback = "https://via.placeholder.com/500x750/1a1a1a/666666?text=No+Image"
-) => {
+// ── Image & video helpers ─────────────────────────────────────────────────────
+
+const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
+const PLACEHOLDER     = "https://via.placeholder.com/500x750/1a1a1a/666666?text=No+Image";
+
+/** Full TMDB image URL. Returns fallback (or null if no fallback given) when path is absent. */
+export const buildImageUrl = (path, size = "w500", fallback = PLACEHOLDER) => {
   if (!path) return fallback;
-  // Ensure path starts with / for proper URL construction
-  const imagePath = path.startsWith("/") ? path : `/${path}`;
-  // Build URL with correct size - TMDB image URLs format: https://image.tmdb.org/t/p/{size}{path}
-  const baseUrl = "https://image.tmdb.org/t/p";
-  return `${baseUrl}/${size}${imagePath}`;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${TMDB_IMAGE_BASE}/${size}${p}`;
 };
 
-/**
- * Build YouTube embed URL from video key
- * @param {string} key - YouTube video key
- * @param {boolean} autoplay - Whether to autoplay
- * @returns {string} YouTube embed URL
- */
+/** YouTube embed URL with optional autoplay. */
 export const buildYouTubeEmbedUrl = (key, autoplay = false) => {
   if (!key) return null;
   return `https://www.youtube.com/embed/${key}${autoplay ? "?autoplay=1" : ""}`;
 };
 
-/**
- * Find trailer video from videos array
- * @param {Array} videos - Array of video objects
- * @returns {Object|null} Trailer video or null
- */
+/** First YouTube Trailer, then Teaser, from a videos array. */
 export const findTrailer = (videos) => {
-  if (!Array.isArray(videos) || videos.length === 0) return null;
-
-  // First try to find a Trailer
-  const trailer = videos.find(
-    (video) => video.type === "Trailer" && video.site === "YouTube"
-  );
-
-  if (trailer) return trailer;
-
-  // Fallback to Teaser
+  if (!Array.isArray(videos) || !videos.length) return null;
+  const isYT   = (v) => v?.site === "YouTube";
   return (
-    videos.find(
-      (video) => video.type === "Teaser" && video.site === "YouTube"
-    ) || null
+    videos.find((v) => isYT(v) && v.type === "Trailer") ??
+    videos.find((v) => isYT(v) && v.type === "Teaser")  ??
+    null
   );
 };
 
-// Weekly TTL constant (7 days) in milliseconds
-export const WEEKLY_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 604800000 ms
+// ── ID helper ─────────────────────────────────────────────────────────────────
+
+/** Returns a positive integer ID, or null. */
+export const parseNumericId = (id) => {
+  const n = Number(id);
+  return Number.isInteger(n) && n > 0 ? n : null;
+};
+
+// ── Bounded cache ─────────────────────────────────────────────────────────────
+
+/** 7 days in ms — default TTL for API caches. */
+export const WEEKLY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 /**
- * Create a bounded cache with size limit and optional TTL (time-to-live)
- * @param {number} maxSize - Maximum cache size (default 50)
- * @param {number} ttlMs - Time-to-live in milliseconds (default: weekly = WEEKLY_TTL_MS)
- * @returns {Object} Bounded cache with TTL support
+ * LRU-style Map cache with optional TTL.
+ * Evicts the oldest entry when the size limit is reached.
  */
 export const createBoundedCache = (maxSize = 50, ttlMs = WEEKLY_TTL_MS) => {
-  const cache = new Map();
-  const timestamps = new Map();
+  const store      = new Map(); // key → value
+  const timestamps = new Map(); // key → set-time (ms)
 
-  const isExpired = (key) => {
-    if (!ttlMs) return false; // TTL disabled if ttlMs is 0 or falsy
-    const timestamp = timestamps.get(key);
-    if (!timestamp) return false;
-    return Date.now() - timestamp > ttlMs;
-  };
+  const expired = (key) =>
+    ttlMs ? Date.now() - (timestamps.get(key) ?? 0) > ttlMs : false;
 
-  const cleanExpired = () => {
-    const keysToDelete = [];
-    for (const key of cache.keys()) {
-      if (isExpired(key)) {
-        keysToDelete.push(key);
-      }
+  const evictExpired = () => {
+    for (const key of store.keys()) {
+      if (expired(key)) { store.delete(key); timestamps.delete(key); }
     }
-    keysToDelete.forEach(key => {
-      cache.delete(key);
-      timestamps.delete(key);
-    });
   };
+
+  const drop = (key) => { store.delete(key); timestamps.delete(key); };
 
   return {
-    get: (key) => {
-      cleanExpired();
-      if (isExpired(key)) {
-        cache.delete(key);
-        timestamps.delete(key);
-        return undefined;
-      }
-      return cache.get(key);
-    },
+    has: (key) => { evictExpired(); if (expired(key)) { drop(key); return false; } return store.has(key); },
+    get: (key) => { evictExpired(); if (expired(key)) { drop(key); return undefined; } return store.get(key); },
     set: (key, value) => {
-      cleanExpired();
-      if (cache.size >= maxSize && !cache.has(key)) {
-        // Remove oldest entry (first key)
-        const firstKey = cache.keys().next().value;
-        cache.delete(firstKey);
-        timestamps.delete(firstKey);
+      evictExpired();
+      if (store.size >= maxSize && !store.has(key)) {
+        drop(store.keys().next().value); // evict oldest
       }
-      cache.set(key, value);
+      store.set(key, value);
       timestamps.set(key, Date.now());
     },
-    has: (key) => {
-      cleanExpired();
-      if (isExpired(key)) {
-        cache.delete(key);
-        timestamps.delete(key);
-        return false;
-      }
-      return cache.has(key);
-    },
-    clear: () => {
-      cache.clear();
-      timestamps.clear();
-    },
-    size: () => cache.size,
-    invalidate: (key) => {
-      cache.delete(key);
-      timestamps.delete(key);
-    },
+    invalidate: drop,
+    clear: () => { store.clear(); timestamps.clear(); },
+    size: () => store.size,
   };
 };
 
-/**
- * Validate and parse numeric ID
- * @param {string|number} id - ID to validate
- * @returns {number|null} Valid numeric ID or null
- */
-export const parseNumericId = (id) => {
-  const numericId = Number(id);
-  if (!Number.isInteger(numericId) || numericId <= 0) {
-    return null;
-  }
-  return numericId;
-};
+// ── Favorites (localStorage) ──────────────────────────────────────────────────
 
-/* Favorites helpers - localStorage backed */
 const FAVORITES_KEY = "myapp.favorites.v1";
 
-const safeParse = (s) => {
+const readFavs = () => {
   try {
-    return JSON.parse(s);
-  } catch {
-    return null;
-  }
-};
-
-export const getFavorites = () => {
-  try {
-    const raw = localStorage.getItem(FAVORITES_KEY);
-    const parsed = safeParse(raw);
+    const parsed = JSON.parse(localStorage.getItem(FAVORITES_KEY));
     return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 };
 
-export const saveFavorites = (items) => {
-  try {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify(items || []));
-    return true;
-  } catch {
-    return false;
-  }
+const writeFavs = (items) => {
+  try { localStorage.setItem(FAVORITES_KEY, JSON.stringify(items)); return true; }
+  catch { return false; }
 };
+
+const matchFav = (f, id, media_type) =>
+  Number(f.id) === id && (f.media_type ?? "movie") === media_type;
+
+export const getFavorites = () => readFavs();
+
+export const saveFavorites = (items) => writeFavs(items ?? []);
 
 export const isFavorited = (id, media_type = "movie") => {
-  if (!id) return false;
-  const numeric = parseNumericId(id);
-  if (!numeric) return false;
-  const favs = getFavorites();
-  return favs.some(
-    (f) => Number(f.id) === numeric && (f.media_type || "movie") === media_type
-  );
+  const n = parseNumericId(id);
+  return n ? readFavs().some((f) => matchFav(f, n, media_type)) : false;
 };
 
 export const addFavorite = (item) => {
-  if (!item || !item.id) return false;
-  const media_type = item.media_type || "movie";
-  const numeric = parseNumericId(item.id);
-  if (!numeric) return false;
-  const favs = getFavorites();
-  const exists = favs.some(
-    (f) => Number(f.id) === numeric && (f.media_type || "movie") === media_type
-  );
-  if (exists) return true; // idempotent
-  const toSave = [
+  if (!item?.id) return false;
+  const media_type = item.media_type ?? "movie";
+  const n = parseNumericId(item.id);
+  if (!n) return false;
+
+  const favs = readFavs();
+  if (favs.some((f) => matchFav(f, n, media_type))) return true; // idempotent
+
+  return writeFavs([
     ...favs,
     {
-      id: numeric,
-      title: item.title || item.name || "",
-      poster_path: item.poster_path || item.posterPath || null,
-      vote_average: item.vote_average != null ? item.vote_average : null,
+      id:           n,
+      title:        item.title || item.name || "",
+      poster_path:  item.poster_path || item.posterPath || null,
+      vote_average: item.vote_average ?? null,
       release_date: item.release_date || item.first_air_date || null,
       media_type,
     },
-  ];
-  return saveFavorites(toSave);
+  ]);
 };
 
 export const removeFavorite = (id, media_type = "movie") => {
-  const numeric = parseNumericId(id);
-  if (!numeric) return false;
-  const favs = getFavorites();
-  const filtered = favs.filter(
-    (f) =>
-      !(Number(f.id) === numeric && (f.media_type || "movie") === media_type)
-  );
-  return saveFavorites(filtered);
+  const n = parseNumericId(id);
+  if (!n) return false;
+  return writeFavs(readFavs().filter((f) => !matchFav(f, n, media_type)));
+};
+
+// ── API response helpers ──────────────────────────────────────────────────────
+
+/** True if the response matches expectedType. */
+export const validateApiResponse = (response, expectedType = "object") => {
+  if (response == null) return false;
+  switch (expectedType) {
+    case "array":  return Array.isArray(response);
+    case "object": return typeof response === "object" && !Array.isArray(response);
+    case "string": return typeof response === "string";
+    case "number": return typeof response === "number" && !isNaN(response);
+    default:       return response != null;
+  }
+};
+
+/** Safely pull `results` (or another key) from an API response. */
+export const extractResults = (response, key = "results") => {
+  if (!response || typeof response !== "object") return [];
+  if (Array.isArray(response)) return response;
+  return Array.isArray(response[key]) ? response[key] : [];
+};
+
+/** True if item has id and title/name. */
+export const validateMediaItem = (item) =>
+  !!(item?.id && (item.title || item.name));
+
+/** Lightweight normalization for search / list contexts. */
+export const normalizeMediaItem = (item) => {
+  if (!validateMediaItem(item)) return null;
+  return {
+    id:           item.id,
+    title:        item.title || item.name,
+    overview:     item.overview || "",
+    poster_path:  item.poster_path   ?? null,
+    backdrop_path: item.backdrop_path ?? null,
+    vote_average: typeof item.vote_average === "number" ? item.vote_average : 0,
+    release_date: item.release_date || item.first_air_date || null,
+    media_type:   item.media_type || (item.title ? "movie" : "tv"),
+    adult:        item.adult || false,
+  };
+};
+
+/** Human-readable error message from an Axios-style error. */
+export const getErrorMessage = (error) => {
+  if (!error) return "An unexpected error occurred.";
+  if (error.message) return error.message;
+  const status = error.response?.status;
+  if (status === 429) return "Too many requests. Please try again later.";
+  if (status === 401) return "Authentication failed. Please check your API key.";
+  if (status === 404) return "Resource not found.";
+  if (status >= 500)  return "Server error. Please try again later.";
+  if (status)         return error.response.data?.status_message || `Error ${status}`;
+  if (error.request)  return "Network error. Please check your internet connection.";
+  if (error.code === "ECONNABORTED") return "Request timeout. Please try again.";
+  return "An unexpected error occurred.";
+};
+
+/** True if the error is worth retrying. */
+export const isRetryableError = (error) => {
+  if (!error) return false;
+  if (error.code === "ECONNABORTED") return true;
+  if (error.request && !error.response) return true;
+  const s = error.response?.status;
+  return s >= 500 || s === 429;
+};
+
+/** Retry delay in ms (exponential back-off, respects Retry-After for 429). */
+export const getRetryDelay = (error, attempt = 1) => {
+  if (error.response?.status === 429) {
+    const ra = error.response.headers?.["retry-after"];
+    if (ra) return parseInt(ra) * 1000;
+    return Math.min(1000 * 2 ** attempt, 30_000) + Math.random() * 1000;
+  }
+  return Math.min(1000 * 2 ** attempt, 10_000);
 };
