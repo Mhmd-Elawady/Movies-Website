@@ -1,34 +1,51 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import bgImage from '../../../assets/SubContainer.png';
-import './StreamVibe.css';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FaPlay, FaArrowRight, FaChevronDown, FaStar, FaFilm, FaTv } from "react-icons/fa";
+import bgImage from "../../../assets/SubContainer.png";
+import "./StreamVibe.css";
 
 export default function StreamVibe() {
   const navigate = useNavigate();
+
   return (
     <section className="hero" aria-label="StreamVibe Hero Section">
+      {/* Background image */}
       <div className="hero-image">
         <img
           src={bgImage}
-          alt="StreamVibe background showcasing a cinematic scene"
+          alt="StreamVibe cinematic background"
           className="hero-bg"
-          loading="lazy"
+          loading="eager"
+          fetchpriority="high"
         />
-        <div className="hero-gradient"></div>
+        <div className="hero-gradient" aria-hidden="true" />
       </div>
+
+      {/* Content */}
       <div className="hero-content-below">
-        <h1>The Best Streaming Experience</h1>
+        <h1>
+          The Best <span>Streaming</span> Experience
+        </h1>
+
         <p>
-          StreamVibe offers the ultimate streaming experience, delivering your favorite movies and shows on demand, anytime, anywhere. Enjoy blockbusters, classics, and exclusive series, with personalized watchlists to keep your content at your fingertips.
+          StreamVibe delivers your favorite movies and shows on demand — anytime,
+          anywhere. Enjoy blockbusters, classics, and exclusives with personalized
+          watchlists built just for you.
         </p>
+
+        
+
         <button
           className="cta-btn"
           aria-label="Start watching StreamVibe now"
-          onClick={() => navigate('/movies_shows')}
+          onClick={() => navigate("/movies_shows")}
         >
+          <FaPlay aria-hidden="true" />
           Start Watching Now
+          <FaArrowRight aria-hidden="true" />
         </button>
       </div>
+
     </section>
   );
 }
