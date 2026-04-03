@@ -1,37 +1,51 @@
 import React from "react";
-import { FaMobileAlt, FaTabletAlt, FaTv, FaLaptop, FaGamepad, FaVrCardboard } from "react-icons/fa";
+import {
+  FaMobileAlt,
+  FaTabletAlt,
+  FaTv,
+  FaLaptop,
+  FaGamepad,
+  FaVrCardboard,
+  FaArrowRight,
+} from "react-icons/fa";
 import "./DevicesSection.css";
 
 const devices = [
   {
     icon: <FaMobileAlt />,
     title: "Smartphones",
-    description: "StreamVibe is optimized for both Android and iOS smartphones. Download our app from the Google Play Store or the Apple App Store",
+    description:
+      "Enjoy StreamVibe on Android and iOS. Download our app from the Google Play Store or the Apple App Store and stream on the go.",
   },
   {
     icon: <FaTabletAlt />,
     title: "Tablet",
-    description: "StreamVibe is optimized for both Android and iOS tablets. Download our app from the Google Play Store or the Apple App Store",
+    description:
+      "A bigger screen, even better experience. StreamVibe is fully optimized for Android and iOS tablets — portrait or landscape.",
   },
   {
     icon: <FaTv />,
     title: "Smart TV",
-    description: "StreamVibe is optimized for both Android and iOS smart TVs. Download our app from the Google Play Store or the Apple App Store",
+    description:
+      "Turn your living room into a cinema. StreamVibe supports all major smart TV platforms with a remote-friendly interface.",
   },
   {
     icon: <FaLaptop />,
     title: "Laptops",
-    description: "StreamVibe is optimized for both Android and iOS laptops. Download our app from the Google Play Store or the Apple App Store",
+    description:
+      "Stream directly in your browser or download the desktop app for Windows and macOS for an uninterrupted experience.",
   },
   {
     icon: <FaGamepad />,
     title: "Gaming Consoles",
-    description: "StreamVibe is optimized for both Android and iOS gaming consoles. Download our app from the Google Play Store or the Apple App Store",
+    description:
+      "Available on PlayStation and Xbox. Switch from gaming to streaming without leaving the couch.",
   },
   {
     icon: <FaVrCardboard />,
     title: "VR Headsets",
-    description: "StreamVibe is optimized for both Android and iOS VR headsets. Download our app from the Google Play Store or the Apple App Store",
+    description:
+      "Step inside your favorite content. StreamVibe delivers an immersive VR viewing experience on leading headset platforms.",
   },
 ];
 
@@ -39,22 +53,34 @@ const DevicesSection = () => {
   return (
     <section className="devices-section">
       <div className="devices-header">
-        <h2>We Provide you streaming experience across various devices.</h2>
+     
+        <h2>We Provide you Streaming Experience Across Various Devices.</h2>
         <p>
-          With StreamVibe, you can enjoy your favorite movies and TV shows anytime, anywhere. Our platform is designed to be compatible with a wide range of
-          devices, ensuring that you never miss a moment of entertainment.
+          With StreamVibe, enjoy your favorite movies and TV shows anytime, anywhere.
+          Our platform is designed to be compatible with a wide range of devices,
+          ensuring you never miss a moment of entertainment.
         </p>
       </div>
+
       <div className="devices-container">
         {devices.map((device, index) => (
           <div key={index} className="device-card">
+            <span className="device-number">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+
             <div className="device-top">
-              <div className="icon-wrapper">
-                {device.icon}
-              </div>
+              <div className="icon-wrapper">{device.icon}</div>
               <h3>{device.title}</h3>
             </div>
+
+            <div className="device-divider" />
+
             <p className="device-description">{device.description}</p>
+
+            <a href="#" className="device-link">
+              Learn more <FaArrowRight />
+            </a>
           </div>
         ))}
       </div>

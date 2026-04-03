@@ -45,12 +45,12 @@ export default function MainSection() {
   // Optimized progress bar with proper cleanup
   useEffect(() => {
     if (!bannerData || bannerData.length === 0) return;
-    
+
     // Clear any existing interval
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
-    
+
     progressIntervalRef.current = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) {
@@ -76,7 +76,7 @@ export default function MainSection() {
   if (!bannerData || bannerData.length === 0) return null
 
   const data = bannerData[currentImage]
-  
+
   // Validate data before rendering
   if (!data || !data.id) return null
 
@@ -135,7 +135,7 @@ export default function MainSection() {
                 }
               }}
             >
-              {bannerAdded ? <span style={{color:'#fff', fontWeight:700}}>✓</span> : <HiPlusSm />}
+              {bannerAdded ? <span style={{ color: '#fff', fontWeight: 700 }}>✓</span> : <HiPlusSm />}
             </button>
           </div>
         </div>
