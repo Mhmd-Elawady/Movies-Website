@@ -1,37 +1,43 @@
+/* =============================================
+   MOVIES SECTION — StreamVibe
+   ============================================= */
+
 :root {
-  --primary-bg: #111;
-  --secondary-bg: #1a1a1a;
-  --tertiary-bg: #252525;
+  --primary-bg: #0d0d0d;
+  --secondary-bg: #161616;
+  --tertiary-bg: #222;
   --primary-color: #e50914;
   --primary-hover: #f40612;
-  --text-primary: #fff;
-  --text-secondary: #bbb;
-  --text-muted: #666;
-  --border-radius: 10px;
-  --transition: all 0.25s ease;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.7);
-  --rating-color: #ffd700;
   --time-color: #00b4d8;
   --year-color: #90e0ef;
+  --rating-color: #ffd700;
+  --text-primary: #fff;
+  --text-secondary: #aaa;
+  --text-muted: #555;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --radius: 10px;
+  --transition: 0.25s ease;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 10px 28px rgba(0, 0, 0, 0.7);
 }
 
-/* ========== BASE STYLES ========== */
-
+/* ── Section ── */
 .movies-section {
   background: var(--primary-bg);
   color: var(--text-primary);
-  padding: 2rem;
+  padding: 2.5rem 2rem;
   min-height: 100vh;
   box-sizing: border-box;
   width: 100%;
 }
 
+/* ── Section header ── */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -39,24 +45,37 @@
 .section-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--primary-color);
-  display: block;
+  color: var(--text-primary);
   position: relative;
   padding-left: 1rem;
-  margin-bottom: 0;
 }
 
+.section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 1.4rem;
+  background: var(--primary-color);
+  border-radius: 2px;
+}
 
-/* ========== TOGGLE ========== */
+.tv-shows-section .section-title::before {
+  background: var(--time-color);
+}
 
+/* ── Content toggle ── */
 .content-toggle {
   display: flex;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 50px;
   padding: 0.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  max-width: 280px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
+  width: 260px;
+  flex-shrink: 0;
 }
 
 .toggle-btn {
@@ -64,15 +83,16 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  padding: 0.65rem 1.25rem;
+  padding: 0.6rem 1rem;
   border-radius: 50px;
   cursor: pointer;
-  transition: var(--transition);
   font-weight: 600;
   font-size: 0.875rem;
   position: relative;
   z-index: 1;
+  transition: color var(--transition);
   white-space: nowrap;
+  text-align: center;
 }
 
 .toggle-btn.active {
@@ -87,41 +107,25 @@
   height: calc(100% - 0.5rem);
   background: var(--primary-color);
   border-radius: 50px;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.35);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 10px rgba(229, 9, 20, 0.4);
   z-index: 0;
-}
-
-.toggle-btn:nth-child(1).active ~ .toggle-indicator {
-  transform: translateX(0);
 }
 
 .toggle-btn:nth-child(2).active ~ .toggle-indicator {
   transform: translateX(100%);
 }
 
-/* ========== TV SHOWS VARIANT ========== */
-
-.tv-shows-section .section-title {
-  color: var(--time-color);
-}
-
-.tv-shows-section .section-title::before {
-  background: var(--time-color);
-}
-
 .tv-shows-section .toggle-indicator {
   background: var(--time-color);
-  box-shadow: 0 2px 8px rgba(0, 180, 216, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 180, 216, 0.4);
 }
 
-/* ========== NAVIGATION ========== */
-
+/* ── Navigation tabs ── */
 .movies-navigation {
   display: flex;
-  gap: 0;
   margin-bottom: 2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   position: relative;
   overflow-x: auto;
   scrollbar-width: none;
@@ -136,11 +140,10 @@
   border: none;
   color: var(--text-secondary);
   padding: 0.875rem 1.25rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
-  position: relative;
+  transition: color var(--transition), background var(--transition);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -172,39 +175,33 @@
   background: var(--time-color);
 }
 
-/* ========== ROW ========== */
-
+/* ── Row ── */
 .row-section {
   margin-bottom: 2.5rem;
-  position: relative;
   opacity: 0;
-  transform: translateY(16px);
-  animation: fadeInUp 0.5s ease forwards;
+  transform: translateY(14px);
+  animation: fadeInUp 0.45s ease forwards;
 }
 
 .row-section:nth-child(1) { animation-delay: 0.05s; }
 .row-section:nth-child(2) { animation-delay: 0.1s; }
 .row-section:nth-child(3) { animation-delay: 0.15s; }
 .row-section:nth-child(4) { animation-delay: 0.2s; }
-.row-section:nth-child(5) { animation-delay: 0.25s; }
 
 @keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .row-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
   padding: 0 0.25rem;
 }
 
 .row-header h3 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
   margin: 0;
   color: var(--text-primary);
@@ -216,31 +213,30 @@
 }
 
 .row-buttons button {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border);
   color: var(--text-primary);
   border-radius: 50%;
+  width: 2.6rem;
+  height: 2.6rem;
   cursor: pointer;
-  transition: var(--transition);
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
 }
 
 .row-buttons button:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: var(--border-hover);
   transform: translateY(-1px);
 }
 
 .row-buttons button:active {
-  transform: translateY(0) scale(0.96);
+  transform: scale(0.95);
 }
 
-/* ========== CARDS SCROLL ========== */
-
+/* ── Cards scroll container ── */
 .row-cards {
   display: flex;
   gap: 1rem;
@@ -255,33 +251,34 @@
   display: none;
 }
 
-/* ========== CARD ========== */
-
+/* ── Card ── */
 .card {
   background: var(--secondary-bg);
-  border-radius: var(--border-radius);
-  min-width: 175px;
-  max-width: 195px;
+  border-radius: var(--radius);
+  min-width: 170px;
+  max-width: 190px;
   flex: 0 0 auto;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   overflow: hidden;
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
   scroll-snap-align: start;
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.07);
   cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  transition: 0.3s all;
+
 }
 
 .card:hover {
-  transform: translateY(-6px) scale(1.02);
+  transform: translateY(-5px) scale(1.02);
   box-shadow: var(--shadow-hover);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
+/* ── Card image ── */
 .card-image-container {
   position: relative;
   width: 100%;
-  height: 255px;
+  aspect-ratio: 2 / 3;
   overflow: hidden;
 }
 
@@ -294,49 +291,39 @@
 }
 
 .card:hover img {
-  transform: scale(1.06);
-}
-
-/* Rating badge on image */
-.card-image-container::after {
-  content: none;
+  transform: scale(1.05);
 }
 
 .card-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    transparent 50%,
-    rgba(0, 0, 0, 0.85) 100%
-  );
+  background: linear-gradient(to bottom, transparent 55%, rgba(0,0,0,0.82) 100%);
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity var(--transition);
 }
 
 .card:hover .card-overlay {
   opacity: 1;
 }
 
-/* ========== WATCHLIST BUTTON ========== */
-
+/* ── Watchlist button ── */
 .add-to-watchlist {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
-  color: white;
+  width: 1.9rem;
+  height: 1.9rem;
+  color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition);
   z-index: 3;
   opacity: 0;
+  transition: opacity var(--transition), background var(--transition), transform var(--transition);
 }
 
 .card:hover .add-to-watchlist {
@@ -353,19 +340,18 @@
   background: var(--primary-color);
   border-color: var(--primary-color);
   opacity: 1;
-  animation: added-pulse 400ms ease;
+  animation: added-pulse 350ms ease;
 }
 
 @keyframes added-pulse {
-  0%   { transform: scale(0.9); }
-  50%  { transform: scale(1.1); }
+  0%   { transform: scale(0.85); }
+  55%  { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
 
-/* ========== CARD CONTENT ========== */
-
+/* ── Card content ── */
 .card-content {
-  padding: 0.75rem;
+  padding: 0.7rem;
 }
 
 .card-title {
@@ -378,23 +364,25 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   color: var(--text-primary);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.55rem;
 }
 
 .card-meta {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
-.meta-row {
+.meta-row,
+.compact-meta-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.775rem;
+  font-size: 0.75rem;
 }
 
-.rating {
+.rating,
+.rating-compact {
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -417,113 +405,78 @@
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
   border: 1px solid rgba(144, 224, 239, 0.15);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
 }
 
 .genre {
   color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 400;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 90px;
-}
-
-/* TV compact meta */
-.card-meta.compact {
-  gap: 0.3rem;
-}
-
-.compact-meta-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.75rem;
-}
-
-.rating-compact {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-  color: var(--rating-color);
-  font-weight: 600;
-}
-
-.episodes-info {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
   font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 85px;
 }
 
 .episodes-info .seasons {
   color: var(--time-color);
   font-weight: 600;
+  font-size: 0.7rem;
 }
 
-/* ========== LOADING SKELETON ========== */
-
+/* ── Loading skeleton ── */
 .card.loading {
-  min-width: 175px;
-  max-width: 195px;
-  height: 330px;
-  display: flex;
-  flex-direction: column;
   pointer-events: none;
-  border-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255,255,255,0.04);
 }
 
 .image-placeholder {
   width: 100%;
-  height: 255px;
-  background: linear-gradient(90deg, var(--tertiary-bg) 0%, #2e2e2e 50%, var(--tertiary-bg) 100%);
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(90deg, var(--tertiary-bg) 0%, #2a2a2a 50%, var(--tertiary-bg) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite;
 }
 
 .text-placeholder {
-  height: 13px;
-  background: linear-gradient(90deg, var(--tertiary-bg) 0%, #2e2e2e 50%, var(--tertiary-bg) 100%);
+  height: 12px;
+  background: linear-gradient(90deg, var(--tertiary-bg) 0%, #2a2a2a 50%, var(--tertiary-bg) 100%);
   background-size: 200% 100%;
-  margin: 0.5rem 0.75rem;
+  margin: 0.5rem 0.7rem;
   border-radius: 6px;
   animation: shimmer 1.6s infinite;
 }
 
-.text-placeholder:nth-child(2) { width: 70%; }
-.text-placeholder:nth-child(3) { width: 50%; }
+.text-placeholder:nth-child(2) { width: 68%; }
+.text-placeholder:nth-child(3) { width: 48%; }
 
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-/* ========== EMPTY / ERROR STATES ========== */
-
+/* ── States ── */
 .no-movies {
   text-align: center;
   padding: 2.5rem 2rem;
   color: var(--text-muted);
-  width: 100%;
-  font-style: italic;
   font-size: 0.9rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: var(--border-radius);
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+  font-style: italic;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius);
+  border: 1px dashed rgba(255,255,255,0.07);
+  width: 100%;
   box-sizing: border-box;
 }
 
 .error-message {
-  background: rgba(229, 9, 20, 0.15);
+  background: rgba(229,9,20,0.12);
   color: #ff6b6b;
   padding: 0.875rem 1.25rem;
-  border-radius: var(--border-radius);
+  border-radius: var(--radius);
   margin-bottom: 1.5rem;
   text-align: center;
-  font-weight: 500;
   font-size: 0.9rem;
-  border: 1px solid rgba(229, 9, 20, 0.3);
+  border: 1px solid rgba(229,9,20,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -533,398 +486,67 @@
 
 .retry-btn {
   background: var(--primary-color);
-  color: white;
+  color: #fff;
   border: none;
   padding: 0.4rem 1rem;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 600;
-  transition: var(--transition);
+  transition: background var(--transition);
 }
 
-.retry-btn:hover {
-  background: var(--primary-hover);
+.retry-btn:hover { background: var(--primary-hover); }
+
+.content-area.hidden { display: none; }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+
+/* Tablet landscape */
+@media (max-width: 1024px) {
+  .movies-section { padding: 2rem 1.5rem; }
 }
 
-/* ========== CONTENT AREA ========== */
-
-.content-area {
-  transition: opacity 0.25s ease;
-}
-
-.content-area.hidden {
-  display: none;
-}
-
-/* ========== MEDIA QUERIES ========== */
-
-/* Ultra Wide (1920px+) */
-@media (min-width: 1920px) {
-  .movies-section {
-    max-width: 1800px;
-    margin: 0 auto;
-    padding: 3rem 4rem;
-  }
-
-  .card {
-    min-width: 220px;
-    max-width: 240px;
-  }
-
-  .card-image-container {
-    height: 310px;
-  }
-
-  .card.loading {
-    min-width: 220px;
-    height: 380px;
-  }
-
-  .image-placeholder {
-    height: 310px;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-}
-
-/* Large Desktop (1440px - 1919px) */
-@media (min-width: 1440px) and (max-width: 1919px) {
-  .movies-section {
-    padding: 2.5rem 3.5rem;
-    max-width: 1600px;
-    margin: 0 auto;
-  }
-
-  .card {
-    min-width: 200px;
-    max-width: 220px;
-  }
-
-  .card-image-container {
-    height: 285px;
-  }
-
-  .card.loading {
-    min-width: 200px;
-    height: 355px;
-  }
-
-  .image-placeholder {
-    height: 285px;
-  }
-
-  .section-title {
-    font-size: 1.875rem;
-  }
-}
-
-/* Standard Desktop (1200px - 1439px) */
-@media (min-width: 1200px) and (max-width: 1439px) {
-  .movies-section {
-    padding: 2rem 2.5rem;
-  }
-
-  .card {
-    min-width: 185px;
-    max-width: 205px;
-  }
-
-  .card-image-container {
-    height: 265px;
-  }
-
-  .card.loading {
-    min-width: 185px;
-    height: 335px;
-  }
-
-  .image-placeholder {
-    height: 265px;
-  }
-}
-
-/* Small Desktop (1024px - 1199px) */
-@media (min-width: 1024px) and (max-width: 1199px) {
-  .movies-section {
-    padding: 1.75rem 2rem;
-  }
-
-  .card {
-    min-width: 170px;
-    max-width: 190px;
-  }
-
-  .card-image-container {
-    height: 245px;
-  }
-
-  .card.loading {
-    min-width: 170px;
-    height: 315px;
-  }
-
-  .image-placeholder {
-    height: 245px;
-  }
-}
-
-/* Tablet Landscape (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .movies-section {
-    padding: 1.5rem;
-  }
-
-  .section-title {
-    font-size: 1.5rem;
-  }
-
-  .content-toggle {
-    max-width: 260px;
-  }
-
-  .toggle-btn {
-    padding: 0.6rem 1.1rem;
-    font-size: 0.82rem;
-  }
-
-  .nav-tab {
-    padding: 0.8rem 1.1rem;
-    font-size: 0.9rem;
-  }
-
-  .row-header h3 {
-    font-size: 1.15rem;
-  }
-
-  .row-buttons button {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-
-  .card {
-    min-width: 155px;
-    max-width: 172px;
-  }
-
-  .card-image-container {
-    height: 220px;
-  }
-
-  .card.loading {
-    min-width: 155px;
-    height: 290px;
-  }
-
-  .image-placeholder {
-    height: 220px;
-  }
-
-  .card-title {
-    font-size: 0.85rem;
-  }
-}
-
-/* Tablet Portrait (600px - 767px) */
-@media (min-width: 600px) and (max-width: 767px) {
-  .movies-section {
-    padding: 1.25rem;
-  }
-
-  .section-title {
-    font-size: 1.4rem;
-  }
+/* Tablet portrait */
+@media (max-width: 768px) {
+  .movies-section { padding: 1.75rem 1.25rem; }
 
   .section-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
+  .section-title { font-size: 1.5rem; }
+
   .content-toggle {
-    max-width: 250px;
+    width: 240px;
     align-self: flex-end;
   }
 
-  .toggle-btn {
-    padding: 0.55rem 1rem;
-    font-size: 0.8rem;
-  }
+  .toggle-btn { font-size: 0.82rem; padding: 0.55rem 0.9rem; }
 
-  .nav-tab {
-    padding: 0.75rem 0.95rem;
-    font-size: 0.875rem;
-  }
+  .nav-tab { padding: 0.8rem 1rem; font-size: 0.875rem; }
 
-  .row-header h3 {
-    font-size: 1.1rem;
-  }
+  .row-header h3 { font-size: 1.1rem; }
 
-  .row-buttons button {
-    width: 2.4rem;
-    height: 2.4rem;
-  }
+  .row-buttons button { width: 2.4rem; height: 2.4rem; }
 
-  .card {
-    min-width: 145px;
-    max-width: 160px;
-  }
-
-  .card-image-container {
-    height: 205px;
-  }
-
-  .card.loading {
-    min-width: 145px;
-    height: 275px;
-  }
-
-  .image-placeholder {
-    height: 205px;
-  }
-
-  .row-cards {
-    gap: 0.875rem;
-  }
-
-  .card-content {
-    padding: 0.65rem;
-  }
-
-  .card-title {
-    font-size: 0.84rem;
-    min-height: 2.35rem;
-  }
+  .card { min-width: 145px; max-width: 165px; }
 }
 
-/* Large Mobile (480px - 599px) */
-@media (min-width: 480px) and (max-width: 599px) {
-  .movies-section {
-    padding: 1rem;
-  }
+/* Mobile */
+@media (max-width: 600px) {
+  .movies-section { padding: 1.5rem 1rem; }
 
-  .section-title {
-    font-size: 1.3rem;
-    padding-left: 0.8rem;
-  }
+  .section-title { font-size: 1.3rem; }
 
-  .section-title::before {
-    width: 3px;
-    height: 1.2rem;
-  }
+  .content-toggle { width: 220px; }
 
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  .toggle-btn { font-size: 0.78rem; padding: 0.5rem 0.75rem; }
 
-  .content-toggle {
-    max-width: 235px;
-    align-self: flex-end;
-  }
-
-  .toggle-btn {
-    padding: 0.5rem 0.9rem;
-    font-size: 0.78rem;
-  }
-
-  .nav-tab {
-    padding: 0.7rem 0.85rem;
-    font-size: 0.84rem;
-  }
-
-  .row-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.6rem;
-  }
-
-  .row-buttons {
-    align-self: flex-end;
-  }
-
-  .row-header h3 {
-    font-size: 1.05rem;
-  }
-
-  .row-buttons button {
-    width: 2.25rem;
-    height: 2.25rem;
-  }
-
-  .card {
-    min-width: 132px;
-    max-width: 148px;
-  }
-
-  .card-image-container {
-    height: 190px;
-  }
-
-  .card.loading {
-    min-width: 132px;
-    height: 258px;
-  }
-
-  .image-placeholder {
-    height: 190px;
-  }
-
-  .row-cards {
-    gap: 0.75rem;
-    padding: 0.4rem 0.2rem 0.75rem;
-  }
-
-  .card-content {
-    padding: 0.6rem;
-  }
-
-  .card-title {
-    font-size: 0.82rem;
-    min-height: 2.3rem;
-  }
-
-  .meta-row {
-    font-size: 0.72rem;
-  }
-}
-
-/* Medium Mobile (375px - 479px) */
-@media (min-width: 375px) and (max-width: 479px) {
-  .movies-section {
-    padding: 0.875rem 0.75rem;
-  }
-
-  .section-title {
-    font-size: 1.2rem;
-    padding-left: 0.7rem;
-  }
-
-  .section-title::before {
-    width: 3px;
-    height: 1.1rem;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .content-toggle {
-    max-width: 215px;
-    align-self: flex-end;
-  }
-
-  .toggle-btn {
-    padding: 0.45rem 0.85rem;
-    font-size: 0.76rem;
-  }
-
-  .nav-tab {
-    padding: 0.65rem 0.75rem;
-    font-size: 0.82rem;
-  }
+  .nav-tab { padding: 0.7rem 0.8rem; font-size: 0.82rem; }
 
   .row-header {
     flex-direction: column;
@@ -932,292 +554,68 @@
     gap: 0.5rem;
   }
 
-  .row-buttons {
-    align-self: flex-end;
-  }
+  .row-buttons { align-self: flex-end; }
 
-  .row-header h3 {
-    font-size: 1rem;
-  }
+  .row-header h3 { font-size: 1rem; }
 
-  .row-buttons button {
-    width: 2.1rem;
-    height: 2.1rem;
-  }
+  .row-buttons button { width: 2.2rem; height: 2.2rem; }
 
-  .card {
-    min-width: 125px;
-    max-width: 140px;
-  }
+  .card { min-width: 128px; max-width: 148px; }
 
-  .card-image-container {
-    height: 178px;
-  }
+  .card-content { padding: 0.6rem; }
 
-  .card.loading {
-    min-width: 125px;
-    height: 246px;
-  }
+  .card-title { font-size: 0.82rem; }
 
-  .image-placeholder {
-    height: 178px;
-  }
-
-  .row-cards {
-    gap: 0.65rem;
-    padding: 0.35rem 0.15rem 0.7rem;
-  }
-
-  .card-content {
-    padding: 0.55rem;
-  }
-
-  .card-title {
-    font-size: 0.8rem;
-    min-height: 2.2rem;
-    margin-bottom: 0.45rem;
-  }
-
-  .meta-row {
-    font-size: 0.7rem;
-  }
-
-  .year {
-    font-size: 0.68rem;
-    padding: 0.1rem 0.35rem;
-  }
-
-  .add-to-watchlist {
-    width: 1.75rem;
-    height: 1.75rem;
-  }
+  /* Always show watchlist btn on touch */
+  .add-to-watchlist { opacity: 1; }
 }
 
-/* Small Mobile (320px - 374px) */
-@media (min-width: 320px) and (max-width: 374px) {
-  .movies-section {
-    padding: 0.75rem 0.5rem;
-  }
+/* Small phones */
+@media (max-width: 420px) {
+  .movies-section { padding: 1.25rem 0.75rem; }
 
-  .section-title {
-    font-size: 1.1rem;
-    padding-left: 0.65rem;
-  }
+  .section-title { font-size: 1.15rem; }
 
-  .section-title::before {
-    width: 3px;
-    height: 1rem;
-  }
+  .content-toggle { width: 200px; }
 
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  .card { min-width: 118px; max-width: 135px; }
 
-  .content-toggle {
-    max-width: 196px;
-    align-self: flex-end;
-  }
+  .card-content { padding: 0.55rem; }
 
-  .toggle-btn {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.73rem;
-  }
+  .card-title { font-size: 0.78rem; }
 
-  .nav-tab {
-    padding: 0.6rem 0.65rem;
-    font-size: 0.78rem;
-  }
+  .meta-row, .compact-meta-row { font-size: 0.68rem; }
 
-  .movies-navigation {
-    margin-bottom: 1.5rem;
-  }
+  .year { font-size: 0.65rem; }
 
-  .row-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .row-buttons {
-    align-self: flex-end;
-  }
-
-  .row-header h3 {
-    font-size: 0.95rem;
-  }
-
-  .row-buttons button {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .card {
-    min-width: 115px;
-    max-width: 128px;
-  }
-
-  .card-image-container {
-    height: 162px;
-  }
-
-  .card.loading {
-    min-width: 115px;
-    height: 230px;
-  }
-
-  .image-placeholder {
-    height: 162px;
-  }
-
-  .row-cards {
-    gap: 0.6rem;
-    padding: 0.3rem 0.1rem 0.6rem;
-  }
-
-  .card-content {
-    padding: 0.5rem;
-  }
-
-  .card-title {
-    font-size: 0.78rem;
-    min-height: 2.1rem;
-    margin-bottom: 0.4rem;
-  }
-
-  .meta-row {
-    font-size: 0.68rem;
-  }
-
-  .year {
-    font-size: 0.65rem;
-    padding: 0.1rem 0.3rem;
-  }
-
-  .add-to-watchlist {
-    width: 1.65rem;
-    height: 1.65rem;
-  }
+  .add-to-watchlist { width: 1.7rem; height: 1.7rem; }
 }
 
-/* Foldable / Ultra Small (max 319px) */
-@media (max-width: 319px) {
-  .movies-section {
-    padding: 0.6rem 0.4rem;
-  }
-
-  .section-title {
-    font-size: 1rem;
-  }
-
-  .content-toggle {
-    max-width: 175px;
-  }
-
-  .toggle-btn {
-    padding: 0.35rem 0.65rem;
-    font-size: 0.7rem;
-  }
-
-  .nav-tab {
-    padding: 0.55rem 0.6rem;
-    font-size: 0.75rem;
-  }
-
-  .card {
-    min-width: 105px;
-    max-width: 118px;
-  }
-
-  .card-image-container {
-    height: 148px;
-  }
-
-  .card.loading {
-    min-width: 105px;
-    height: 215px;
-  }
-
-  .image-placeholder {
-    height: 148px;
-  }
-
-  .row-cards {
-    gap: 0.5rem;
-  }
-
-  .card-content {
-    padding: 0.45rem;
-  }
-
-  .card-title {
-    font-size: 0.75rem;
-  }
-
-  .meta-row {
-    font-size: 0.65rem;
-  }
-}
-
-/* Landscape Mobile */
+/* Landscape mobile */
 @media (max-height: 500px) and (orientation: landscape) {
-  .movies-section {
-    padding: 0.875rem;
-  }
+  .movies-section { padding: 1rem; }
 
-  .section-header {
-    margin-bottom: 1rem;
-    flex-direction: row;
-    align-items: center;
-  }
+  .section-header { flex-direction: row; margin-bottom: 1rem; }
 
-  .movies-navigation {
-    margin-bottom: 1rem;
-  }
+  .movies-navigation { margin-bottom: 1rem; }
 
-  .row-section {
-    margin-bottom: 1.75rem;
-  }
+  .row-section { margin-bottom: 1.5rem; }
 
-  .card {
-    min-width: 130px;
-    max-width: 145px;
-  }
-
-  .card-image-container {
-    height: 180px;
-  }
-
-  .card.loading {
-    min-width: 130px;
-    height: 248px;
-  }
-
-  .image-placeholder {
-    height: 180px;
-  }
+  .card { min-width: 120px; max-width: 138px; }
 
   .card-title {
-    font-size: 0.8rem;
     -webkit-line-clamp: 1;
     min-height: auto;
+    font-size: 0.8rem;
   }
 }
 
-/* High DPI */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .card img {
-    image-rendering: -webkit-optimize-contrast;
-  }
-}
-
-/* Reduced Motion */
+/* ── Accessibility ── */
 @media (prefers-reduced-motion: reduce) {
   .row-section,
   .card,
   .card img,
   .add-to-watchlist,
-  .row-buttons button,
   .active-indicator,
   .toggle-indicator,
   .image-placeholder,
@@ -1226,92 +624,34 @@
     transition: none !important;
   }
 
-  .card:hover {
-    transform: none;
-  }
-
-  .card:hover img {
-    transform: none;
-  }
+  .card:hover { transform: none; }
+  .card:hover img { transform: none; }
+  .row-section { opacity: 1; transform: none; }
 }
 
-/* Touch Devices */
 @media (hover: none) and (pointer: coarse) {
-  .card:hover {
-    transform: none;
-  }
-
-  .card:hover img {
-    transform: none;
-  }
-
-  .add-to-watchlist {
-    opacity: 1;
-  }
-
-  .card-overlay {
-    opacity: 0.5;
-  }
-
-  .row-buttons button:hover {
-    transform: none;
-  }
-
-  .row-buttons button:active {
-    transform: scale(0.94);
-    background: rgba(255, 255, 255, 0.18);
-  }
-
-  .nav-tab:hover {
-    background: transparent;
-  }
-
-  .nav-tab:active {
-    background: rgba(255, 255, 255, 0.06);
-  }
+  .card:hover { transform: none; box-shadow: var(--shadow); }
+  .card:hover img { transform: none; }
+  .card:active { transform: scale(0.98); }
+  .card-overlay { opacity: 0.4; }
+  .row-buttons button:hover { transform: none; }
+  .nav-tab:hover { background: transparent; }
 }
 
-/* High Contrast */
 @media (prefers-contrast: high) {
-  .card {
-    border: 2px solid rgba(255, 255, 255, 0.4);
-  }
-
-  .active-indicator {
-    height: 3px;
-  }
-
-  .nav-tab.active {
-    text-decoration: underline;
-  }
+  .card { border: 2px solid rgba(255,255,255,0.35); }
+  .active-indicator { height: 3px; }
+  .nav-tab.active { text-decoration: underline; }
 }
 
-/* Print */
 @media print {
-  .movies-section {
-    background: white !important;
-    color: black !important;
-    padding: 1rem !important;
-  }
-
-  .section-title {
-    color: black !important;
-  }
-
+  .movies-section { background: #fff !important; color: #000 !important; }
+  .section-title { color: #000 !important; }
+  .section-title::before { background: #000 !important; }
   .content-toggle,
   .row-buttons,
   .add-to-watchlist,
-  .movies-navigation {
-    display: none !important;
-  }
-
-  .card {
-    background: #f5f5f5 !important;
-    border: 1px solid #ccc !important;
-    break-inside: avoid;
-  }
-
-  .card-title {
-    color: black !important;
-  }
+  .movies-navigation { display: none !important; }
+  .card { background: #f5f5f5 !important; border: 1px solid #ccc !important; break-inside: avoid; }
+  .card-title { color: #000 !important; }
 }
