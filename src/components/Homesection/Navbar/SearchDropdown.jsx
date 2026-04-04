@@ -1,4 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { IoIosSearch, IoIosClose } from "react-icons/io";
 import {
@@ -10,34 +15,95 @@ import {
 import { parseNumericId } from "../../../utils/helpers";
 import "./SearchDropdown.css";
 
-export default function SearchDropdown() {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [showResults, setShowResults] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+// ── Constants ──────────────────────────────────────────────────────────────────
+const DEBOUNCE_MS     = 300;
+const MAX_RESULTS     = 8;
+const MIN_QUERY_LEN   = 1;
+const PLACEHOLDER_IMG = "https://via.placeholder.com/40x60/1a1a1a/555?text=N%2FA";
 
-  const navigate = useNavigate();
-  const containerRef = useRef(null);
-  const inputRef = useRef(null);
-  const abortRef = useRef(null);
-  const debounceRef = useRef(null);
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function normalizeItem(raw) {
+  const media = raw.media_type || (raw.title ? "movie" : "tv");
+  const base  = media === "movie" ? normalizeMovie(raw) : normalizeTV(raw);
+  return { ...base, media_type: media };
+}
+
+function getPosterSrc(item) {
+  return item.posterUrl || buildImageUrl(item.poster_path, "w92") || PLACEHOLDER_IMG;
+}
+
+function getYear(item) {
+  const date = item.release_date || item.first_air_date || "";
+  return date.slice(0, 4) || null;
+}
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+function ResultItem({ item, isActive, onSelect, onHover }) {
+  const year    = getYear(item);
+  const isTV    = item.media_type === "tv";
+  const title   = item.title || item.name || "Untitled";
+
+  return (
+    <div
+      className={`result-item ${isActive ? "active" : ""}`}
+      onClick={() => onSelect(item)}
+      onMouseEnter={onHover}
+      role="option"
+      aria-selected={isActive}
+      tabIndex={-1}
+    >
+      <img
+        src={getPosterSrc(item)}
+        alt=""
+        aria-hidden="true"
+        className="poster"
+        loading="lazy"
+        onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMG; }}
+      />
+      <div className="item-info">
+        <div className="item-title" title={title}>{title}</div>
+        <div className="item-meta">
+          {year && <span className="year">{year}</span>}
+          <span className={`badge-type ${isTV ? "badge-tv" : "badge-movie"}`}>
+            {isTV ? "TV" : "Movie"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Component ─────────────────────────────────────────────────────────────
+export default function SearchDropdown() {
+  const [query,       setQuery]       = useState("");
+  const [results,     setResults]     = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState(null);
   const [activeIndex, setActiveIndex] = useState(-1);
 
-  // إغلاق عند النقر خارج المكون
+  const navigate      = useNavigate();
+  const containerRef  = useRef(null);
+  const inputRef      = useRef(null);
+  const abortRef      = useRef(null);
+  const debounceRef   = useRef(null);
+
+  // ── Close on outside click ─────────────────────────────────────────────────
   useEffect(() => {
-    function handleDocClick(e) {
+    function onDocClick(e) {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setShowResults(false);
       }
     }
-    document.addEventListener("click", handleDocClick);
-    return () => document.removeEventListener("click", handleDocClick);
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  // بحث عند تغيير الاستعلام
+  // ── Search Effect ──────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!query || query.trim().length === 0) {
+    const trimmed = query.trim();
+
+    if (trimmed.length < MIN_QUERY_LEN) {
       setResults([]);
       setShowResults(false);
       setLoading(false);
@@ -45,13 +111,11 @@ export default function SearchDropdown() {
       return;
     }
 
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+    // Debounce
+    clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      if (abortRef.current) {
-        if (typeof abortRef.current.abort === "function")
-          abortRef.current.abort();
-      }
-
+      // Abort previous request
+      abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
 
@@ -60,166 +124,168 @@ export default function SearchDropdown() {
 
       try {
         const { data } = await apiClient.get("/search/multi", {
-          params: { query: query.trim(), page: 1 },
+          params: { query: trimmed, page: 1, include_adult: false },
           signal: controller.signal,
         });
 
-        const items = Array.isArray(data.results) ? data.results : [];
+        const items = Array.isArray(data?.results) ? data.results : [];
+        // Filter out person results
+        const normalized = items
+          .filter((r) => r.media_type !== "person")
+          .map(normalizeItem)
+          .slice(0, MAX_RESULTS);
 
-        const normalized = items.map((raw) => {
-          const media =
-            raw.media_type || (raw.title ? "movie" : raw.name ? "tv" : "movie");
-          if (media === "movie") {
-            const m = normalizeMovie(raw || {});
-            return { ...m, media_type: media };
-          }
-          const t = normalizeTV(raw || {});
-          return { ...t, media_type: media };
-        });
-
-        setResults(normalized.slice(0, 8));
-        setShowResults(true);
+        setResults(normalized);
+        setShowResults(normalized.length > 0);
         setActiveIndex(-1);
       } catch (err) {
-        if (
-          err?.name === "CanceledError" ||
-          err?.code === "ERR_CANCELED" ||
-          err?.name === "AbortError"
-        ) {
-          // ignore
-        } else {
-          console.error("Search error", err);
-          setError("Search failed");
-        }
+        // Ignore abort errors
+        if (err?.name === "AbortError" || err?.code === "ERR_CANCELED") return;
+        console.error("[SearchDropdown] Search error:", err);
+        setError("Search failed. Please try again.");
+        setResults([]);
       } finally {
         setLoading(false);
       }
-    }, 300);
+    }, DEBOUNCE_MS);
 
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+    return () => clearTimeout(debounceRef.current);
   }, [query]);
 
-  const handleSelect = useCallback(
-    (item) => {
-      if (!item) return;
-      const id = parseNumericId(item.id);
-      if (!id) return;
-      const route = item.media_type === "tv" ? `/tv/${id}` : `/movie/${id}`;
-      setShowResults(false);
-      setQuery("");
-      setResults([]);
-      navigate(route);
-    },
-    [navigate]
-  );
+  // ── Navigate to item ───────────────────────────────────────────────────────
+  const handleSelect = useCallback((item) => {
+    if (!item) return;
+    const id = parseNumericId(item.id);
+    if (!id) return;
+    const route = item.media_type === "tv" ? `/tv/${id}` : `/movie/${id}`;
+    setShowResults(false);
+    setQuery("");
+    setResults([]);
+    setActiveIndex(-1);
+    navigate(route);
+  }, [navigate]);
 
-  // التنقل باستخدام لوحة المفاتيح
-  const handleKeyDown = useCallback(
-    (e) => {
-      if (!showResults) return;
-      if (e.key === "ArrowDown") {
+  // ── Keyboard navigation ────────────────────────────────────────────────────
+  const handleKeyDown = useCallback((e) => {
+    if (!showResults) return;
+
+    switch (e.key) {
+      case "ArrowDown":
         e.preventDefault();
         setActiveIndex((i) => Math.min(i + 1, results.length - 1));
-      } else if (e.key === "ArrowUp") {
+        break;
+      case "ArrowUp":
         e.preventDefault();
         setActiveIndex((i) => Math.max(i - 1, 0));
-      } else if (e.key === "Enter") {
-        if (activeIndex >= 0 && results[activeIndex]) {
+        break;
+      case "Enter":
+        if (activeIndex >= 0) {
           e.preventDefault();
           handleSelect(results[activeIndex]);
         }
-      } else if (e.key === "Escape") {
+        break;
+      case "Escape":
         setShowResults(false);
-      }
-    },
-    [showResults, results, activeIndex, handleSelect]
-  );
-
-  const clearSearch = () => {
-    setQuery("");
-    setShowResults(false);
-    setResults([]);
-    if (inputRef.current) {
-      inputRef.current.focus();
+        setActiveIndex(-1);
+        inputRef.current?.blur();
+        break;
+      default:
+        break;
     }
-  };
+  }, [showResults, results, activeIndex, handleSelect]);
 
+  // ── Clear ──────────────────────────────────────────────────────────────────
+  const clearSearch = useCallback(() => {
+    setQuery("");
+    setResults([]);
+    setShowResults(false);
+    setActiveIndex(-1);
+    setError(null);
+    inputRef.current?.focus();
+  }, []);
+
+  // ── Computed ───────────────────────────────────────────────────────────────
+  const dropdownId  = "search-listbox";
+  const hasContent  = showResults && (loading || error || results.length > 0 || query.trim().length >= MIN_QUERY_LEN);
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div ref={containerRef} className="search-container">
-      <div className="search-bar">
-        <IoIosSearch className="search-icon" size={18} />
+    <div
+      ref={containerRef}
+      className={`search-container ${showResults ? "open" : ""}`}
+      role="combobox"
+      aria-haspopup="listbox"
+      aria-expanded={showResults}
+      aria-owns={dropdownId}
+    >
+      {/* Search Bar */}
+      <div className={`search-bar ${loading ? "is-loading" : ""}`}>
+        <IoIosSearch className="search-icon" aria-hidden="true" />
         <input
           ref={inputRef}
-          type="text"
-          placeholder="Search movies & TV..."
+          id="search-input"
+          type="search"
+          autoComplete="off"
+          spellCheck="false"
+          placeholder="Search movies & TV…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (results.length > 0) setShowResults(true);
-          }}
+          onFocus={() => results.length > 0 && setShowResults(true)}
           className="search-input"
+          aria-label="Search movies and TV shows"
+          aria-autocomplete="list"
+          aria-controls={dropdownId}
+          aria-activedescendant={activeIndex >= 0 ? `result-${activeIndex}` : undefined}
         />
         {query && (
-          <button className="clear-btn" onClick={clearSearch}>
-            <IoIosClose size={20} />
+          <button
+            className="clear-btn"
+            onClick={clearSearch}
+            aria-label="Clear search"
+            type="button"
+          >
+            <IoIosClose aria-hidden="true" />
           </button>
         )}
       </div>
 
-      {/* نتائج البحث */}
+      {/* Dropdown */}
       {showResults && (
-        <div className="search-results">
+        <div
+          id={dropdownId}
+          className="search-results"
+          role="listbox"
+          aria-label="Search results"
+        >
           {loading && (
-            <div className="search-loading">Searching...</div>
-          )}
-          
-          {!loading && error && (
-            <div className="search-error">{error}</div>
-          )}
-          
-          {!loading && !error && results.length === 0 && (
-            <div className="no-results">
-              No results for "{query}"
+            <div className="state-message" role="status" aria-live="polite">
+              <span className="spinner" aria-hidden="true" />
+              Searching…
             </div>
           )}
 
-          {!loading &&
-            !error &&
-            results.map((item, idx) => (
-              <div
-                key={`${item.media_type}-${item.id}`}
-                className={`result-item ${activeIndex === idx ? "active" : ""}`}
-                onClick={() => handleSelect(item)}
-                onMouseEnter={() => setActiveIndex(idx)}
-              >
-                <img
-                  src={item.posterUrl || buildImageUrl(item.poster_path, "w92")}
-                  alt={item.title || item.name || "Poster"}
-                  className="poster"
-                  onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/40x60/1a1a1a/666666?text=No+Image";
-                  }}
-                />
-                <div className="item-info">
-                  <div className="title">
-                    {item.title || item.name || "Untitled"}
-                  </div>
-                  <div className="meta">
-                    <span className="year">
-                      {item.release_date || item.first_air_date
-                        ? (item.release_date || item.first_air_date).slice(0, 4)
-                        : "Unknown"}
-                    </span>
-                    <span className="type">
-                      {item.media_type === "tv" ? "TV" : "Movie"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          {!loading && error && (
+            <div className="state-message state-error" role="alert">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && results.length === 0 && query.trim().length >= MIN_QUERY_LEN && (
+            <div className="state-message state-empty" role="status">
+              No results for &ldquo;{query}&rdquo;
+            </div>
+          )}
+
+          {!loading && !error && results.map((item, idx) => (
+            <ResultItem
+              key={`${item.media_type}-${item.id}`}
+              item={item}
+              isActive={activeIndex === idx}
+              onSelect={handleSelect}
+              onHover={() => setActiveIndex(idx)}
+            />
+          ))}
         </div>
       )}
     </div>

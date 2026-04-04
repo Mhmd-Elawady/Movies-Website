@@ -38,11 +38,11 @@ export default function SupportPage() {
 
   const validateForm = useCallback(() => {
     const newErrors = {};
-    
+
     Object.keys(VALIDATION_RULES).forEach((field) => {
       const rule = VALIDATION_RULES[field];
       const value = formData[field];
-      
+
       if (rule.required) {
         if (typeof value === "boolean") {
           if (!value) newErrors[field] = rule.message;
@@ -50,14 +50,14 @@ export default function SupportPage() {
           newErrors[field] = rule.message;
         }
       }
-      
+
       if (rule.pattern && value?.trim()) {
         if (!rule.pattern.test(value)) {
           newErrors[field] = rule.message;
         }
       }
     });
-    
+
     return newErrors;
   }, [formData]);
 
@@ -68,7 +68,7 @@ export default function SupportPage() {
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: newValue,
@@ -87,14 +87,14 @@ export default function SupportPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const newErrors = validateForm();
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setIsSubmitting(false);
-      
-   
+
+
       const firstErrorField = Object.keys(newErrors)[0];
       const errorElement = document.getElementById(firstErrorField);
       if (errorElement) {
@@ -106,12 +106,12 @@ export default function SupportPage() {
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       alert(
         `Message Sent!\nThank you, ${formData.firstName}. We'll get back to you soon.`
       );
-      
-  
+
+
       setFormData(INITIAL_FORM_DATA);
       setErrors({});
     } catch (error) {
@@ -121,11 +121,11 @@ export default function SupportPage() {
     }
   };
 
-  
+
   const handleBlur = useCallback((e) => {
     const { name } = e.target;
     const newErrors = validateForm();
-    
+
     if (newErrors[name]) {
       setErrors(prev => ({ ...prev, [name]: newErrors[name] }));
     }
@@ -133,10 +133,10 @@ export default function SupportPage() {
 
   return (
     <div className="support-container d-flex justify-content-center align-items-center">
-      <div className="container support-box row text-light gx-3 gx-md-4 gx-lg-5">
-       
-        <section 
-          className="col-md-6 left-section mb-4 mb-md-0"
+        <div className="container support-box row text-light gx-5">
+
+        <section
+          className="col-md-6 left-section mb-4 mb-md-0 "
           aria-labelledby="welcome-heading"
         >
           <h2 id="welcome-heading" className="fw-bold mb-3">
@@ -156,16 +156,16 @@ export default function SupportPage() {
           </div>
         </section>
 
-        <section 
+        <section
           className="col-md-6 right-section bg-dark p-4 rounded"
           aria-labelledby="support-form-heading"
         >
           <h3 id="support-form-heading" className="visually-hidden">
             Support Request Form
           </h3>
-          
+
           <form onSubmit={handleSubmit} noValidate>
-         
+
             <div className="row">
               <div className="col-md-6 mb-3">
                 <label htmlFor="firstName" className="form-label">
@@ -189,7 +189,7 @@ export default function SupportPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="col-md-6 mb-3">
                 <label htmlFor="lastName" className="form-label">
                   Last Name *
@@ -237,13 +237,13 @@ export default function SupportPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="col-md-6 mb-3">
                 <label htmlFor="phone" className="form-label">
                   Phone Number *
                 </label>
                 <div className="d-flex align-items-start">
-                  
+
                   <div className="flex-grow-1">
                     <input
                       type="tel"
@@ -326,7 +326,7 @@ export default function SupportPage() {
                 "Send Message"
               )}
             </button>
-            
+
             <div id="submit-help" className="form-text text-muted mt-2 text-center">
               * Required fields
             </div>

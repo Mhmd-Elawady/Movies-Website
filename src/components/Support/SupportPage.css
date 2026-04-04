@@ -15,10 +15,9 @@
   max-width: 1200px;
   margin: 0 auto;
   animation: fadeIn 0.6s ease-out;
-
-
+  column-gap: 5rem;
+ 
 }
-
 /* ── Left Section ── */
 
 .left-section h2 {
@@ -28,6 +27,15 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+.row {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  display: flex;
+  
+  margin-top: calc(-1 * var(--bs-gutter-y));
+  margin-right: calc(-.5 * var(--bs-gutter-x));
+  margin-left: calc(-.5 * var(--bs-gutter-x));
 }
 
 .left-section p {

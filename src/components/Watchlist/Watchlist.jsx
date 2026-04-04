@@ -122,9 +122,8 @@ export default function Watchlist() {
                 : (it.posterUrl || "https://via.placeholder.com/200x300?text=No+Image");
               const rating     = it.vote_average != null ? Number(it.vote_average).toFixed(1) : null;
               const title      = it.title || it.name || "Untitled";
-              const year       = it.release_date || it.first_air_date
-                ? (it.release_date || it.first_air_date).slice(0, 4)
-                : null;
+              const dateVal = it.release_date || it.first_air_date;
+              const year = dateVal ? String(dateVal).slice(0, 4) : null;
 
               return (
                 <div className="watchlist-card" key={`${it.media_type}-${it.id}`}>
