@@ -10,24 +10,32 @@ import TVDetail from '../components/Movies&Shows/ShowsOpenHero/TVDetail';
 import Actor from "../components/Actor/Actor";
 import Watchlist from "../components/Watchlist/Watchlist";
 import Category from "../pages/Category";
+import Register from "../pages/Register";
+import Login from "../pages/Login";
+import ProtectedRoute from "../components/Auth/ProtectedRoute";
 import { Route, Routes } from "react-router-dom";
 
 export default function AppRoutes() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/movies_shows" element={<Movies_Shows />} />
-        <Route path="/moviesOpen" element={<MoviesOpen />} />
-        <Route path="/showsOpen" element={<ShowsOpen />} />
-        <Route path="/support" element={<Support />} />
-        <Route path="/subscription" element={<Subscription />} />
-        <Route path="/movie/:id" element={<MovieDetail />} />
-        <Route path="/tv/:id" element={<TVDetail />} />
-        <Route path="/category/:name" element={<Category />} />
-        <Route path="/actor/:id" element={<Actor />} />
-        <Route path="/watchlist" element={<Watchlist />} />
+        {/* ── Public routes (no auth required) ── */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* ── Protected routes (redirect to /register if not logged in) ── */}
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/movies_shows" element={<ProtectedRoute><Movies_Shows /></ProtectedRoute>} />
+        <Route path="/moviesOpen" element={<ProtectedRoute><MoviesOpen /></ProtectedRoute>} />
+        <Route path="/showsOpen" element={<ProtectedRoute><ShowsOpen /></ProtectedRoute>} />
+        <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+        <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+        <Route path="/movie/:id" element={<ProtectedRoute><MovieDetail /></ProtectedRoute>} />
+        <Route path="/tv/:id" element={<ProtectedRoute><TVDetail /></ProtectedRoute>} />
+        <Route path="/category/:name" element={<ProtectedRoute><Category /></ProtectedRoute>} />
+        <Route path="/actor/:id" element={<ProtectedRoute><Actor /></ProtectedRoute>} />
+        <Route path="/watchlist" element={<ProtectedRoute><Watchlist /></ProtectedRoute>} />
       </Routes>
     </>
   );
-}
+}
