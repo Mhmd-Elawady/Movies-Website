@@ -5,6 +5,7 @@ import useMovie from "../../../hooks/useMovie";
 import { buildImageUrl, getYearFromDate, formatRating, isFavorited, addFavorite, removeFavorite } from "../../../utils/helpers";
 import "./MovieDetail.css";
 import Footer from "../../Homesection/FooterHero/Footer";
+import MovieReviews from "../../Moviereviews/Moviereviews";
 
 const MovieDetail = () => {
   const { id } = useParams();
@@ -15,10 +16,10 @@ const MovieDetail = () => {
   const [inWatchlist, setInWatchlist] = useState(false);
 
   // Data extraction
-  const movie = useMemo(() => data?.movie || {}, [data?.movie]);
-  const similar = data?.similar || [];
-  const cast = data?.cast || [];
-  const trailer = data?.trailer || null;
+  const movie   = useMemo(() => data?.movie   || {}, [data?.movie]);
+  const similar = useMemo(() => data?.similar  || [], [data?.similar]);
+  const cast    = useMemo(() => data?.cast     || [], [data?.cast]);
+  const trailer = useMemo(() => data?.trailer  || null, [data?.trailer]);
 
   // Image URLs
   const posterSrc = useMemo(
@@ -33,11 +34,14 @@ const MovieDetail = () => {
 
   // Formatted data
   const releaseYear = useMemo(() => getYearFromDate(movie.release_date), [movie.release_date]);
-  const rating = useMemo(() => formatRating(movie.vote_average), [movie.vote_average]);
+  const rating      = useMemo(() => formatRating(movie.vote_average),    [movie.vote_average]);
 
-  // Trailer data
+  // Trailer
   const hasTrailerValue = useMemo(() => !!trailer?.key, [trailer]);
-  const trailerUrl = useMemo(() => (trailer?.key ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1` : null), [trailer]);
+  const trailerUrl      = useMemo(
+    () => trailer?.key ? `https://www.youtube.com/embed/${trailer.key}?autoplay=1` : null,
+    [trailer]
+  );
 
   // Event handlers
   const handlePlayTrailer = useCallback(() => {
@@ -46,17 +50,27 @@ const MovieDetail = () => {
 
   const toggleWatchlist = useCallback(() => {
     if (!movie.id) return;
-    const alreadyInWatchlist = isFavorited(movie.id, movie.media_type || "movie");
-    
-    if (alreadyInWatchlist) {
+    const alreadyIn = isFavorited(movie.id, movie.media_type || "movie");
+
+    if (alreadyIn) {
       removeFavorite(movie.id, movie.media_type || "movie");
       setInWatchlist(false);
-      window.dispatchEvent(new CustomEvent("app:toast", { detail: { message: "Removed from Watchlist", type: "info" } }));
+      window.dispatchEvent(new CustomEvent("app:toast", {
+        detail: { message: "Removed from Watchlist", type: "info" },
+      }));
     } else {
-      const favItem = { id: movie.id, title: movie.title || movie.name, poster_path: movie.poster_path, vote_average: movie.vote_average, release_date: movie.release_date || movie.first_air_date, media_type: movie.media_type || "movie" };
-      addFavorite(favItem);
+      addFavorite({
+        id:           movie.id,
+        title:        movie.title || movie.name,
+        poster_path:  movie.poster_path,
+        vote_average: movie.vote_average,
+        release_date: movie.release_date || movie.first_air_date,
+        media_type:   movie.media_type || "movie",
+      });
       setInWatchlist(true);
-      window.dispatchEvent(new CustomEvent("app:toast", { detail: { message: "Added to Watchlist", type: "success" } }));
+      window.dispatchEvent(new CustomEvent("app:toast", {
+        detail: { message: "Added to Watchlist", type: "success" },
+      }));
     }
     try { window.dispatchEvent(new Event("favorites:change")); } catch (err) { console.debug(err); }
   }, [movie]);
@@ -68,25 +82,29 @@ const MovieDetail = () => {
     window.scrollTo(0, 0);
   }, [navigate]);
 
+  // Close trailer on ESC
   useEffect(() => {
-    if (movie && movie.id) {
+    const onKey = (e) => { if (e.key === "Escape") closeTrailer(); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [closeTrailer]);
+
+  useEffect(() => {
+    if (movie?.id) {
       setInWatchlist(isFavorited(movie.id, movie.media_type || "movie"));
     }
   }, [movie]);
 
-  if (loading) return null;
-
-  if (error) return null;
-
-  if (!data?.movie) return null;
+  if (loading || error || !data?.movie) return null;
 
   return (
     <div className="movie-detail">
-      {/* Trailer Modal */}
+
+      {/* ── Trailer Modal ── */}
       {showTrailer && (
-        <div className="trailer-modal">
+        <div className="trailer-modal" role="dialog" aria-modal="true" aria-label="Movie trailer">
           <div className="trailer-modal-content">
-            <button className="close-trailer" onClick={closeTrailer}>
+            <button className="close-trailer" onClick={closeTrailer} aria-label="Close trailer">
               <FaTimes />
             </button>
             {trailerUrl && (
@@ -97,52 +115,47 @@ const MovieDetail = () => {
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
-                ></iframe>
+                />
               </div>
             )}
           </div>
-          <div className="trailer-modal-overlay" onClick={closeTrailer}></div>
+          <div className="trailer-modal-overlay" onClick={closeTrailer} aria-hidden="true" />
         </div>
       )}
 
-      <button className="back-button" onClick={() => navigate(-1)}>
-        <FaArrowLeft /> Back
+      {/* ── Back button ── */}
+      <button className="back-button" onClick={() => navigate(-1)} aria-label="Go back">
+        <FaArrowLeft aria-hidden="true" /> Back
       </button>
 
-      <section className="movie-hero">
-        <div className="hero-backdrop">
+      {/* ── Hero ── */}
+      <section className="movie-hero" aria-label={`${movie.title} details`}>
+        <div className="hero-backdrop" aria-hidden="true">
           <img
             src={backdropSrc}
-            alt={movie.title || "Movie"}
+            alt=""
             className="backdrop-image"
             loading="eager"
             onError={(e) => {
-              const fallback =
-                "https://via.placeholder.com/1200x675/0f0f0f/333333?text=No+Backdrop";
-              if (e.target.src !== fallback && !e.target.dataset.fallbackSet) {
-                e.target.src = fallback;
+              if (!e.target.dataset.fallbackSet) {
+                e.target.src = "https://via.placeholder.com/1200x675/0f0f0f/333333?text=No+Backdrop";
                 e.target.dataset.fallbackSet = "true";
               }
             }}
           />
-          <div className="backdrop-overlay"></div>
+          <div className="backdrop-overlay" />
         </div>
 
         <div className="hero-content">
           <div className="poster-container">
             <img
               src={posterSrc}
-              alt={movie.title || "Movie"}
+              alt={movie.title || "Movie poster"}
               className="movie-poster"
               loading="eager"
               onError={(e) => {
-                const fallback =
-                  "https://via.placeholder.com/300x450/1a1a1a/666666?text=No+Image";
-                if (
-                  e.target.src !== fallback &&
-                  !e.target.dataset.fallbackSet
-                ) {
-                  e.target.src = fallback;
+                if (!e.target.dataset.fallbackSet) {
+                  e.target.src = "https://via.placeholder.com/300x450/1a1a1a/666666?text=No+Image";
                   e.target.dataset.fallbackSet = "true";
                 }
               }}
@@ -153,29 +166,25 @@ const MovieDetail = () => {
             <h1 className="movie-title">{movie.title}</h1>
 
             <div className="movie-meta">
-              <div className="rating" aria-label={`Rating ${rating}`}>
-                <FaStar className="star-icon" />
+              <div className="rating" aria-label={`Rating: ${rating} out of 10`}>
+                <FaStar className="star-icon" aria-hidden="true" />
                 <span className="rating-value">{rating}</span>
               </div>
-              
               {releaseYear && (
                 <span className="release-year">
-                  <FaCalendar /> {releaseYear}
+                  <FaCalendar aria-hidden="true" /> {releaseYear}
                 </span>
               )}
-              
               {movie.runtime && (
                 <span className="runtime">
-                  <FaClock /> {movie.runtime} min
+                  <FaClock aria-hidden="true" /> {movie.runtime} min
                 </span>
               )}
             </div>
 
-            <div className="genres">
+            <div className="genres" aria-label="Genres">
               {movie.genres?.map((genre) => (
-                <span key={genre.id} className="genre-tag">
-                  {genre.name}
-                </span>
+                <span key={genre.id} className="genre-tag">{genre.name}</span>
               ))}
             </div>
 
@@ -188,20 +197,17 @@ const MovieDetail = () => {
                 disabled={!hasTrailerValue}
                 aria-disabled={!hasTrailerValue}
               >
-                <FaPlay className="play-icon" />
+                <FaPlay className="play-icon" aria-hidden="true" />
                 {hasTrailerValue ? "Watch Trailer" : "No Trailer"}
               </button>
-              
+
               <button
-                className={`watchlist-button ${inWatchlist ? 'in-watchlist' : ''}`}
+                className={`watchlist-button ${inWatchlist ? "in-watchlist" : ""}`}
                 onClick={toggleWatchlist}
-                title={
-                  inWatchlist
-                    ? "Remove from Watchlist"
-                    : "Add to Watchlist"
-                }
+                aria-label={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+                aria-pressed={inWatchlist}
               >
-                <FaPlus className="plus-icon" />
+                <FaPlus className="plus-icon" aria-hidden="true" />
                 {inWatchlist ? "In Watchlist" : "Add to Watchlist"}
               </button>
             </div>
@@ -209,9 +215,9 @@ const MovieDetail = () => {
         </div>
       </section>
 
-      {/* Cast Section */}
+      {/* ── Cast ── */}
       {cast.length > 0 && (
-        <section className="cast-section">
+        <section className="cast-section" aria-label="Top cast">
           <h2 className="section-title">Top Cast</h2>
           <div className="cast-scroll-container">
             <div className="cast-grid">
@@ -221,26 +227,21 @@ const MovieDetail = () => {
                   key={actor.id}
                   className="cast-card-link"
                   state={{ from: location.pathname + location.search }}
+                  aria-label={`View ${actor.name}'s profile`}
                 >
-                  <div className="cast-card" role="link" aria-label={`View ${actor.name}`}>
+                  <div className="cast-card">
                     <div className="actor-image-container">
                       <img
                         src={buildImageUrl(
-                          actor.profile_path,
-                          "w500",
+                          actor.profile_path, "w500",
                           "https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image"
                         )}
                         alt={actor.name || "Actor"}
                         className="actor-image"
                         loading="lazy"
                         onError={(e) => {
-                          const fallback =
-                            "https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image";
-                          if (
-                            e.target.src !== fallback &&
-                            !e.target.dataset.fallbackSet
-                          ) {
-                            e.target.src = fallback;
+                          if (!e.target.dataset.fallbackSet) {
+                            e.target.src = "https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image";
                             e.target.dataset.fallbackSet = "true";
                           }
                         }}
@@ -258,39 +259,40 @@ const MovieDetail = () => {
         </section>
       )}
 
-      {/* Similar Movies Section */}
+      {/* ── Similar Movies ── */}
       {similar.length > 0 && (
-        <section className="similar-section">
+        <section className="similar-section" aria-label="Similar movies">
           <h2 className="section-title">Similar Movies</h2>
           <div className="similar-scroll-container">
             <div className="similar-grid">
               {similar.map((similarMovie) => (
-                <div 
-                  key={similarMovie.id} 
+                <div
+                  key={similarMovie.id}
                   className="similar-movie-card"
                   onClick={() => gotoMovie(similarMovie.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View ${similarMovie.title}`}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") gotoMovie(similarMovie.id); }}
                 >
                   <div className="similar-poster-container">
                     <img
                       src={buildImageUrl(
-                        similarMovie.poster_path,
-                        "w300",
+                        similarMovie.poster_path, "w300",
                         "https://via.placeholder.com/200x300/1a1a1a/666666?text=No+Image"
                       )}
                       alt={similarMovie.title}
                       className="similar-poster"
                       loading="lazy"
                     />
-                    <div className="movie-rating">
-                      <FaStar className="rating-star" />
+                    <div className="movie-rating" aria-label={`Rating: ${formatRating(similarMovie.vote_average)}`}>
+                      <FaStar className="rating-star" aria-hidden="true" />
                       {formatRating(similarMovie.vote_average)}
                     </div>
                   </div>
                   <div className="similar-movie-info">
                     <h3 className="similar-movie-title">{similarMovie.title}</h3>
-                    <p className="similar-movie-year">
-                      {getYearFromDate(similarMovie.release_date)}
-                    </p>
+                    <p className="similar-movie-year">{getYearFromDate(similarMovie.release_date)}</p>
                   </div>
                 </div>
               ))}
@@ -298,6 +300,10 @@ const MovieDetail = () => {
           </div>
         </section>
       )}
+
+      {/* ── Reviews ── */}
+      <MovieReviews movieId={id} />
+
       <Footer />
     </div>
   );
