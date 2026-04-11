@@ -12,6 +12,7 @@ import Watchlist from "../components/Watchlist/Watchlist";
 import Category from "../pages/Category";
 import Register from "../pages/Register";
 import Login from "../pages/Login";
+import Profile from "../components/Profile/Profile";
 import ProtectedRoute from "../components/Auth/ProtectedRoute";
 import { Route, Routes } from "react-router-dom";
 
@@ -35,7 +36,8 @@ export default function AppRoutes() {
         <Route path="/category/:name" element={<ProtectedRoute><Category /></ProtectedRoute>} />
         <Route path="/actor/:id" element={<ProtectedRoute><Actor /></ProtectedRoute>} />
         <Route path="/watchlist" element={<ProtectedRoute><Watchlist /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       </Routes>
     </>
   );
-}
+}

@@ -1,10 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { FaRegListAlt } from "react-icons/fa";
-import { IoIosSearch, IoMdClose } from "react-icons/io";
-import { HiOutlineMenuAlt3 } from "react-icons/hi";
-import { AiOutlineHome } from "react-icons/ai";
-import { MdOutlineLocalMovies, MdOutlineContactSupport, MdOutlineSubscriptions } from "react-icons/md";
+import { IoMdClose } from "react-icons/io";
+import { AiOutlineHome, AiOutlineUser } from "react-icons/ai";
+import {
+  MdOutlineLocalMovies,
+  MdOutlineContactSupport,
+  MdOutlineSubscriptions,
+} from "react-icons/md";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./MyNavbar.css";
 import logo from "../../../assets/Logo.svg";
@@ -12,55 +15,56 @@ import { Link, useLocation } from "react-router-dom";
 import SearchDropdown from "./SearchDropdown";
 import { getFavorites } from "../../../utils/helpers";
 
-export default function MyNavbar() {
-  const [count, setCount] = useState(0);
-  const storeCount = useSelector((s) => (s.watchlist?.items || []).length || 0);
-  const [bump, setBump] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const firstRenderRef = useRef(true);
-  const location = useLocation();
+const NAV_LINKS = [
+  { to: "/",             label: "Home",           Icon: AiOutlineHome },
+  { to: "/movies_shows", label: "Movies & Shows",  Icon: MdOutlineLocalMovies },
+  { to: "/support",      label: "Support",         Icon: MdOutlineContactSupport },
+  { to: "/subscription", label: "Subscriptions",   Icon: MdOutlineSubscriptions },
+  { to: "/profile",      label: "Profile",         Icon: AiOutlineUser },
+];
 
-  // ---- Favorites count ----
-  useEffect(() => {
+export default function MyNavbar() {
+  const storeCount  = useSelector((s) => (s.watchlist?.items || []).length);
+  const [count,     setCount]    = useState(0);
+  const [bump,      setBump]     = useState(false);
+  const [menuOpen,  setMenuOpen] = useState(false);
+  const [scrolled,  setScrolled] = useState(false);
+  const firstRender = useRef(true);
+  const location    = useLocation();
+
+  /* ── Sync favorites count ─────────────────────────────────── */
+  const syncCount = useCallback(() => {
     const favs = getFavorites();
     setCount(Array.isArray(favs) ? favs.length : 0);
-    if (storeCount && storeCount > 0) setCount(storeCount);
-
-    const onStorage = (e) => {
-      if (e.key === null || e.key === undefined || e.key === "myapp.favorites.v1") {
-        const updated = getFavorites();
-        setCount(Array.isArray(updated) ? updated.length : 0);
-      }
-    };
-    const onCustom = () => {
-      const updated = getFavorites();
-      setCount(Array.isArray(updated) ? updated.length : 0);
-    };
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("favorites:change", onCustom);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("favorites:change", onCustom);
-    };
   }, []);
 
   useEffect(() => {
-    if (typeof storeCount === "number") setCount(storeCount);
+    syncCount();
+    const onStorage = (e) => {
+      if (!e.key || e.key === "myapp.favorites.v1") syncCount();
+    };
+    window.addEventListener("storage",         onStorage);
+    window.addEventListener("favorites:change", syncCount);
+    return () => {
+      window.removeEventListener("storage",         onStorage);
+      window.removeEventListener("favorites:change", syncCount);
+    };
+  }, [syncCount]);
+
+  // Redux watchlist overrides local count when it has items
+  useEffect(() => {
+    if (typeof storeCount === "number" && storeCount > 0) setCount(storeCount);
   }, [storeCount]);
 
-  // ---- Bump animation ----
+  /* ── Bump animation on count change ──────────────────────── */
   useEffect(() => {
-    if (firstRenderRef.current) {
-      firstRenderRef.current = false;
-      return;
-    }
+    if (firstRender.current) { firstRender.current = false; return; }
     setBump(true);
     const t = setTimeout(() => setBump(false), 650);
     return () => clearTimeout(t);
   }, [storeCount]);
 
-  // ---- Scroll detection ----
+  /* ── Scroll detection ─────────────────────────────────────── */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -68,54 +72,52 @@ export default function MyNavbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ---- Close menu on route change ----
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
+  /* ── Close menu on route change ───────────────────────────── */
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
-  // ---- Lock body scroll when menu open ----
+  /* ── Lock body scroll ─────────────────────────────────────── */
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [menuOpen]);
 
-  // ---- Close menu on ESC ----
+  /* ── Close on ESC ─────────────────────────────────────────── */
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") setMenuOpen(false); };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // ---- Close menu if screen resizes to desktop ----
+  /* ── Close on desktop resize ──────────────────────────────── */
   useEffect(() => {
-    const onResize = () => { if (window.innerWidth > 600) setMenuOpen(false); };
+    const onResize = () => { if (window.innerWidth > 768) setMenuOpen(false); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const navLinks = [
-    { to: "/",              label: "Home",          Icon: AiOutlineHome },
-    { to: "/movies_shows",  label: "Movies & Shows", Icon: MdOutlineLocalMovies },
-    { to: "/support",       label: "Support",        Icon: MdOutlineContactSupport },
-    { to: "/subscription",  label: "Subscriptions",  Icon: MdOutlineSubscriptions },
-  ];
+  const toggleMenu = useCallback(() => setMenuOpen((p) => !p), []);
+  const closeMenu  = useCallback(() => setMenuOpen(false),     []);
+
+  const displayCount = count > 99 ? "99+" : count;
 
   return (
     <>
       {/* ===== NAVBAR ===== */}
-      <nav className={`navbar px-4 ${scrolled ? "scrolled" : ""}`}>
+      <nav className={`navbar px-4 ${scrolled ? "scrolled" : ""}`} role="navigation" aria-label="Main navigation">
         {/* Logo */}
-        <Link className="navbar-brand" to="/">
+        <Link className="navbar-brand" to="/" aria-label="StreamVibe Home">
           <img src={logo} alt="StreamVibe" />
         </Link>
 
         {/* Desktop links */}
-        <div className="links d-none d-md-flex">
-          {navLinks.map(({ to, label }) => (
+        <div className="links d-none d-md-flex" role="menubar">
+          {NAV_LINKS.map(({ to, label }) => (
             <Link
               key={to}
               className={`nav-link ${location.pathname === to ? "active" : ""}`}
               to={to}
+              role="menuitem"
+              aria-current={location.pathname === to ? "page" : undefined}
             >
               {label}
             </Link>
@@ -126,43 +128,40 @@ export default function MyNavbar() {
         <div className="nav-actions d-none d-md-flex align-items-center gap-2">
           <SearchDropdown />
           <Link
-            className="nav-link"
+            className="nav-link watchlist-link"
             to="/watchlist"
-            title={`Watchlist (${count})`}
+            aria-label={`Watchlist, ${count} item${count !== 1 ? "s" : ""}`}
           >
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <FaRegListAlt size={18} />
-              <span
-                className={`watchlist-count ${bump ? "bump" : ""}`}
-                aria-live="polite"
-              >
-                {count > 99 ? "99+" : count}
-              </span>
-            </div>
+            <FaRegListAlt size={18} />
+            <span className={`watchlist-count ${bump ? "bump" : ""}`} aria-live="polite" aria-atomic="true">
+              {displayCount}
+            </span>
           </Link>
         </div>
 
-        {/* Mobile: icons + hamburger */}
+        {/* Mobile: search + watchlist + hamburger */}
         <div className="mobile-right d-flex d-md-none align-items-center gap-3">
           <SearchDropdown />
+
           <Link
             className="mobile-icon-btn"
             to="/watchlist"
-            title={`Watchlist (${count})`}
+            aria-label={`Watchlist, ${count} item${count !== 1 ? "s" : ""}`}
           >
             <FaRegListAlt size={20} />
             {count > 0 && (
-              <span className={`mobile-badge ${bump ? "bump" : ""}`} aria-live="polite">
-                {count > 99 ? "99+" : count}
+              <span className={`mobile-badge ${bump ? "bump" : ""}`} aria-live="polite" aria-atomic="true">
+                {displayCount}
               </span>
             )}
           </Link>
 
           <button
             className={`hamburger-btn ${menuOpen ? "open" : ""}`}
-            onClick={() => setMenuOpen((prev) => !prev)}
+            onClick={toggleMenu}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
           >
             <span className="bar" />
             <span className="bar" />
@@ -171,8 +170,16 @@ export default function MyNavbar() {
         </div>
       </nav>
 
-      {/* ===== MOBILE MENU OVERLAY ===== */}
+      {/* ===== MOBILE OVERLAY BACKDROP ===== */}
       <div
+        className={`mobile-backdrop ${menuOpen ? "open" : ""}`}
+        onClick={closeMenu}
+        aria-hidden="true"
+      />
+
+      {/* ===== MOBILE MENU ===== */}
+      <div
+        id="mobile-menu"
         className={`mobile-menu ${menuOpen ? "open" : ""}`}
         role="dialog"
         aria-modal="true"
@@ -180,28 +187,25 @@ export default function MyNavbar() {
       >
         {/* Header */}
         <div className="mobile-menu-header">
-          <Link className="navbar-brand" to="/" onClick={() => setMenuOpen(false)}>
+          <Link className="navbar-brand" to="/" onClick={closeMenu} aria-label="StreamVibe Home">
             <img src={logo} alt="StreamVibe" />
           </Link>
-          <button
-            className="close-btn"
-            onClick={() => setMenuOpen(false)}
-            aria-label="Close menu"
-          >
+          <button className="close-btn" onClick={closeMenu} aria-label="Close menu">
             <IoMdClose size={24} />
           </button>
         </div>
 
-        {/* Links in column */}
-        <nav className="mobile-menu-links">
-          {navLinks.map(({ to, label, Icon }) => (
+        {/* Nav links */}
+        <nav className="mobile-menu-links" aria-label="Mobile navigation links">
+          {NAV_LINKS.map(({ to, label, Icon }) => (
             <Link
               key={to}
               className={`mobile-nav-link ${location.pathname === to ? "active" : ""}`}
               to={to}
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
+              aria-current={location.pathname === to ? "page" : undefined}
             >
-              <Icon size={20} />
+              <Icon size={20} aria-hidden="true" />
               {label}
             </Link>
           ))}
