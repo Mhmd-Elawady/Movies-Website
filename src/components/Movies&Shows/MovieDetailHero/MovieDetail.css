@@ -16,7 +16,7 @@
 }
 
 /* ============================================
-   Base
+   Base — FIX: كانت width: 100% بس بتخلي الـ backdrop يتقيد
    ============================================ */
 
 .movie-detail {
@@ -27,6 +27,7 @@
   animation: fadeIn 0.45s ease-out;
   box-sizing: border-box;
   width: 100%;
+  overflow-x: hidden; /* FIX: منع أي overflow أفقي */
 }
 
 /* ============================================
@@ -60,7 +61,7 @@
 }
 
 /* ============================================
-   Hero Section
+   Hero Section — FIX: بياخد العرض الكامل
    ============================================ */
 
 .movie-hero {
@@ -68,23 +69,30 @@
   height: 100vh;
   min-height: 560px;
   overflow: hidden;
+  width: 100%;        /* FIX */
+  left: 0;            /* FIX */
 }
 
 .hero-backdrop {
   position: absolute;
   inset: 0;
+  width: 100%;        /* FIX: الـ backdrop يغطي كل شيء */
+  height: 100%;
 }
 
 .backdrop-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center; /* FIX: تمركز الصورة */
   filter: brightness(0.45);
+  display: block;     /* FIX: إزالة أي gap تحت الصورة */
 }
 
 .backdrop-overlay {
   position: absolute;
   inset: 0;
+  width: 100%;
   background: linear-gradient(
     to bottom,
     rgba(15, 15, 15, 0.2) 0%,
@@ -628,9 +636,8 @@
    MEDIA QUERIES
    ============================================ */
 
-/* Ultra Wide (1920px+) */
 @media (min-width: 1920px) {
-  .movie-detail { max-width: 1800px; margin: 0 auto; }
+  .movie-detail { max-width: 100%; margin: 0 auto; }
 
   .hero-content {
     max-width: 1600px;
@@ -652,7 +659,6 @@
   .similar-poster-container { height: 330px; }
 }
 
-/* Large Desktop (1440px - 1919px) */
 @media (min-width: 1440px) and (max-width: 1919px) {
   .hero-content {
     max-width: 1400px;
@@ -674,7 +680,6 @@
   .similar-poster-container { height: 300px; }
 }
 
-/* Small Desktop (1024px - 1199px) */
 @media (min-width: 1024px) and (max-width: 1199px) {
   .hero-content {
     padding: 52px 36px;
@@ -695,7 +700,6 @@
   .similar-poster-container { height: 245px; }
 }
 
-/* Tablet Landscape (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .back-button {
     top: 14px;
@@ -741,7 +745,6 @@
   }
 }
 
-/* Tablet Portrait (600px - 767px) */
 @media (min-width: 600px) and (max-width: 767px) {
   .back-button {
     top: 12px;
@@ -804,7 +807,6 @@
   .trailer-modal-content { width: 94%; }
 }
 
-/* Large Mobile (480px - 599px) */
 @media (min-width: 480px) and (max-width: 599px) {
   .back-button {
     top: 10px;
@@ -892,7 +894,6 @@
   .similar-grid { gap: 12px; }
 }
 
-/* Medium Mobile (375px - 479px) */
 @media (min-width: 375px) and (max-width: 479px) {
   .back-button {
     top: 10px;
@@ -978,7 +979,6 @@
   .close-trailer { width: 32px; height: 32px; font-size: 0.875rem; }
 }
 
-/* Small Mobile (320px - 374px) */
 @media (min-width: 320px) and (max-width: 374px) {
   .back-button {
     top: 8px;
@@ -1061,7 +1061,6 @@
   .similar-grid { gap: 9px; }
 }
 
-/* Foldable / Ultra Small (max 319px) */
 @media (max-width: 319px) {
   .hero-content {
     flex-direction: column;
@@ -1081,7 +1080,6 @@
   .similar-poster-container { height: 152px; }
 }
 
-/* Landscape Mobile */
 @media (max-height: 500px) and (orientation: landscape) {
   .movie-hero {
     height: auto;
@@ -1122,7 +1120,6 @@
   .similar-section { padding: 20px; }
 }
 
-/* High DPI */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .backdrop-image,
   .movie-poster,
@@ -1132,7 +1129,6 @@
   }
 }
 
-/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .movie-detail,
   .movie-hero,
@@ -1155,7 +1151,6 @@
   .similar-movie-card:hover { transform: none; }
 }
 
-/* Touch Devices */
 @media (hover: none) and (pointer: coarse) {
   .movie-poster:hover,
   .cast-card:hover,
@@ -1168,7 +1163,6 @@
   .watchlist-button:active { transform: scale(0.97); }
 }
 
-/* High Contrast */
 @media (prefers-contrast: high) {
   .play-button { border: 2px solid #fff; }
   .watchlist-button { border: 2px solid #fff; }
@@ -1176,7 +1170,6 @@
   .similar-movie-card { border: 1px solid rgba(255, 255, 255, 0.35); }
 }
 
-/* Print */
 @media print {
   .movie-detail { background: white !important; color: black !important; }
   .back-button,

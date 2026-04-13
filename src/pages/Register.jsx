@@ -137,7 +137,7 @@ export default function Register() {
       if (error) {
         setServerError(error.message || "Registration failed. Please try again.");
       } else {
-        // ✅ User saved in Supabase → redirect to /login
+  
         setSuccess(true);
         setTimeout(() => navigate("/login"), 2000);
       }

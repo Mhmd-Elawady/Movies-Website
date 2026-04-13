@@ -24,7 +24,7 @@
 
 /* ── Section ── */
 .movies-section {
-  background: var(--primary-bg);
+  background: #000;
   color: var(--text-primary);
   padding: 2.5rem 2rem;
   min-height: 100vh;

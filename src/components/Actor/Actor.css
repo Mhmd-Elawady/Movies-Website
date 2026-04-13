@@ -28,7 +28,7 @@
   margin: 0 auto;
   padding: 130px 40px 80px;
   min-height: 100vh;
-  background: var(--bg);
+  background: #000000;
   background-image:
     radial-gradient(ellipse 60% 30% at 70% 0%, rgba(220,38,38,0.06) 0%, transparent 60%);
   color: var(--text-1);

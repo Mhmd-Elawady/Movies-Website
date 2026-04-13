@@ -142,7 +142,7 @@ export default function SupportPage() {
           <h2 id="welcome-heading" className="fw-bold mb-3">
             Welcome to our<br />support page!
           </h2>
-          <p className="text-muted mb-4">
+          <p className=" mb-4">
             We're here to help you with any problems you may be having with our
             product.
           </p>

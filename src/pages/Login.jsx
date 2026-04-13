@@ -103,7 +103,6 @@ export default function Login() {
           : error.message || "Login failed. Please try again.";
         setServerError(msg);
       } else {
-        // ✅ Authenticated → go to Home (or the page they originally wanted)
         navigate(redirectTo, { replace: true });
       }
     } catch (err) {

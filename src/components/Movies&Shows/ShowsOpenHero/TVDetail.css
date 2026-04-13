@@ -17,7 +17,7 @@
 }
 
 /* ============================================
-   Base
+   Base — FIX: overflow-x hidden منع الـ black bars
    ============================================ */
 
 .tv-detail {
@@ -28,6 +28,7 @@
   animation: fadeIn 0.45s ease-out;
   box-sizing: border-box;
   width: 100%;
+  overflow-x: hidden; /* FIX */
 }
 
 /* ============================================
@@ -61,7 +62,7 @@
 }
 
 /* ============================================
-   Hero Section
+   Hero Section — FIX: full width
    ============================================ */
 
 .tv-hero {
@@ -69,23 +70,30 @@
   height: 100vh;
   min-height: 560px;
   overflow: hidden;
+  width: 100%;   /* FIX */
+  left: 0;       /* FIX */
 }
 
 .hero-backdrop {
   position: absolute;
   inset: 0;
+  width: 100%;   /* FIX */
+  height: 100%;
 }
 
 .backdrop-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center; /* FIX */
   filter: brightness(0.45);
+  display: block; /* FIX */
 }
 
 .backdrop-overlay {
   position: absolute;
   inset: 0;
+  width: 100%;
   background: linear-gradient(
     to bottom,
     rgba(15, 15, 15, 0.2) 0%,
@@ -650,9 +658,8 @@
    MEDIA QUERIES
    ============================================ */
 
-/* Ultra Wide (1920px+) */
 @media (min-width: 1920px) {
-  .tv-detail { max-width: 1800px; margin: 0 auto; }
+  .tv-detail { max-width: 100%; margin: 0 auto; }
 
   .hero-content {
     max-width: 1600px;
@@ -674,7 +681,6 @@
   .similar-poster-container { height: 330px; }
 }
 
-/* Large Desktop (1440px - 1919px) */
 @media (min-width: 1440px) and (max-width: 1919px) {
   .hero-content {
     max-width: 1400px;
@@ -696,9 +702,6 @@
   .similar-poster-container { height: 300px; }
 }
 
-/* Standard Desktop (1200px - 1439px) — base styles apply */
-
-/* Small Desktop (1024px - 1199px) */
 @media (min-width: 1024px) and (max-width: 1199px) {
   .hero-content {
     padding: 52px 36px;
@@ -719,7 +722,6 @@
   .similar-poster-container { height: 245px; }
 }
 
-/* Tablet Landscape (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   .back-button {
     top: 14px;
@@ -765,7 +767,6 @@
   }
 }
 
-/* Tablet Portrait (600px - 767px) */
 @media (min-width: 600px) and (max-width: 767px) {
   .back-button {
     top: 12px;
@@ -794,11 +795,8 @@
   }
 
   .tv-info { padding-bottom: 0; }
-
   .tv-title { font-size: 2rem; }
-
   .tv-meta { justify-content: center; gap: 8px; }
-
   .genres { justify-content: center; }
 
   .tv-overview {
@@ -830,7 +828,6 @@
   .trailer-modal-content { width: 94%; }
 }
 
-/* Large Mobile (480px - 599px) */
 @media (min-width: 480px) and (max-width: 599px) {
   .back-button {
     top: 10px;
@@ -859,13 +856,8 @@
   }
 
   .tv-info { padding-bottom: 0; }
-
   .tv-title { font-size: 1.75rem; }
-
-  .tv-meta {
-    justify-content: center;
-    gap: 8px;
-  }
+  .tv-meta { justify-content: center; gap: 8px; }
 
   .rating,
   .meta-item {
@@ -903,7 +895,6 @@
 
   .cast-section,
   .similar-section { padding: 32px 18px; }
-
   .section-title { font-size: 1.2rem; }
 
   .cast-card { width: 118px; }
@@ -921,7 +912,6 @@
   .similar-grid { gap: 12px; }
 }
 
-/* Medium Mobile (375px - 479px) */
 @media (min-width: 375px) and (max-width: 479px) {
   .back-button {
     top: 10px;
@@ -950,13 +940,8 @@
   }
 
   .tv-info { padding-bottom: 0; }
-
   .tv-title { font-size: 1.6rem; }
-
-  .tv-meta {
-    justify-content: center;
-    gap: 7px;
-  }
+  .tv-meta { justify-content: center; gap: 7px; }
 
   .rating,
   .meta-item {
@@ -989,7 +974,6 @@
 
   .cast-section,
   .similar-section { padding: 28px 16px; }
-
   .section-title { font-size: 1.15rem; }
 
   .cast-card { width: 108px; }
@@ -1010,7 +994,6 @@
   .close-trailer { width: 32px; height: 32px; font-size: 0.875rem; }
 }
 
-/* Small Mobile (320px - 374px) */
 @media (min-width: 320px) and (max-width: 374px) {
   .back-button {
     top: 8px;
@@ -1040,11 +1023,7 @@
 
   .tv-info { padding-bottom: 0; }
   .tv-title { font-size: 1.45rem; }
-
-  .tv-meta {
-    justify-content: center;
-    gap: 6px;
-  }
+  .tv-meta { justify-content: center; gap: 6px; }
 
   .rating,
   .meta-item {
@@ -1077,7 +1056,6 @@
 
   .cast-section,
   .similar-section { padding: 24px 14px; }
-
   .section-title { font-size: 1.1rem; }
 
   .cast-card { width: 100px; }
@@ -1095,7 +1073,6 @@
   .similar-grid { gap: 9px; }
 }
 
-/* Foldable / Ultra Small (max 319px) */
 @media (max-width: 319px) {
   .hero-content {
     flex-direction: column;
@@ -1115,7 +1092,6 @@
   .similar-poster-container { height: 152px; }
 }
 
-/* Landscape Mobile */
 @media (max-height: 500px) and (orientation: landscape) {
   .tv-hero {
     height: auto;
@@ -1156,7 +1132,6 @@
   .similar-section { padding: 20px; }
 }
 
-/* High DPI */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .backdrop-image,
   .tv-poster,
@@ -1166,7 +1141,6 @@
   }
 }
 
-/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .tv-detail,
   .tv-hero,
@@ -1188,7 +1162,6 @@
   .similar-tv-card:hover { transform: none; }
 }
 
-/* Touch Devices */
 @media (hover: none) and (pointer: coarse) {
   .tv-poster:hover,
   .cast-card:hover,
@@ -1201,7 +1174,6 @@
   .watchlist-button:active { transform: scale(0.97); }
 }
 
-/* High Contrast */
 @media (prefers-contrast: high) {
   .play-button { border: 2px solid #fff; }
   .watchlist-button { border: 2px solid #fff; }
@@ -1209,7 +1181,6 @@
   .similar-tv-card { border: 1px solid rgba(255, 255, 255, 0.35); }
 }
 
-/* Print */
 @media print {
   .tv-detail { background: white !important; color: black !important; }
   .back-button,

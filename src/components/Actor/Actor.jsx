@@ -138,7 +138,7 @@ export default function Actor() {
 
         {/* ── Reviews ── */}
         <MovieReviews movieId={reviewsId} />
-
+       
       </main>
     </div>
   );

@@ -56,7 +56,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="footer-bottom">
-        <p>© 2023 streamVibe. All Rights Reserved</p>
+        <p>© 2026 streamVibe. All Rights Reserved</p>
         <div className="footer-links">
           <a href="#">Terms of Use</a> | <a href="#">Privacy Policy</a> | <a href="#">Cookie Policy</a>
         </div>
