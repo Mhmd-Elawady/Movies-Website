@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./SupportPage.css";
-import subContainer from "../../assets/Sub_Container.png";
+import subContainer from "../../assets/Sub_Container.webp";
 
 const VALIDATION_RULES = {
   firstName: { required: true, message: "First name is required" },

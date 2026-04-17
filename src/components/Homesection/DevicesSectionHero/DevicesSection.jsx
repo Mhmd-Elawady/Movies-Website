@@ -88,4 +88,4 @@ const DevicesSection = () => {
   );
 };
 
-export default DevicesSection;
+export default React.memo(DevicesSection);

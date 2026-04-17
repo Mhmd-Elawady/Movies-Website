@@ -233,7 +233,7 @@ const MovieDetail = () => {
                     <div className="actor-image-container">
                       <img
                         src={buildImageUrl(
-                          actor.profile_path, "w500",
+                          actor.profile_path, "w185",
                           "https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image"
                         )}
                         alt={actor.name || "Actor"}
@@ -278,7 +278,7 @@ const MovieDetail = () => {
                   <div className="similar-poster-container">
                     <img
                       src={buildImageUrl(
-                        similarMovie.poster_path, "w300",
+                        similarMovie.poster_path, "w185",
                         "https://via.placeholder.com/200x300/1a1a1a/666666?text=No+Image"
                       )}
                       alt={similarMovie.title}

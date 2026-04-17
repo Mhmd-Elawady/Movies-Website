@@ -246,26 +246,4 @@ function _emptyTV() {
            vote_average: null, episode_run_time: null, number_of_seasons: 0,
            number_of_episodes: 0, status: null, genres: [], media_type: "tv" };
 }
-
-// ── Dev diagnostics ──────────────────────────────────────────────────────────
-
-/** @deprecated Use apiClient directly */
-export function buildUrl(path) {
-  const url = new URL(path, BASE_URL);
-  if (API_KEY) url.searchParams.set("api_key", API_KEY);
-  return url.toString();
-}
-
-export function verifyAPIConfig() {
-  const cfg = {
-    baseURL: BASE_URL,
-    hasAccessToken: !!ACCESS_TOKEN,
-    hasAPIKey: !!API_KEY,
-    accessTokenLength: ACCESS_TOKEN?.length ?? 0,
-    apiKeyLength: API_KEY?.length ?? 0,
-  };
-  IS_DEV && console.log("[tmdb] API config:", cfg);
-  return cfg;
-}
-
-if (IS_DEV) verifyAPIConfig();
+

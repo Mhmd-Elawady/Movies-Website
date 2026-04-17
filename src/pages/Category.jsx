@@ -38,6 +38,11 @@ export default function Category() {
   const categoryName = String(name || '').toLowerCase();
   const category     = CATEGORIES.find((c) => c.name.toLowerCase() === categoryName);
 
+  /** Stable fallback handler — avoids creating a new function per card per render */
+  const handleImageError = useCallback((e) => {
+    if (e.target.src !== PLACEHOLDER) e.target.src = PLACEHOLDER;
+  }, []);
+
   /* ── Fetch ── */
   const fetchCategory = useCallback(async (catId, page = 1) => {
     try {
@@ -210,13 +215,11 @@ export default function Category() {
                   {/* Poster */}
                   <div className="thumb">
                     <img
-                      src={buildImageUrl(it.poster_path, 'w500')}
+                      src={buildImageUrl(it.poster_path, 'w342')}
                       alt={`${it.title} poster`}
                       loading="lazy"
                       decoding="async"
-                      onError={(e) => {
-                        if (e.target.src !== PLACEHOLDER) e.target.src = PLACEHOLDER;
-                      }}
+                      onError={handleImageError}
                     />
                     <div className="card-overlay" aria-hidden="true">
                       <div className="overlay-content">

@@ -8,7 +8,6 @@ import {
   MdOutlineContactSupport,
   MdOutlineSubscriptions,
 } from "react-icons/md";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./MyNavbar.css";
 import logo from "../../../assets/Logo.svg";
 import { Link, useLocation } from "react-router-dom";
@@ -124,20 +123,6 @@ export default function MyNavbar() {
           ))}
         </div>
 
-        {/* Desktop actions */}
-        <div className="nav-actions d-none d-md-flex align-items-center gap-2">
-          <SearchDropdown />
-          <Link
-            className="nav-link watchlist-link"
-            to="/watchlist"
-            aria-label={`Watchlist, ${count} item${count !== 1 ? "s" : ""}`}
-          >
-            <FaRegListAlt size={18} />
-            <span className={`watchlist-count ${bump ? "bump" : ""}`} aria-live="polite" aria-atomic="true">
-              {displayCount}
-            </span>
-          </Link>
-        </div>
 
         {/* Mobile: search + watchlist + hamburger */}
         <div className="mobile-right d-flex d-md-none align-items-center gap-3">

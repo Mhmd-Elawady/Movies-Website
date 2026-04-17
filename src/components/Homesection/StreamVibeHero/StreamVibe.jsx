@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaPlay, FaArrowRight, FaChevronDown, FaStar, FaFilm, FaTv } from "react-icons/fa";
-import bgImage from "../../../assets/SubContainer.png";
+import bgImage from "../../../assets/SubContainer.webp";
 import "./StreamVibe.css";
 
 export default function StreamVibe() {

@@ -13,6 +13,7 @@ const useRecommendations = (limit = 8) => {
   const [error,   setError]   = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     let mounted = true;
 
     const fetchRecs = async () => {
@@ -20,7 +21,9 @@ const useRecommendations = (limit = 8) => {
         setLoading(true);
         setError(null);
 
-        const { data } = await apiClient.get("/trending/movie/week");
+        const { data } = await apiClient.get("/trending/movie/week", {
+          signal: controller.signal,
+        });
 
         if (!mounted) return;
 
@@ -34,6 +37,7 @@ const useRecommendations = (limit = 8) => {
 
         setItems(filtered);
       } catch (err) {
+        if (err.name === "AbortError" || err.code === "ERR_CANCELED") return;
         if (mounted) {
           console.error("[useRecommendations]", err);
           setError(err?.message ?? "Failed to fetch recommendations");
@@ -45,7 +49,10 @@ const useRecommendations = (limit = 8) => {
 
     fetchRecs();
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
   }, [limit]);
 
   return { items, loading, error };

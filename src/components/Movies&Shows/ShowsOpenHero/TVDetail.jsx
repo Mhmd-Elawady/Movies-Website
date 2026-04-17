@@ -240,7 +240,7 @@ const TVDetail = () => {
                     <div className="actor-image-container">
                       <img
                         src={buildImageUrl(
-                          actor.profile_path, "w500",
+                          actor.profile_path, "w185",
                           "https://via.placeholder.com/150x225/1a1a1a/666666?text=No+Image"
                         )}
                         alt={actor.name || "Actor"}
@@ -283,7 +283,7 @@ const TVDetail = () => {
                   <div className="similar-poster-container">
                     <img
                       src={buildImageUrl(
-                        s.poster_path, "w300",
+                        s.poster_path, "w185",
                         "https://via.placeholder.com/200x300/1a1a1a/666666?text=No+Image"
                       )}
                       alt={s.name || s.title || "Similar show"}
